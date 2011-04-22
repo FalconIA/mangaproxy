@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FrameLayout android:layout_width="fill_parent"
+	android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+	<FrameLayout android:id="@id/mvgForAdmobRequest"
+		android:layout_width="fill_parent" android:layout_height="52.0dip" />
+	<LinearLayout android:gravity="center"
+		android:orientation="vertical" android:background="@android:color/background_dark"
+		android:layout_width="fill_parent" android:layout_height="fill_parent">
+		<RelativeLayout android:layout_width="fill_parent"
+			android:layout_height="0.0dip" android:layout_weight="1.0">
+			<ListView android:id="@+id/mlvList" android:layout_width="fill_parent"
+				android:drawSelectorOnTop="false" android:fastScrollEnabled="true"
+				android:layout_height="fill_parent" android:layout_centerInParent="true"/>
+			<helper.ProgressView android:layout_height="fill_parent"
+				android:id="@+id/mvgProgress" android:layout_width="fill_parent"></helper.ProgressView>
+		</RelativeLayout>
+		<LinearLayout android:id="@+id/mvgSearch"
+			android:gravity="center" android:orientation="horizontal"
+			android:layout_width="fill_parent" android:layout_height="wrap_content">
+			<EditText android:id="@+id/metSearch" android:gravity="center_vertical"
+				android:layout_width="0.0dip" android:layout_height="wrap_content"
+				android:hint="Search" android:singleLine="true"
+				android:selectAllOnFocus="true" android:layout_weight="1.0"
+				android:inputType="text" android:imeOptions="actionDone" />
+			<ImageButton android:id="@+id/mbtnSearch"
+				android:background="@drawable/btn_square" android:layout_width="48.0dip"
+				android:layout_height="48.0dip" android:src="@drawable/search" />
+		</LinearLayout>
+	</LinearLayout>
+</FrameLayout>
