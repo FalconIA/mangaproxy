@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="hello">Hello World, MangaProxy!</string>
-    <string name="app_name">Manga Proxy</string>
-    <string name="genre">分类</string>
-    <string name="genre_all">全部漫画</string>
-</resources>
