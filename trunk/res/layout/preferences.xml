@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen android:key="settings_preferencescreen"
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<EditTextPreference android:title="Twitter Login"
+		android:key="twitter.login" />
+	<EditTextPreference android:password="true"
+		android:title="Twitter Password" android:key="twitter.passwd" />
+	<EditTextPreference android:title="Brightkite Login"
+		android:key="brightkite.login" />
+	<EditTextPreference android:password="true"
+		android:title="Brightkite Password" android:key="brightkite.passwd" />
+	<CheckBoxPreference android:title="Google Map"
+		android:key="google.map" />
+	<PreferenceScreen android:title="Find Me" android:key="find.me">
+		<CheckBoxPreference android:title="Approximate"
+			android:key="approximate" />
+		<EditTextPreference android:password="true"
+			android:title="Approximate Password" android:key="approximate.passwd" />
+		<CheckBoxPreference android:title="Best Available"
+			android:key="bestAvailable" />
+		<EditTextPreference android:password="true"
+			android:title="Best Available Password" android:key="bestAvailable.passwd" />
+	</PreferenceScreen>
+</PreferenceScreen>
