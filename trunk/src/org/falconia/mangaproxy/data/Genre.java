@@ -2,8 +2,8 @@ package org.falconia.mangaproxy.data;
 
 import java.io.Serializable;
 
+import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugin;
-
 
 public final class Genre implements Serializable, ISiteId {
 
@@ -16,19 +16,16 @@ public final class Genre implements Serializable, ISiteId {
 	}
 
 	public static Genre getGenreAll(int siteId) {
-		return new Genre(GENRE_ID_ALL, GENRE_TEXT_ALL, Plugin.getPlugin(siteId)
-				.getGenreAllUrl(), siteId);
+		return new Genre(GENRE_ID_ALL, GENRE_TEXT_ALL, siteId);
 	}
 
 	public final int iSiteId;
 	public final int iGenreId;
 	public final String sDisplayName;
-	public final String sUrl;
 
-	public Genre(int genreId, String displayname, String url, int siteId) {
+	public Genre(int genreId, String displayname, int siteId) {
 		this.iGenreId = genreId;
 		this.sDisplayName = displayname;
-		this.sUrl = url;
 		this.iSiteId = siteId;
 	}
 
@@ -45,8 +42,12 @@ public final class Genre implements Serializable, ISiteId {
 		return this.sDisplayName;
 	}
 
+	private IPlugin getPlugin() {
+		return Plugin.getPlugin(this.iSiteId);
+	}
+
 	public String getUrl() {
-		return this.sUrl;
+		return getPlugin().getGenreUrl(this.iGenreId);
 	}
 
 	public boolean isGenreAll() {
@@ -59,15 +60,14 @@ public final class Genre implements Serializable, ISiteId {
 
 	public MangaList getMangaList(int page) {
 		if (isGenreAll())
-			return Plugin.getPlugin(this.iSiteId).getAllMangaList(page);
+			return getPlugin().getAllMangaList(page);
 		else
-			return Plugin.getPlugin(this.iSiteId).getMangaList(this.iGenreId, page);
+			return getPlugin().getMangaList(this.iGenreId, page);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("[%d-%04d] %s: %s", getSiteId(), getGenreId(),
-				getDisplayname(), getUrl());
+		return getDisplayname();
 	}
 
 }

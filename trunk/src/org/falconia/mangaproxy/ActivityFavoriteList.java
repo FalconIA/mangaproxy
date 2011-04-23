@@ -1,6 +1,5 @@
 package org.falconia.mangaproxy;
 
-
 import java.util.HashMap;
 
 import org.falconia.mangaproxy.data.Genre;
@@ -67,7 +66,8 @@ public final class ActivityFavoriteList extends AActivityBase {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				Manga manga = mhListAdapter.getItem(position);
+				Manga manga = ActivityFavoriteList.this.mhListAdapter
+						.getItem(position);
 				startActivityManga(manga, false);
 			}
 		};
@@ -76,7 +76,7 @@ public final class ActivityFavoriteList extends AActivityBase {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				miSelectedItem = position;
+				ActivityFavoriteList.this.miSelectedItem = position;
 				getMyDialog(DIALOG_ID_CONTEXT_MENU);
 				showMyDialog(DIALOG_ID_CONTEXT_MENU);
 				return false;

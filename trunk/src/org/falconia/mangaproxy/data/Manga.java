@@ -2,6 +2,9 @@ package org.falconia.mangaproxy.data;
 
 import java.io.Serializable;
 
+import org.falconia.mangaproxy.plugin.IPlugin;
+import org.falconia.mangaproxy.plugin.Plugin;
+
 import android.graphics.Bitmap;
 
 public class Manga implements Serializable, ISiteId {
@@ -11,7 +14,7 @@ public class Manga implements Serializable, ISiteId {
 	public final int iSiteId;
 	public final int iMangaId;
 	public final String sDisplayName;
-	public final String sUrl;
+	public final String sInital;
 
 	public String sChapterDisplayname;
 	public String sUpdatedAt;
@@ -28,16 +31,24 @@ public class Manga implements Serializable, ISiteId {
 	private Chapter mhLastReadChapter = null;
 	private Chapter mhLatestChapter = null;
 
-	public Manga(int mangaId, String displayname, String url, int siteId) {
+	public Manga(int mangaId, String displayname, String inital, int siteId) {
 		this.iMangaId = mangaId;
 		this.sDisplayName = displayname;
-		this.sUrl = url;
+		this.sInital = inital;
 		this.iSiteId = siteId;
 	}
 
 	@Override
 	public int getSiteId() {
 		return this.iSiteId;
+	}
+
+	private IPlugin getPlugin() {
+		return Plugin.getPlugin(this.iSiteId);
+	}
+
+	public String getUrl() {
+		return getPlugin().getMangaUrl(this.iMangaId);
 	}
 
 	public int getIconDrawableId() {

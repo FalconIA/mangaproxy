@@ -170,7 +170,7 @@ public class ActivityMangaList extends AActivityBase {
 		this.mlvListView.setOnItemClickListener(this.mhOnListItemClick);
 		this.mlvListView.setOnItemLongClickListener(this.mhOnListItemLongClick);
 		this.mlvListView.setOnScrollListener(this.mhOnScroll);
-		this.mlvListView.setAdapter(mhListAdapter);
+		this.mlvListView.setAdapter(this.mhListAdapter);
 		this.mtvIndex = (TextView) findViewById(R.id.mtvIndex);
 		this.metSearch = (EditText) findViewById(R.id.metSearch);
 		this.metSearch.addTextChangedListener(this.mhTextWatcher);
@@ -204,10 +204,12 @@ public class ActivityMangaList extends AActivityBase {
 		Runnable run = new Runnable() {
 			@Override
 			public void run() {
-				mhMangaList = mhGenre.getMangaList(miPageIndexCurrent);
+				ActivityMangaList.this.mhMangaList = ActivityMangaList.this.mhGenre
+						.getMangaList(ActivityMangaList.this.miPageIndexCurrent);
 
-				if (miPageIndexMax == 0)
-					miPageIndexMax = mhMangaList.getPageIndexMax();
+				if (ActivityMangaList.this.miPageIndexMax == 0)
+					ActivityMangaList.this.miPageIndexMax = ActivityMangaList.this.mhMangaList
+							.getPageIndexMax();
 			}
 		};
 		new Thread(run).start();

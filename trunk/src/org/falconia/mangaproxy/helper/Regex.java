@@ -23,6 +23,18 @@ public class Regex {
 		return groups;
 	}
 
+	public static String matchString(String pattern, String subject) {
+		ArrayList<String> groups = match(pattern, subject);
+		switch(groups.size()) {
+		case 0:
+			return null;
+		case 1:
+			return groups.get(0);
+		default:
+			return groups.get(1);
+		}
+	}
+
 	public static ArrayList<ArrayList<String>> matchAll(String pattern,
 			String subject) {
 		ArrayList<ArrayList<String>> matches = new ArrayList<ArrayList<String>>();
