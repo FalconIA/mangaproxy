@@ -131,9 +131,10 @@ public class ActivityInit extends Activity {
 
 	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array,
 			int start, int length, String delimiter, String delimiter2) {
-		//ArrayList<String> tokens = new ArrayList<String>();
+		// ArrayList<String> tokens = new ArrayList<String>();
 		for (int i = 0; i < array.size(); i++)
-			debugPrintArrayList(array.get(i), start, length, delimiter, delimiter2);
+			debugPrintArrayList(array.get(i), start, length, delimiter,
+					delimiter2);
 		if (delimiter2 != DELIMITER2)
 			debugPrintLine("");
 	}
@@ -153,8 +154,9 @@ public class ActivityInit extends Activity {
 			setContentView(R.layout.main);
 			txtDebug = (TextView) findViewById(R.id.txtDebug);
 
-			org.falconia.mangaproxy.plugin.Plugin99770 plugin = new org.falconia.mangaproxy.plugin.Plugin99770(0);
-			// Genre genreAll = Genre.getGenreAll(0);
+			org.falconia.mangaproxy.plugin.IPlugin plugin = org.falconia.mangaproxy.plugin.Plugin
+					.getPlugin(1000);
+			// plugin.getGenreList();
 			plugin.getAllMangaList();
 		} else {
 			Intent i = new Intent(this, ActivityFavoriteList.class);

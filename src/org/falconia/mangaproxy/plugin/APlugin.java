@@ -1,6 +1,5 @@
 package org.falconia.mangaproxy.plugin;
 
-
 import java.io.IOException;
 
 import org.apache.http.HttpEntity;
@@ -16,10 +15,12 @@ import org.falconia.mangaproxy.data.MangaList;
 import org.falconia.mangaproxy.helper.HttpHelper;
 import org.falconia.mangaproxy.helper.Regex;
 
-
 public abstract class APlugin implements IPlugin {
 	protected static final String CHARSET_GBK = HttpHelper.CHARSET_GBK;
 	protected static final String CHARSET_UTF8 = HttpHelper.CHARSET_UTF8;
+
+	protected static final String DEFAULT_MANGA_URL_PREFIX = "comic/";
+	protected static final String DEFAULT_MANGA_URL_POSTFIX = "/";
 
 	private static final DefaultHttpClient client;
 
@@ -35,17 +36,16 @@ public abstract class APlugin implements IPlugin {
 
 	public APlugin(int siteId) {
 		this.miSiteId = siteId;
-		mhHttpHelper = new HttpHelper(getEncoding());
+		this.mhHttpHelper = new HttpHelper(getEncoding());
 
-		mhResponseHandler = new ResponseHandler<String>() {
+		this.mhResponseHandler = new ResponseHandler<String>() {
 			@Override
 			public String handleResponse(final HttpResponse response)
 					throws HttpResponseException, IOException {
 				StatusLine statusLine = response.getStatusLine();
-				if (statusLine.getStatusCode() >= 300) {
+				if (statusLine.getStatusCode() >= 300)
 					throw new HttpResponseException(statusLine.getStatusCode(),
 							statusLine.getReasonPhrase());
-				}
 
 				HttpEntity entity = response.getEntity();
 				return entity == null ? null : EntityUtils.toString(entity,
@@ -60,7 +60,12 @@ public abstract class APlugin implements IPlugin {
 	}
 
 	@Override
-	public String getGenreUrl(String genreId) {
+	public String getMangaUrl(int mangaId) {
+		return getUrlBase() + getMangaUrlPrefix() + mangaId
+				+ getMangaUrlPostfix();
+	}
+
+	protected String getGenreUrl(String genreId) {
 		return getUrlBase() + genreId.replace('-', '/') + "/";
 	}
 
@@ -89,14 +94,14 @@ public abstract class APlugin implements IPlugin {
 
 	@Deprecated
 	protected String parseHtml2(String url) {
-		return mhHttpHelper.performGet(url);
+		return this.mhHttpHelper.performGet(url);
 	}
 
 	protected String parseHtml(String url) {
 		String html = "";
 		HttpGet request = new HttpGet(url);
 		try {
-			html = client.execute(request, mhResponseHandler);
+			html = client.execute(request, this.mhResponseHandler);
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -116,7 +121,7 @@ public abstract class APlugin implements IPlugin {
 	}
 
 	protected String intToBits(int i) {
-		byte[] bits = new  byte[4];
+		byte[] bits = new byte[4];
 		for (int n = 0; n < 4; n++) {
 			bits[n] = (byte) (i % 256);
 			i /= 256;

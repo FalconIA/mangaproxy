@@ -46,7 +46,7 @@ public class ActivityGenreList extends AActivityBase {
 		private LayoutInflater mhInflater;
 
 		public GenreListAdapter() {
-			this.mhGenreList = new GenreList(miSiteId);
+			this.mhGenreList = new GenreList(ActivityGenreList.this.miSiteId);
 			this.mhInflater = LayoutInflater.from(ActivityGenreList.this);
 		}
 
@@ -152,9 +152,8 @@ public class ActivityGenreList extends AActivityBase {
 			findViewById(R.id.mvgSearch).setVisibility(View.VISIBLE);
 			this.metSearch = (EditText) findViewById(R.id.metSearch);
 			findViewById(R.id.mbtnSearch).setOnClickListener(this.mhOnClick);
-		} else {
+		} else
 			findViewById(R.id.mvgSearch).setVisibility(View.GONE);
-		}
 
 		loadGenreList();
 
@@ -172,7 +171,8 @@ public class ActivityGenreList extends AActivityBase {
 				super.handleMessage(msg);
 				switch (msg.what) {
 				case WHAT_COMPLETED:
-					mhListAdapter.setGenreList(mhGenreList);
+					ActivityGenreList.this.mhListAdapter
+							.setGenreList(ActivityGenreList.this.mhGenreList);
 					hideProgressView();
 					break;
 				}
@@ -181,7 +181,8 @@ public class ActivityGenreList extends AActivityBase {
 		Runnable run = new Runnable() {
 			@Override
 			public void run() {
-				mhGenreList = mhSite.getGenreList();
+				ActivityGenreList.this.mhGenreList = ActivityGenreList.this.mhSite
+						.getGenreList();
 				messageHandler.sendEmptyMessage(WHAT_COMPLETED);
 			}
 		};

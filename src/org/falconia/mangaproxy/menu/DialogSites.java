@@ -16,7 +16,8 @@ public final class DialogSites extends ADialogMenuBase {
 	protected void generateMenuItems() {
 		Integer[] siteIds = Site.getIds();
 		for (int i = 0; i < siteIds.length; i++)
-			addMenuItem(Site.get(siteIds[i]).getDisplayname(), 2130837520, siteIds[i]);
+			addMenuItem(Site.get(siteIds[i]).getDisplayname(), 2130837520,
+					siteIds[i]);
 	}
 
 }

@@ -2,8 +2,9 @@ package org.falconia.mangaproxy.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
-public class GenreList implements ISiteId {
+public class GenreList implements ISiteId, Iterable<Genre> {
 
 	private ArrayList<Genre> marrGenre;
 	private final int miSiteId;
@@ -22,12 +23,17 @@ public class GenreList implements ISiteId {
 		return get(position).getDisplayname();
 	}
 
+	@Override
+	public Iterator<Genre> iterator() {
+		return marrGenre.iterator();
+	}
+
 	public void add(Genre genre) {
 		this.marrGenre.add(genre);
 	}
 
-	public void add(int genreId, String displayname, String url) {
-		this.marrGenre.add(new Genre(genreId, displayname, url, this.miSiteId));
+	public void add(int genreId, String displayname) {
+		this.marrGenre.add(new Genre(genreId, displayname, this.miSiteId));
 	}
 
 	public void addAll(Collection<Genre> genres) {
@@ -38,9 +44,9 @@ public class GenreList implements ISiteId {
 		this.marrGenre.add(index, genre);
 	}
 
-	public void add(int index, int genreId, String displayname, String url) {
-		this.marrGenre.add(index, new Genre(genreId, displayname, url,
-				this.miSiteId));
+	public void add(int index, int genreId, String displayname) {
+		this.marrGenre.add(index,
+				new Genre(genreId, displayname, this.miSiteId));
 	}
 
 	public Genre get(int position) {
@@ -52,7 +58,7 @@ public class GenreList implements ISiteId {
 	}
 
 	public ArrayList<Genre> toArray() {
-		return marrGenre;
+		return this.marrGenre;
 	}
 
 }

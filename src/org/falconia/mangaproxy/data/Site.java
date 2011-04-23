@@ -5,7 +5,6 @@ import java.util.HashMap;
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugin;
 
-
 public class Site {
 
 	private final static HashMap<Integer, Site> mSites;
