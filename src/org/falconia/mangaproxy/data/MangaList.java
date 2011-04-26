@@ -80,9 +80,9 @@ public class MangaList implements ISiteId, Collection<Manga> {
 
 	public Manga update(Manga manga) {
 		int key = manga.iMangaId;
-		if (contains(key)) {
+		if (contains(key))
 			return this.marrManga.put(key, manga);
-		} else {
+		else {
 			add(manga);
 			return null;
 		}
@@ -126,30 +126,30 @@ public class MangaList implements ISiteId, Collection<Manga> {
 
 	@Override
 	public boolean isEmpty() {
-		return marrMangaKey.isEmpty();
+		return this.marrMangaKey.isEmpty();
 	}
 
 	@Override
 	public Iterator<Manga> iterator() {
 		return new Iterator<Manga>() {
 
-			Iterator<Integer> keys = marrMangaKey.iterator();
+			Iterator<Integer> keys = MangaList.this.marrMangaKey.iterator();
 
 			@Override
 			public boolean hasNext() {
-				return keys.hasNext();
+				return this.keys.hasNext();
 			}
 
 			@Override
 			public Manga next() {
-				return get(keys.next());
+				return get(this.keys.next());
 			}
 
 			@Override
 			public void remove() {
-				keys.remove();
+				this.keys.remove();
 			}
-			
+
 		};
 	}
 

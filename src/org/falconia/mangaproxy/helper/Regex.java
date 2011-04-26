@@ -25,7 +25,7 @@ public class Regex {
 
 	public static String matchString(String pattern, String subject) {
 		ArrayList<String> groups = match(pattern, subject);
-		switch(groups.size()) {
+		switch (groups.size()) {
 		case 0:
 			return null;
 		case 1:

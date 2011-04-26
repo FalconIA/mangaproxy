@@ -25,6 +25,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class ActivityMangaList extends AActivityBase {
+
+	private static final int WHAT_COMPLETED = -1;
+
 	private static final int DIALOG_ID_CONTEXT_MENU = 0;
 	private static final int DIALOG_ID_CONFIRM_REMOVE_FROM_FAVORITE = 1;
 	private static final int DIALOG_ID_VIEW_SUMMARY = 2;
@@ -160,11 +163,10 @@ public class ActivityMangaList extends AActivityBase {
 		if (this.mhGenre == null)
 			finish();
 
-		setTitle(this.mhGenre.getDisplayname() + " - "
-				+ getString(R.string.genre));
+		setTitle(this.mhGenre.sDisplayname + " - " + getString(R.string.genre));
 		setProgressView((ProgressView) findViewById(R.id.mvgProgress));
 
-		this.mhListAdapter = new MangaListAdapter(this);
+		this.mhListAdapter = new MangaListAdapter(this, this.mhGenre.iSiteId);
 
 		this.mlvListView = (ListView) findViewById(R.id.mlvList);
 		this.mlvListView.setOnItemClickListener(this.mhOnListItemClick);
@@ -198,7 +200,17 @@ public class ActivityMangaList extends AActivityBase {
 		final Handler messageHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
+				if (ActivityMangaList.this.miPageIndexMax == 0)
+					ActivityMangaList.this.miPageIndexMax = ActivityMangaList.this.mhMangaList
+							.getPageIndexMax();
 
+				switch (msg.what) {
+				case WHAT_COMPLETED:
+					ActivityMangaList.this.mhListAdapter
+							.setMangaList(ActivityMangaList.this.mhMangaList);
+					hideProgressView();
+					break;
+				}
 			}
 		};
 		Runnable run = new Runnable() {
@@ -206,10 +218,7 @@ public class ActivityMangaList extends AActivityBase {
 			public void run() {
 				ActivityMangaList.this.mhMangaList = ActivityMangaList.this.mhGenre
 						.getMangaList(ActivityMangaList.this.miPageIndexCurrent);
-
-				if (ActivityMangaList.this.miPageIndexMax == 0)
-					ActivityMangaList.this.miPageIndexMax = ActivityMangaList.this.mhMangaList
-							.getPageIndexMax();
+				messageHandler.sendEmptyMessage(WHAT_COMPLETED);
 			}
 		};
 		new Thread(run).start();

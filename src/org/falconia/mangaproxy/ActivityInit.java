@@ -149,7 +149,7 @@ public class ActivityInit extends Activity {
 	public void onInitFinshed() {
 		Genre.GENRE_TEXT_ALL = getString(R.string.genre_all);
 
-		debug = true;
+		debug = false;
 		if (debug) {
 			setContentView(R.layout.main);
 			txtDebug = (TextView) findViewById(R.id.txtDebug);

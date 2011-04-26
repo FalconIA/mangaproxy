@@ -22,7 +22,9 @@ public interface IPlugin {
 	String getGenreAllUrl();
 
 	String getMangaUrl(int mangaId);
+
 	String getMangaUrlPrefix();
+
 	String getMangaUrlPostfix();
 
 	boolean hasGenreList();

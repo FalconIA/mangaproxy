@@ -57,7 +57,7 @@ public class ActivityGenreList extends AActivityBase {
 
 		@Override
 		public Genre getItem(int position) {
-			return this.mhGenreList.get(position);
+			return this.mhGenreList.getAt(position);
 		}
 
 		@Override
@@ -67,27 +67,17 @@ public class ActivityGenreList extends AActivityBase {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			// ViewHolder holder;
-			// if (convertView == null) {
-			// holder = new ViewHolder();
-			// convertView = this.mhInflater.inflate(R.layout.list_item_genre,
-			// null);
-			// holder.tvDisplayname = (TextView) convertView
-			// .findViewById(R.id.mtvDisplayname);
-			// holder.tvDisplayname.setText(this.mhGenreList
-			// .getDisplayname(position));
-			// convertView.setTag(holder);
-			// } else {
-			// holder = (ViewHolder) convertView.getTag();
-			// holder.tvDisplayname.setText(this.mhGenreList
-			// .getDisplayname(position));
-			// }
-			if (convertView == null)
-				convertView = this.mhInflater.inflate(R.layout.list_item_genre,
-						null);
-			String text = this.mhGenreList.getDisplayname(position);
-			((TextView) convertView.findViewById(R.id.mtvDisplayname))
-					.setText(text);
+			ViewHolder holder;
+			if (convertView == null) {
+				holder = new ViewHolder();
+				convertView = this.mhInflater.inflate(R.layout.list_item_genre, null);
+				holder.tvDisplayname = (TextView) convertView.findViewById(R.id.mtvDisplayname);
+				holder.tvDisplayname.setText(this.mhGenreList.getDisplayname(position));
+				convertView.setTag(holder);
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+				holder.tvDisplayname.setText(this.mhGenreList.getDisplayname(position));
+			}
 			return convertView;
 		}
 
@@ -168,7 +158,6 @@ public class ActivityGenreList extends AActivityBase {
 		final Handler messageHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				super.handleMessage(msg);
 				switch (msg.what) {
 				case WHAT_COMPLETED:
 					ActivityGenreList.this.mhListAdapter

@@ -7,7 +7,7 @@ import org.falconia.mangaproxy.plugin.Plugin;
 
 import android.graphics.Bitmap;
 
-public class Manga implements Serializable, ISiteId {
+public class Manga implements Serializable {
 
 	private static final long serialVersionUID = 3889024929248955233L;
 
@@ -18,7 +18,7 @@ public class Manga implements Serializable, ISiteId {
 
 	public String sChapterDisplayname;
 	public String sUpdatedAt;
-	public boolean bCompleted = false;
+	public boolean bIsCompleted = false;
 	public boolean bHasNewChapter = false;
 	public boolean bIsFavorite = false;
 
@@ -36,11 +36,6 @@ public class Manga implements Serializable, ISiteId {
 		this.sDisplayName = displayname;
 		this.sInital = inital;
 		this.iSiteId = siteId;
-	}
-
-	@Override
-	public int getSiteId() {
-		return this.iSiteId;
 	}
 
 	private IPlugin getPlugin() {

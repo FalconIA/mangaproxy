@@ -20,12 +20,12 @@ public class GenreList implements ISiteId, Iterable<Genre> {
 	}
 
 	public String getDisplayname(int position) {
-		return get(position).getDisplayname();
+		return getAt(position).sDisplayname;
 	}
 
 	@Override
 	public Iterator<Genre> iterator() {
-		return marrGenre.iterator();
+		return this.marrGenre.iterator();
 	}
 
 	public void add(Genre genre) {
@@ -49,7 +49,7 @@ public class GenreList implements ISiteId, Iterable<Genre> {
 				new Genre(genreId, displayname, this.miSiteId));
 	}
 
-	public Genre get(int position) {
+	public Genre getAt(int position) {
 		return this.marrGenre.get(position);
 	}
 

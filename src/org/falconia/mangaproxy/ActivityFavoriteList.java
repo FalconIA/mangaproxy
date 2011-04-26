@@ -105,7 +105,7 @@ public final class ActivityFavoriteList extends AActivityBase {
 		setContentView(R.layout.activity_favorite_list);
 		setProgressView((ProgressView) findViewById(R.id.mvgProgress));
 
-		this.mhListAdapter = new MangaListAdapter(this);
+		this.mhListAdapter = new MangaListAdapter(this, Site.SITE_ID_FAVORITE);
 
 		this.mlvListView = (ListView) findViewById(R.id.mlvList);
 		this.mlvListView.setOnItemClickListener(this.mhOnListItemClick);
