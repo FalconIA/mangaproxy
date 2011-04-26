@@ -48,6 +48,7 @@ public class Plugin99770 extends APlugin {
 		return getGenreUrl(decodeGenreId(genreId));
 	}
 
+	@Override
 	protected String getGenreUrl(String genreId) {
 		String url = getUrlBase();
 		if (genreId == GENRE_NEW_ID)
@@ -187,10 +188,9 @@ public class Plugin99770 extends APlugin {
 						html2);
 				int nMangaSize = matches2.size();
 				ActivityInit.debugPrintLine("" + nMangaSize);
-				for (ArrayList<String> groups2 : matches2) {
+				for (ArrayList<String> groups2 : matches2)
 					list.add(Integer.valueOf(groups2.get(1)),
 							checkName(groups2.get(2)), sGenre);
-				}
 			}
 
 			time = System.currentTimeMillis() - time;
@@ -201,7 +201,7 @@ public class Plugin99770 extends APlugin {
 			e.printStackTrace();
 		}
 
-		return null;
+		return list;
 	}
 
 	@Override

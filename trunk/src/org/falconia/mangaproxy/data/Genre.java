@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugin;
 
-public final class Genre implements Serializable, ISiteId {
+public final class Genre implements Serializable {
 
 	private static final long serialVersionUID = 4844325344090017780L;
 
@@ -21,25 +21,12 @@ public final class Genre implements Serializable, ISiteId {
 
 	public final int iSiteId;
 	public final int iGenreId;
-	public final String sDisplayName;
+	public final String sDisplayname;
 
 	public Genre(int genreId, String displayname, int siteId) {
 		this.iGenreId = genreId;
-		this.sDisplayName = displayname;
+		this.sDisplayname = displayname;
 		this.iSiteId = siteId;
-	}
-
-	@Override
-	public int getSiteId() {
-		return this.iSiteId;
-	}
-
-	public int getGenreId() {
-		return this.iGenreId;
-	}
-
-	public String getDisplayname() {
-		return this.sDisplayName;
 	}
 
 	private IPlugin getPlugin() {
@@ -67,7 +54,7 @@ public final class Genre implements Serializable, ISiteId {
 
 	@Override
 	public String toString() {
-		return getDisplayname();
+		return sDisplayname;
 	}
 
 }

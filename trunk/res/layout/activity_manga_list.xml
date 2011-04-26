@@ -18,7 +18,7 @@
 				android:minEms="2" android:shadowColor="#ffd8d8d8"
 				android:shadowRadius="0.4" android:layout_alignParentTop="true"
 				android:layout_alignParentRight="true" />
-			<helper.ProgressView android:id="@+id/mvgProgress"
+			<org.falconia.mangaproxy.helper.ProgressView android:id="@+id/mvgProgress"
 				android:layout_width="fill_parent" android:layout_height="fill_parent" />
 		</RelativeLayout>
 		<EditText android:id="@+id/metSearch" android:gravity="center_vertical"

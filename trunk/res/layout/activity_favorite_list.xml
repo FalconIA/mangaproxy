@@ -11,7 +11,7 @@
 		<ListView android:id="@+id/mlvList" android:layout_width="fill_parent"
 			android:layout_height="fill_parent" android:cacheColorHint="#00000000"
 			android:fastScrollEnabled="true" />
-		<helper.ProgressView android:id="@+id/mvgProgress"
+		<org.falconia.mangaproxy.helper.ProgressView android:id="@+id/mvgProgress"
 			android:layout_width="fill_parent" android:layout_height="fill_parent" />
 	</RelativeLayout>
 		<LinearLayout android:orientation="horizontal"

@@ -7,6 +7,8 @@ import org.falconia.mangaproxy.plugin.Plugin;
 
 public class Site {
 
+	public final static int SITE_ID_FAVORITE = -1;
+
 	private final static HashMap<Integer, Site> mSites;
 
 	static {
