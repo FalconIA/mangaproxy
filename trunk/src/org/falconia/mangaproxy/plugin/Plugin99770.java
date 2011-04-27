@@ -10,7 +10,9 @@ import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.data.MangaList;
 import org.falconia.mangaproxy.helper.Regex;
 
-public class Plugin99770 extends APlugin {
+import android.text.TextUtils;
+
+public class Plugin99770 extends PluginBase {
 	protected static final String GENRE_URL_PREFIX_1 = "list/";
 	protected static final String GENRE_URL_PREFIX_2 = "listabc/";
 	protected static final String GENRE_NEW_ID = "new";
@@ -41,6 +43,11 @@ public class Plugin99770 extends APlugin {
 	@Override
 	public String getUrlBase() {
 		return "http://mh.99770.cc/";
+	}
+
+	@Override
+	public String getGenreListUrl() {
+		return getUrlBase() + "list/1/";
 	}
 
 	@Override
@@ -75,7 +82,7 @@ public class Plugin99770 extends APlugin {
 
 	@Override
 	public boolean hasGenreList() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -92,26 +99,27 @@ public class Plugin99770 extends APlugin {
 	}
 
 	@Override
-	public GenreList getGenreList() {
+	public GenreList getGenreList(String source) {
 		GenreList list = new GenreList(getSiteId());
-		String url = getUrlBase() + "list/1/";
 
 		// ActivityInit.debugPrintLine("Start.");
 		// ActivityInit.debugPrintLine(url);
 
+		if (TextUtils.isEmpty(source))
+			return list;
+
 		try {
-			String html = parseHtml(url);
 			String genreId;
 			String pattern, html2;
 			// ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			ActivityInit.debugPrintLine("Length: " + html.length());
-			// ActivityInit.debugPrintLine(html);
+			// ActivityInit.debugPrintLine("Length: " + html.length());
+			// ActivityInit.debugPrintLine(source);
 
 			pattern = "(?s)(<div class=\"mm bg bd\">.*?)<div class=ncont ";
 			// ActivityInit.debugPrintLine("Pattern: " + pattern);
-			html2 = Regex.matchString(pattern, html);
+			html2 = Regex.matchString(pattern, source);
 			// ActivityInit.debugPrintLine(pattern2);
 
 			pattern = "(?s)<a\\s+href=\"([^\"]+?)\"\\s+target=\"_top\"\\s*>(.+?)</a>";
@@ -147,26 +155,24 @@ public class Plugin99770 extends APlugin {
 	}
 
 	@Override
-	public MangaList getMangaList(int genreId, int page) {
+	public MangaList getMangaList(String source, int genreId, int page) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public MangaList getAllMangaList(int page) {
+	public MangaList getAllMangaList(String source, int page) {
 		// TODO Auto-generated method stub
 		MangaList list = new MangaList(getSiteId());
-		String url = getGenreAllUrl();
 
 		try {
 			long time = System.currentTimeMillis();
 
-			String html = parseHtml(url);
 			String pattern, html2;
 			ArrayList<ArrayList<String>> matches;
 
-			ActivityInit.debugPrintLine("Length: " + html.length());
-			// ActivityInit.debugPrintLine(html);
+			ActivityInit.debugPrintLine("Length: " + source.length());
+			// ActivityInit.debugPrintLine(source);
 
 			time = System.currentTimeMillis() - time;
 			ActivityInit.debugPrintLine("Cost: " + time + "ms");
@@ -174,7 +180,7 @@ public class Plugin99770 extends APlugin {
 
 			pattern = "(?s)(<div id='all'><div class='allf'>.*?<span class='redzi'>(.*?)</span>.*?)<div class='aa'></div>";
 			// ActivityInit.debugPrintLine("Pattern: " + pattern);
-			matches = Regex.matchAll(pattern, html);
+			matches = Regex.matchAll(pattern, source);
 			ActivityInit.debugPrintLine("Matches: " + matches.size());
 
 			for (ArrayList<String> groups : matches) {

@@ -1,6 +1,9 @@
-package org.falconia.mangaproxy.data;
+package org.falconia.mangaproxy.ui;
 
 import org.falconia.mangaproxy.R;
+import org.falconia.mangaproxy.data.Manga;
+import org.falconia.mangaproxy.data.MangaList;
+import org.falconia.mangaproxy.data.Site;
 
 import android.content.Context;
 import android.view.LayoutInflater;

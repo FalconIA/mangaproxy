@@ -4,7 +4,8 @@ import org.falconia.mangaproxy.data.Site;
 
 import android.app.Activity;
 
-public final class DialogSites extends ADialogMenuBase {
+@Deprecated
+public final class DialogSites extends DialogMenuBase {
 
 	public DialogSites(Activity activity,
 			IOnMenuItemClickListener onMenuItemClickListener) {

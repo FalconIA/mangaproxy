@@ -1,7 +1,7 @@
 package org.falconia.mangaproxy.menu;
 
 import org.falconia.mangaproxy.R;
-import org.falconia.mangaproxy.dialog.ADialogBase;
+import org.falconia.mangaproxy.dialog.DialogBase;
 
 import android.app.Activity;
 import android.view.LayoutInflater;
@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public abstract class ADialogMenuBase extends ADialogBase implements
+public abstract class DialogMenuBase extends DialogBase implements
 		View.OnClickListener {
 	public static final int ID_ADD_TO_FAVORITES = 1;
 	public static final int ID_CLEAR_HIGHLIGHT = 2;
@@ -26,7 +26,7 @@ public abstract class ADialogMenuBase extends ADialogBase implements
 	private TextView mtvMenuTitle;
 	private LinearLayout mvgMenu;
 
-	public ADialogMenuBase(Activity activity,
+	public DialogMenuBase(Activity activity,
 			IOnMenuItemClickListener onMenuItemClickListener) {
 		super(activity);
 

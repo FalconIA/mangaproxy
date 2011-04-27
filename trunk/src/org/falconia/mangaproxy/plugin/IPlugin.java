@@ -17,6 +17,8 @@ public interface IPlugin {
 
 	String getUrlBase();
 
+	String getGenreListUrl();
+
 	String getGenreUrl(int genreId);
 
 	String getGenreAllUrl();
@@ -31,17 +33,20 @@ public interface IPlugin {
 
 	boolean hasSearchEngine();
 
-	GenreList getGenreList();
+	GenreList getGenreList(String source);
 
-	MangaList getMangaList(int genreId);
+	MangaList getMangaList(String source, int genreId);
 
-	MangaList getMangaList(int genreId, int page);
+	MangaList getMangaList(String source, int genreId, int page);
 
-	MangaList getAllMangaList();
+	String getAllMangaListUrl();
 
-	MangaList getAllMangaList(int page);
+	MangaList getAllMangaList(String source);
+
+	MangaList getAllMangaList(String source, int page);
 
 	Manga getComic(int comicId);
 
 	Chapter getChapter(int comicId, int chapterId);
+
 }

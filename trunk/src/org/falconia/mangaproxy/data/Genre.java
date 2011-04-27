@@ -3,7 +3,7 @@ package org.falconia.mangaproxy.data;
 import java.io.Serializable;
 
 import org.falconia.mangaproxy.plugin.IPlugin;
-import org.falconia.mangaproxy.plugin.Plugin;
+import org.falconia.mangaproxy.plugin.Plugins;
 
 public final class Genre implements Serializable {
 
@@ -30,7 +30,7 @@ public final class Genre implements Serializable {
 	}
 
 	private IPlugin getPlugin() {
-		return Plugin.getPlugin(this.iSiteId);
+		return Plugins.getPlugin(this.iSiteId);
 	}
 
 	public String getUrl() {
@@ -41,20 +41,20 @@ public final class Genre implements Serializable {
 		return this.iGenreId == GENRE_ID_ALL;
 	}
 
-	public MangaList getMangaList() {
-		return getMangaList(1);
+	public MangaList getMangaList(String source) {
+		return getMangaList(source, 1);
 	}
 
-	public MangaList getMangaList(int page) {
+	public MangaList getMangaList(String source, int page) {
 		if (isGenreAll())
-			return getPlugin().getAllMangaList(page);
+			return getPlugin().getAllMangaList(source, page);
 		else
-			return getPlugin().getMangaList(this.iGenreId, page);
+			return getPlugin().getMangaList(source, this.iGenreId, page);
 	}
 
 	@Override
 	public String toString() {
-		return sDisplayname;
+		return this.sDisplayname;
 	}
 
 }
