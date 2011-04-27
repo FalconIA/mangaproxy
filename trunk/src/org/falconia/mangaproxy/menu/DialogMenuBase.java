@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+@Deprecated
 public abstract class DialogMenuBase extends DialogBase implements
 		View.OnClickListener {
 	public static final int ID_ADD_TO_FAVORITES = 1;

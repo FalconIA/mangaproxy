@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 
+@SuppressWarnings("deprecation")
 public abstract class ActivityBase extends Activity {
 	public static final int DIALOG_CLOSE_ID = -1;
 	public static final int DIALOG_LOADING_ID = 0;
@@ -26,6 +27,8 @@ public abstract class ActivityBase extends Activity {
 	private boolean mbInProgress = false;
 	private boolean mbIsDestroyed = false;
 	private boolean mbIsVisble = false;
+
+	@Deprecated
 	private ProgressView mvProgress;
 
 	protected String getTag() {
@@ -214,15 +217,18 @@ public abstract class ActivityBase extends Activity {
 		return createProcessDialog(getString(whatResId));
 	}
 
+	@Deprecated
 	protected void setProgressView(ProgressView progressView) {
 		progressView.setVisibility(View.GONE);
 		this.mvProgress = progressView;
 	}
 
+	@Deprecated
 	protected void showProgressView() {
 		showProgressView(null);
 	}
 
+	@Deprecated
 	protected void showProgressView(String string) {
 		this.mbInProgress = true;
 		if (this.mvProgress != null)
@@ -230,6 +236,7 @@ public abstract class ActivityBase extends Activity {
 		setProgressBarIndeterminateVisibility(true);
 	}
 
+	@Deprecated
 	protected void hideProgressView() {
 		this.mbInProgress = false;
 		if (this.mvProgress != null)

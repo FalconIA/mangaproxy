@@ -25,13 +25,11 @@ public class MangaListAdapter extends BaseAdapter {
 
 	private MangaList mhMangaList;
 
-	private final Context mhContext;
 	private LayoutInflater mhInflater;
 
 	public MangaListAdapter(Context context, int siteId) {
 		this.mhMangaList = new MangaList(siteId);
 
-		this.mhContext = context;
 		this.mhInflater = LayoutInflater.from(context);
 	}
 

@@ -21,8 +21,6 @@ import android.widget.TextView;
 
 public class ActivityGenreList extends ActivityBase {
 
-	private static final int WHAT_COMPLETED = -1;
-
 	public final static class BundleHandler {
 		private static final String BUNDLE_KEY_SITE_ID = "BUNDLE_KEY_SITE_ID";
 
@@ -96,8 +94,8 @@ public class ActivityGenreList extends ActivityBase {
 	private Site mhSite;
 	private GenreList mhGenreList;
 
-	private OnClickListener mhOnClick;
 	private final OnItemClickListener mhOnListItemClick;
+	private OnClickListener mhOnClick;
 
 	private GenreListAdapter mhListAdapter;
 	private ListView mlvListView;
@@ -105,18 +103,18 @@ public class ActivityGenreList extends ActivityBase {
 
 	public ActivityGenreList() {
 
-		this.mhOnClick = new OnClickListener() {
+		this.mhOnListItemClick = new OnItemClickListener() {
 			@Override
-			public void onClick(View v) {
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
 				// TODO Auto-generated method stub
 
 			}
 		};
 
-		this.mhOnListItemClick = new OnItemClickListener() {
+		this.mhOnClick = new OnClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			public void onClick(View v) {
 				// TODO Auto-generated method stub
 
 			}

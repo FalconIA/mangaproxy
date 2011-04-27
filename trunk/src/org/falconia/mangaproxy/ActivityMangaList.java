@@ -24,12 +24,16 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+@SuppressWarnings("deprecation")
 public class ActivityMangaList extends ActivityBase {
 
 	private static final int WHAT_COMPLETED = -1;
 
+	@Deprecated
 	private static final int DIALOG_ID_CONTEXT_MENU = 0;
+	@Deprecated
 	private static final int DIALOG_ID_CONFIRM_REMOVE_FROM_FAVORITE = 1;
+	@Deprecated
 	private static final int DIALOG_ID_VIEW_SUMMARY = 2;
 
 	public final static class IntentHandler {
@@ -65,6 +69,7 @@ public class ActivityMangaList extends ActivityBase {
 	// private final IOnFadeEndListener mhOnFadeOutEnd;
 	private TextWatcher mhTextWatcher;
 	private OnClickListener mhOnClick;
+	@Deprecated
 	private final IOnMenuItemClickListener mhOnContextMenuItemClick;
 
 	private MangaListAdapter mhListAdapter;
@@ -194,6 +199,7 @@ public class ActivityMangaList extends ActivityBase {
 		this.mhListAdapter.onDestroy();
 	}
 
+	@Deprecated
 	private void loadMangaList() {
 		showProgressView("Loading...");
 
