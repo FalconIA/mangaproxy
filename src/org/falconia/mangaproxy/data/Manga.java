@@ -3,7 +3,7 @@ package org.falconia.mangaproxy.data;
 import java.io.Serializable;
 
 import org.falconia.mangaproxy.plugin.IPlugin;
-import org.falconia.mangaproxy.plugin.Plugin;
+import org.falconia.mangaproxy.plugin.Plugins;
 
 import android.graphics.Bitmap;
 
@@ -39,7 +39,7 @@ public class Manga implements Serializable {
 	}
 
 	private IPlugin getPlugin() {
-		return Plugin.getPlugin(this.iSiteId);
+		return Plugins.getPlugin(this.iSiteId);
 	}
 
 	public String getUrl() {

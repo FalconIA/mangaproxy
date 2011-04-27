@@ -1,4 +1,4 @@
-package org.falconia.mangaproxy.helper;
+package org.falconia.mangaproxy.ui;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+@Deprecated
 public class ProgressView extends RelativeLayout {
 
 	private final TextView mtvLoadingMsg;

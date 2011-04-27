@@ -13,6 +13,36 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class ActivityInit extends Activity {
+
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		onInit();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		finish();
+	}
+
+	public void onInit() {
+		Genre.GENRE_TEXT_ALL = getString(R.string.genre_all);
+
+		debug = false;
+		if (debug) {
+			setContentView(R.layout.main);
+			txtDebug = (TextView) findViewById(R.id.txtDebug);
+
+			org.falconia.mangaproxy.plugin.IPlugin plugin = org.falconia.mangaproxy.plugin.Plugins
+					.getPlugin(1000);
+			// plugin.getGenreList();
+			// plugin.getAllMangaList();
+		} else
+			startActivity(new Intent(this, ActivityFavoriteList.class));
+	}
+
 	public static boolean debug = false;
 	public static TextView txtDebug;
 	private final static int SATRT = 0;
@@ -137,31 +167,6 @@ public class ActivityInit extends Activity {
 					delimiter2);
 		if (delimiter2 != DELIMITER2)
 			debugPrintLine("");
-	}
-
-	/** Called when the activity is first created. */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		onInitFinshed();
-	}
-
-	public void onInitFinshed() {
-		Genre.GENRE_TEXT_ALL = getString(R.string.genre_all);
-
-		debug = false;
-		if (debug) {
-			setContentView(R.layout.main);
-			txtDebug = (TextView) findViewById(R.id.txtDebug);
-
-			org.falconia.mangaproxy.plugin.IPlugin plugin = org.falconia.mangaproxy.plugin.Plugin
-					.getPlugin(1000);
-			// plugin.getGenreList();
-			plugin.getAllMangaList();
-		} else {
-			Intent i = new Intent(this, ActivityFavoriteList.class);
-			startActivity(i);
-		}
 	}
 
 }

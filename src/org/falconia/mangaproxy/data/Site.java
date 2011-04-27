@@ -3,7 +3,8 @@ package org.falconia.mangaproxy.data;
 import java.util.HashMap;
 
 import org.falconia.mangaproxy.plugin.IPlugin;
-import org.falconia.mangaproxy.plugin.Plugin;
+import org.falconia.mangaproxy.plugin.Plugins;
+import org.falconia.mangaproxy.task.GetSourceTask;
 
 public class Site {
 
@@ -13,9 +14,9 @@ public class Site {
 
 	static {
 		mSites = new HashMap<Integer, Site>();
-		Integer[] ids = Plugin.getPluginIds();
+		Integer[] ids = Plugins.getPluginIds();
 		for (int i = 0; i < ids.length; i++)
-			mSites.put(ids[i], new Site(Plugin.getPlugin(ids[i])));
+			mSites.put(ids[i], new Site(Plugins.getPlugin(ids[i])));
 	}
 
 	public static boolean contains(int id) {
@@ -42,10 +43,14 @@ public class Site {
 		return this.mhPlugin.getDisplayname();
 	}
 
-	public GenreList getGenreList() {
+	public void getGenreListSource(GetSourceTask task) {
+		task.execute(this.mhPlugin.getGenreListUrl());
+	}
+
+	public GenreList getGenreList(String source) {
 		GenreList list = new GenreList(this.miSiteId);
 		list.add(Genre.getGenreAll(this.miSiteId));
-		list.addAll(this.mhPlugin.getGenreList().toArray());
+		list.addAll(this.mhPlugin.getGenreList(source).toArray());
 
 		return list;
 	}

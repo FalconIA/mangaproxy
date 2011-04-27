@@ -2,9 +2,9 @@ package org.falconia.mangaproxy;
 
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.MangaList;
-import org.falconia.mangaproxy.data.MangaListAdapter;
-import org.falconia.mangaproxy.helper.ProgressView;
 import org.falconia.mangaproxy.menu.IOnMenuItemClickListener;
+import org.falconia.mangaproxy.ui.MangaListAdapter;
+import org.falconia.mangaproxy.ui.ProgressView;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +24,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ActivityMangaList extends AActivityBase {
+public class ActivityMangaList extends ActivityBase {
 
 	private static final int WHAT_COMPLETED = -1;
 
@@ -168,7 +168,7 @@ public class ActivityMangaList extends AActivityBase {
 
 		this.mhListAdapter = new MangaListAdapter(this, this.mhGenre.iSiteId);
 
-		this.mlvListView = (ListView) findViewById(R.id.mlvList);
+		this.mlvListView = (ListView) findViewById(R.id.mlvListView);
 		this.mlvListView.setOnItemClickListener(this.mhOnListItemClick);
 		this.mlvListView.setOnItemLongClickListener(this.mhOnListItemLongClick);
 		this.mlvListView.setOnScrollListener(this.mhOnScroll);
@@ -216,8 +216,9 @@ public class ActivityMangaList extends AActivityBase {
 		Runnable run = new Runnable() {
 			@Override
 			public void run() {
-				ActivityMangaList.this.mhMangaList = ActivityMangaList.this.mhGenre
-						.getMangaList(ActivityMangaList.this.miPageIndexCurrent);
+				// ActivityMangaList.this.mhMangaList =
+				// ActivityMangaList.this.mhGenre
+				// .getMangaList(ActivityMangaList.this.miPageIndexCurrent);
 				messageHandler.sendEmptyMessage(WHAT_COMPLETED);
 			}
 		};
