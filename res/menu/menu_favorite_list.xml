@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:title="@string/menu_item_source" android:icon="@drawable/ic_menu_archive" android:id="@+id/mmiSource">
+		<menu>
+			<group android:id="@+id/mmgSourceGroup">
+			</group>
+		</menu>
+	</item>
+	<item android:title="@string/menu_item_refresh" android:icon="@drawable/ic_menu_refresh" android:id="@+id/mmiRefresh"></item>
+	<item android:title="@string/menu_item_preferences" android:icon="@drawable/ic_menu_preferences" android:id="@+id/mmiPreferences"></item>
+	
+</menu>
