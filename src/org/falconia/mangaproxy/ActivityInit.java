@@ -35,8 +35,8 @@ public class ActivityInit extends Activity {
 			setContentView(R.layout.main);
 			txtDebug = (TextView) findViewById(R.id.txtDebug);
 
-			org.falconia.mangaproxy.plugin.IPlugin plugin = org.falconia.mangaproxy.plugin.Plugins
-					.getPlugin(1000);
+			// org.falconia.mangaproxy.plugin.IPlugin plugin =
+			// org.falconia.mangaproxy.plugin.Plugins.getPlugin(1000);
 			// plugin.getGenreList();
 			// plugin.getAllMangaList();
 		} else
