@@ -5,62 +5,71 @@ import org.falconia.mangaproxy.data.GenreList;
 import org.falconia.mangaproxy.data.Site;
 import org.falconia.mangaproxy.task.GetSourceTask;
 import org.falconia.mangaproxy.task.ProcessDataTask;
+import org.falconia.mangaproxy.ui.BaseListAdapter;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
-import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 
 public class ActivityGenreList extends ActivityBase {
 
-	public final static class BundleHandler {
+	public final static class IntentHandler {
+
 		private static final String BUNDLE_KEY_SITE_ID = "BUNDLE_KEY_SITE_ID";
 
-		public static Bundle getBundle(int siteId) {
-			Bundle localBundle = new Bundle();
-			localBundle.putInt(BUNDLE_KEY_SITE_ID, siteId);
-			return localBundle;
+		private static Intent getIntent(Context context, int siteId) {
+			Bundle bundle = new Bundle();
+			bundle.putInt(BUNDLE_KEY_SITE_ID, siteId);
+			Intent i = new Intent(context, ActivityGenreList.class);
+			i.putExtras(bundle);
+			return i;
 		}
 
-		public static int getSiteId(Bundle bundle) {
-			return bundle.getInt(BUNDLE_KEY_SITE_ID);
+		protected static int getSiteId(ActivityGenreList activity) {
+			return activity.getIntent().getExtras().getInt(BUNDLE_KEY_SITE_ID);
 		}
+
+		public static void startActivityGenreList(Context context, int siteId) {
+			context.startActivity(getIntent(context, siteId));
+		}
+
 	}
 
-	final class GenreListAdapter extends BaseAdapter {
+	final class GenreListAdapter extends BaseListAdapter {
 		final class ViewHolder {
 			public TextView tvDisplayname;
 		}
 
-		private GenreList mhGenreList;
-		private LayoutInflater mhInflater;
+		private GenreList mGenreList;
+		private LayoutInflater mInflater;
 
 		public GenreListAdapter() {
-			this.mhGenreList = new GenreList(ActivityGenreList.this.miSiteId);
-			this.mhInflater = LayoutInflater.from(ActivityGenreList.this);
+			// this.mGenreList = new GenreList(ActivityGenreList.this.mSiteId);
+			this.mInflater = LayoutInflater.from(ActivityGenreList.this);
 		}
 
 		@Override
 		public int getCount() {
-			return this.mhGenreList.size();
+			if (this.mGenreList == null)
+				return 0;
+			return this.mGenreList.size();
 		}
 
 		@Override
 		public Genre getItem(int position) {
-			return this.mhGenreList.getAt(position);
+			return this.mGenreList.getAt(position);
 		}
 
 		@Override
 		public long getItemId(int position) {
-			return position;
+			return getItem(position).genreId;
 		}
 
 		@Override
@@ -68,94 +77,90 @@ public class ActivityGenreList extends ActivityBase {
 			ViewHolder holder;
 			if (convertView == null) {
 				holder = new ViewHolder();
-				convertView = this.mhInflater.inflate(R.layout.list_item_genre,
+				convertView = this.mInflater.inflate(R.layout.list_item_genre,
 						null);
 				holder.tvDisplayname = (TextView) convertView
 						.findViewById(R.id.mtvDisplayname);
-				holder.tvDisplayname.setText(this.mhGenreList
+				holder.tvDisplayname.setText(this.mGenreList
 						.getDisplayname(position));
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
-				holder.tvDisplayname.setText(this.mhGenreList
+				holder.tvDisplayname.setText(this.mGenreList
 						.getDisplayname(position));
 			}
 			return convertView;
 		}
 
+		@Override
+		public void onScroll(AbsListView view, int firstVisibleItem,
+				int visibleItemCount, int totalItemCount) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onScrollStateChanged(AbsListView view, int scrollState) {
+			// TODO Auto-generated method stub
+
+		}
+
 		public void setGenreList(GenreList genreList) {
-			this.mhGenreList = genreList;
+			this.mGenreList = genreList;
 			notifyDataSetChanged();
 		}
 
 	}
 
-	private int miSiteId;
-	private Site mhSite;
-	private GenreList mhGenreList;
+	protected static final String BUNDLE_KEY_GENRE_LIST = "BUNDLE_KEY_GENRE_LIST";
 
-	private final OnItemClickListener mhOnListItemClick;
-	private OnClickListener mhOnClick;
+	private int mSiteId;
+	private Site mSite;
+	private GenreList mGenreList;
 
-	private GenreListAdapter mhListAdapter;
-	private ListView mlvListView;
-	private EditText metSearch;
-
-	public ActivityGenreList() {
-
-		this.mhOnListItemClick = new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
-		this.mhOnClick = new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
+	@Override
+	public String getSiteName() {
+		return this.mSite.getName();
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		this.miSiteId = BundleHandler.getSiteId(getIntent().getExtras());
-		this.mhSite = Site.get(this.miSiteId);
-
-		this.mhGetSourceTask = new GetSourceTask(this.miSiteId, this);
-		this.mhProcessDataTask = new ProcessDataTask(this);
-		// this.mbShowProcessDialog = false;
+		this.mSiteId = IntentHandler.getSiteId(this);
+		this.mSite = Site.get(this.mSiteId);
 
 		setContentView(R.layout.activity_genre_list);
-		setTitle(this.mhSite.getDisplayname() + " - "
-				+ getString(R.string.genre));
+		setTitle(String.format("%s - %s", this.mSite.getDisplayname(),
+				getString(R.string.genre)));
 
-		this.mhListAdapter = new GenreListAdapter();
+		this.mGetSourceTask = new GetSourceTask(this.mSiteId, this);
+		this.mProcessDataTask = new ProcessDataTask(this);
+		// this.mShowProcessDialog = false;
 
-		this.mlvListView = (ListView) findViewById(R.id.mlvListView);
-		this.mlvListView.setEmptyView(findViewById(R.id.mtvNoItems));
-		this.mlvListView.setOnItemClickListener(this.mhOnListItemClick);
-		this.mlvListView.setAdapter(this.mhListAdapter);
+		setupListView(new GenreListAdapter());
 
-		if (this.mhSite.hasSearchEngine()) {
+		if (this.mSite.hasSearchEngine())
 			findViewById(R.id.mvgSearch).setVisibility(View.VISIBLE);
-			this.metSearch = (EditText) findViewById(R.id.metSearch);
-			findViewById(R.id.mbtnSearch).setOnClickListener(this.mhOnClick);
-		} else
+		else
 			findViewById(R.id.mvgSearch).setVisibility(View.GONE);
 
-		loadGenreList();
+		if (!this.mProcessed)
+			loadGenreList();
+	}
 
-		// showProgressView("Loading...");
-		// mhListAdapter.setGenreList(mdSite.getGenreList());
-		// hideProgressView();
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable(BUNDLE_KEY_GENRE_LIST, this.mGenreList);
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		this.mGenreList = (GenreList) savedInstanceState
+				.getSerializable(BUNDLE_KEY_GENRE_LIST);
+		((GenreListAdapter) this.mListAdapter).setGenreList(this.mGenreList);
+		super.onRestoreInstanceState(savedInstanceState);
 	}
 
 	@Override
@@ -175,18 +180,27 @@ public class ActivityGenreList extends ActivityBase {
 	}
 
 	@Override
-	public void onPostProcess() {
-		super.onPostProcess();
-		this.mhListAdapter.setGenreList(this.mhGenreList);
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		Genre genre = this.mGenreList.getAt(position);
+		ActivityMangaList.IntentHandler.startActivityMangaList(this, genre);
 	}
 
 	@Override
-	public void onProcess(String source) {
-		this.mhGenreList = this.mhSite.getGenreList(source);
+	public int onProcess(String source) {
+		this.mGenreList = this.mSite.getGenreList(source);
+		return this.mGenreList.size();
+	}
+
+	@Override
+	public void onPostProcess(int result) {
+		super.onPostProcess(result);
+		((GenreListAdapter) this.mListAdapter).setGenreList(this.mGenreList);
+		getListView().requestFocus();
 	}
 
 	private void loadGenreList() {
-		this.mhSite.getGenreListSource(this.mhGetSourceTask);
+		this.mSite.getGenreListSource(this.mGetSourceTask);
 	}
 
 }

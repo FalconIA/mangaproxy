@@ -1,6 +1,5 @@
 package org.falconia.mangaproxy;
 
-import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.Site;
 import org.falconia.mangaproxy.plugin.Plugins;
 import org.falconia.mangaproxy.ui.MangaListAdapter;
@@ -8,53 +7,27 @@ import org.falconia.mangaproxy.ui.MangaListAdapter;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ListView;
 
 public final class ActivityFavoriteList extends ActivityBase {
-	private OnItemClickListener mhOnListItemClick;
-	private OnItemLongClickListener mhOnListItemLongClick;
 
-	private ListView mlvListView;
-	private MangaListAdapter mhListAdapter;
-
-	public ActivityFavoriteList() {
-		this.mhOnListItemClick = new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				// TODO Auto-generated method stub
-
-			}
-		};
-		this.mhOnListItemLongClick = new OnItemLongClickListener() {
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				// TODO Auto-generated method stub
-
-				return false;
-			}
-		};
+	@Override
+	public String getSiteName() {
+		return "";
 	}
 
 	@Override
-	public boolean dispatchKeyEvent(KeyEvent event) {
-		if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && !event.isLongPress()) {
 			showDialog(DIALOG_CLOSE_ID);
 			return true;
 		}
-		return super.dispatchKeyEvent(event);
+		return super.onKeyDown(keyCode, event);
 	}
 
 	@Override
@@ -62,13 +35,7 @@ public final class ActivityFavoriteList extends ActivityBase {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_favorite_list);
 
-		this.mhListAdapter = new MangaListAdapter(this, Site.SITE_ID_FAVORITE);
-
-		this.mlvListView = (ListView) findViewById(R.id.mlvListView);
-		this.mlvListView.setEmptyView(findViewById(R.id.mtvNoItems));
-		this.mlvListView.setOnItemClickListener(this.mhOnListItemClick);
-		this.mlvListView.setOnItemLongClickListener(this.mhOnListItemLongClick);
-		this.mlvListView.setAdapter(this.mhListAdapter);
+		setupListView(new MangaListAdapter(this, Site.SITE_ID_FAVORITE));
 	}
 
 	@Override
@@ -112,30 +79,27 @@ public final class ActivityFavoriteList extends ActivityBase {
 
 	private void onSourceSelected(int siteId) {
 		Site site = Site.get(siteId);
-		if (site.hasGenreList()) {
-			Intent i = new Intent(ActivityFavoriteList.this,
-					ActivityGenreList.class);
-			i.putExtras(ActivityGenreList.BundleHandler.getBundle(siteId));
-			startActivity(i);
-		} else {
-			Genre genreAll = Genre.getGenreAll(siteId);
-			Intent i = ActivityMangaList.IntentHandler.getIntent(
-					ActivityFavoriteList.this, genreAll);
-			startActivity(i);
-		}
+		if (site.hasGenreList())
+			ActivityGenreList.IntentHandler
+					.startActivityGenreList(this, siteId);
+		else
+			ActivityMangaList.IntentHandler.startActivityAllMangaList(this,
+					siteId);
 	}
 
 	private Dialog createExitConfirmDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Confirm to exit?")
+		builder.setMessage(getString(R.string.dialog_confirm_to_exit))
 				.setCancelable(false)
-				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int id) {
-						ActivityFavoriteList.this.finish();
-					}
-				})
-				.setNegativeButton("Cancel",
+				.setPositiveButton(getString(R.string.dialog_ok),
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int id) {
+								ActivityFavoriteList.this.finish();
+								System.exit(0);
+							}
+						})
+				.setNegativeButton(getString(R.string.dialog_cancel),
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int id) {

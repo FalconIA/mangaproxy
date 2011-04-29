@@ -9,41 +9,41 @@ import android.graphics.Bitmap;
 
 public class Manga implements Serializable {
 
-	private static final long serialVersionUID = 3889024929248955233L;
+	private static final long serialVersionUID = 1L;
 
-	public final int iSiteId;
-	public final int iMangaId;
-	public final String sDisplayName;
-	public final String sInital;
+	public final int siteId;
+	public final int mangaId;
+	public final String displayName;
+	public final String section;
 
-	public String sChapterDisplayname;
-	public String sUpdatedAt;
-	public boolean bIsCompleted = false;
-	public boolean bHasNewChapter = false;
-	public boolean bIsFavorite = false;
+	public String chapterDisplayname;
+	public String updatedAt;
+	public boolean isCompleted = false;
+	public boolean hasNewChapter = false;
+	public boolean isFavorite = false;
 
-	public transient Bitmap hExtraInfoCoverBitmap = null;
-	public transient String sExtraInfoArtist = null;
-	public transient String sExtraInfoAuthor = null;
-	public transient String sExtraInfoGenre = null;
-	public transient String sExtraInfoSummary = null;
+	public transient Bitmap extraInfoCoverBitmap = null;
+	public transient String extraInfoArtist = null;
+	public transient String extraInfoAuthor = null;
+	public transient String extraInfoGenre = null;
+	public transient String extraInfoSummary = null;
 
-	private Chapter mhLastReadChapter = null;
-	private Chapter mhLatestChapter = null;
+	private Chapter mLastReadChapter = null;
+	private Chapter mLatestChapter = null;
 
-	public Manga(int mangaId, String displayname, String inital, int siteId) {
-		this.iMangaId = mangaId;
-		this.sDisplayName = displayname;
-		this.sInital = inital;
-		this.iSiteId = siteId;
+	public Manga(int mangaId, String displayname, String section, int siteId) {
+		this.mangaId = mangaId;
+		this.displayName = displayname;
+		this.section = section;
+		this.siteId = siteId;
 	}
 
 	private IPlugin getPlugin() {
-		return Plugins.getPlugin(this.iSiteId);
+		return Plugins.getPlugin(this.siteId);
 	}
 
 	public String getUrl() {
-		return getPlugin().getMangaUrl(this.iMangaId);
+		return getPlugin().getMangaUrl(this.mangaId);
 	}
 
 	public int getIconDrawableId() {
@@ -51,43 +51,43 @@ public class Manga implements Serializable {
 	}
 
 	public void setLastReadChapter(Chapter chapter) {
-		this.mhLastReadChapter = chapter;
+		this.mLastReadChapter = chapter;
 	}
 
 	public Chapter getLastReadChapter() {
-		return this.mhLastReadChapter;
+		return this.mLastReadChapter;
 	}
 
 	public String getLastReadChapterDisplayname() {
-		if (this.mhLastReadChapter != null)
-			return this.mhLastReadChapter.sDisplayName;
+		if (this.mLastReadChapter != null)
+			return this.mLastReadChapter.displayname;
 		else
 			return null;
 	}
 
 	public void setLatestChapter(Chapter chapter) {
-		this.mhLatestChapter = chapter;
+		this.mLatestChapter = chapter;
 	}
 
 	public Chapter getLatestChapter() {
-		return this.mhLatestChapter;
+		return this.mLatestChapter;
 	}
 
 	public String getLatestChapterDisplayname() {
-		if (this.mhLatestChapter != null)
-			return this.mhLatestChapter.sDisplayName;
+		if (this.mLatestChapter != null)
+			return this.mLatestChapter.displayname;
 		else
 			return null;
 	}
 
 	public void resetExtraInfo() {
-		this.sExtraInfoAuthor = null;
-		this.sExtraInfoArtist = null;
-		this.sExtraInfoGenre = null;
-		this.sExtraInfoSummary = null;
-		if (this.hExtraInfoCoverBitmap != null) {
-			this.hExtraInfoCoverBitmap.recycle();
-			this.hExtraInfoCoverBitmap = null;
+		this.extraInfoAuthor = null;
+		this.extraInfoArtist = null;
+		this.extraInfoGenre = null;
+		this.extraInfoSummary = null;
+		if (this.extraInfoCoverBitmap != null) {
+			this.extraInfoCoverBitmap.recycle();
+			this.extraInfoCoverBitmap = null;
 		}
 	}
 

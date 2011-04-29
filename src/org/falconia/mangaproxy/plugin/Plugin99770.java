@@ -11,11 +11,13 @@ import org.falconia.mangaproxy.data.MangaList;
 import org.falconia.mangaproxy.helper.Regex;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 public class Plugin99770 extends PluginBase {
 	protected static final String GENRE_URL_PREFIX_1 = "list/";
 	protected static final String GENRE_URL_PREFIX_2 = "listabc/";
-	protected static final String GENRE_NEW_ID = "new";
+	protected static final int GENRE_NEW_ID = 0;
+	protected static final String GENRE_NEW_ID_STRING = "new";
 	protected static final String GENRE_NEW_URL = "more.htm";
 	protected static final String GENRE_ALL_URL = "sitemap/";
 
@@ -46,27 +48,55 @@ public class Plugin99770 extends PluginBase {
 	}
 
 	@Override
-	public String getGenreListUrl() {
-		return getUrlBase() + "list/1/";
+	public boolean hasGenreList() {
+		return true;
 	}
 
 	@Override
-	public String getGenreUrl(int genreId) {
-		return getGenreUrl(decodeGenreId(genreId));
+	public boolean hasSearchEngine() {
+		return false;
+	}
+
+	@Override
+	public String getGenreListUrl() {
+		String url = getUrlBase() + "list/1/";
+		logI("Get URL of GenreList: " + url);
+		return url;
+	}
+
+	@Override
+	public String getGenreUrl(int genreId, int page) {
+		String url;
+		if (genreId == Genre.GENRE_ALL_ID) {
+			url = getGenreAllUrl(page);
+			logI("Get URL of MangaList(All): " + url);
+		} else {
+			String genreIdString = decodeGenreId(genreId);
+			url = getGenreUrl(genreIdString, page);
+			logI("Get URL of MangaList(" + genreIdString + "): " + url);
+		}
+		return url;
 	}
 
 	@Override
 	protected String getGenreUrl(String genreId) {
 		String url = getUrlBase();
-		if (genreId == GENRE_NEW_ID)
+		if (genreId == GENRE_NEW_ID_STRING)
 			url += GENRE_NEW_URL;
 		else
 			url = super.getGenreUrl(genreId);
 		return url;
 	}
 
+	protected String getGenreUrl(String genreId, int page) {
+		String url = getGenreUrl(genreId);
+		if (page > 1)
+			url += String.format("%s.htm", page);
+		return url;
+	}
+
 	@Override
-	public String getGenreAllUrl() {
+	public String getGenreAllUrl(int page) {
 		return getUrlBase() + GENRE_ALL_URL;
 	}
 
@@ -78,16 +108,6 @@ public class Plugin99770 extends PluginBase {
 	@Override
 	public String getMangaUrlPostfix() {
 		return DEFAULT_MANGA_URL_POSTFIX;
-	}
-
-	@Override
-	public boolean hasGenreList() {
-		return true;
-	}
-
-	@Override
-	public boolean hasSearchEngine() {
-		return false;
 	}
 
 	@Override
@@ -127,7 +147,7 @@ public class Plugin99770 extends PluginBase {
 			// ActivityInit.debugPrintMatchAll(matches, 2, 1, ", ", "; ");
 			for (ArrayList<String> groups : matches) {
 				genreId = checkId(groups.get(1));
-				if (genreId.equalsIgnoreCase(GENRE_NEW_ID))
+				if (genreId.equalsIgnoreCase(GENRE_NEW_ID_STRING))
 					list.add(0, encodeGenreId(genreId),
 							checkGenreName(groups.get(2)));
 				else
@@ -147,8 +167,8 @@ public class Plugin99770 extends PluginBase {
 				ActivityInit.debugPrintLine(genre.toString());
 
 		} catch (Exception e) {
-			ActivityInit.debugPrintLine(e.toString());
 			e.printStackTrace();
+			log(Log.ERROR, e.toString() + ": " + e.getMessage());
 		}
 
 		return list;
@@ -156,27 +176,49 @@ public class Plugin99770 extends PluginBase {
 
 	@Override
 	public MangaList getMangaList(String source, int genreId, int page) {
-		// TODO Auto-generated method stub
-		return null;
+		MangaList list = new MangaList(getSiteId());
+
+		logI("Get MangaList.");
+		logD("Get MangaList source of " + source.length() + "B.");
+
+		try {
+			long time = System.currentTimeMillis();
+
+			String pattern;
+			ArrayList<String> groups;
+
+			if (genreId == GENRE_NEW_ID) {
+				logD("Process MangaList for Genre of NEW.");
+
+				pattern = "(?s)<td width=\"50%\">\\s*((?:<table .*?</table>)+)\\s*</td>\\s*<td width=\"50%\">\\s*((?:<table .*?</table>)+)\\s*</td>";
+				groups = Regex.match(pattern, source);
+				logD("Matches: " + (groups.size() - 1) + "part(s).");
+			} else
+				logD("Process MangaList for normal Genre.");
+
+			time = System.currentTimeMillis() - time;
+			logD("Process MangaList in " + time + "ms.");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log(Log.ERROR, e.toString() + ": " + e.getMessage());
+		}
+
+		return list;
 	}
 
 	@Override
 	public MangaList getAllMangaList(String source, int page) {
-		// TODO Auto-generated method stub
 		MangaList list = new MangaList(getSiteId());
 
 		try {
 			long time = System.currentTimeMillis();
 
-			String pattern, html2;
+			String pattern, source2;
 			ArrayList<ArrayList<String>> matches;
 
 			ActivityInit.debugPrintLine("Length: " + source.length());
 			// ActivityInit.debugPrintLine(source);
-
-			time = System.currentTimeMillis() - time;
-			ActivityInit.debugPrintLine("Cost: " + time + "ms");
-			time = System.currentTimeMillis();
 
 			pattern = "(?s)(<div id='all'><div class='allf'>.*?<span class='redzi'>(.*?)</span>.*?)<div class='aa'></div>";
 			// ActivityInit.debugPrintLine("Pattern: " + pattern);
@@ -184,16 +226,15 @@ public class Plugin99770 extends PluginBase {
 			ActivityInit.debugPrintLine("Matches: " + matches.size());
 
 			for (ArrayList<String> groups : matches) {
-				html2 = groups.get(1);
+				source2 = groups.get(1);
 				// ActivityInit.debugPrintLine(pattern2);
 				String sGenre = checkGenreName(groups.get(2));
-				ActivityInit.debugPrint(sGenre + ": ");
 				pattern = "(?s)<a href=\"/" + getMangaUrlPrefix()
 						+ "(\\d+)\">(.*?)</a>";
 				ArrayList<ArrayList<String>> matches2 = Regex.matchAll(pattern,
-						html2);
+						source2);
 				int nMangaSize = matches2.size();
-				ActivityInit.debugPrintLine("" + nMangaSize);
+				ActivityInit.debugPrintLine(sGenre + ": " + nMangaSize);
 				for (ArrayList<String> groups2 : matches2)
 					list.add(Integer.valueOf(groups2.get(1)),
 							checkName(groups2.get(2)), sGenre);
@@ -203,8 +244,8 @@ public class Plugin99770 extends PluginBase {
 			ActivityInit.debugPrintLine("Cost: " + time + "ms");
 
 		} catch (Exception e) {
-			ActivityInit.debugPrintLine(e.toString());
 			e.printStackTrace();
+			log(Log.ERROR, e.toString() + ": " + e.getMessage());
 		}
 
 		return list;
@@ -223,23 +264,23 @@ public class Plugin99770 extends PluginBase {
 	}
 
 	public int encodeGenreId(String string) {
-		int id = -2;
+		int id = Genre.GENRE_UNKNOWN_ID;
 		if (Regex.isMatch("^" + GENRE_URL_PREFIX_1.replace('/', '-') + "\\d+$",
 				string))
 			id = Integer.valueOf(string.substring(GENRE_URL_PREFIX_1.length()));
 		else if (Regex.isMatch("^" + GENRE_URL_PREFIX_2.replace('/', '-')
 				+ "[\\da-zA-Z]$", string))
 			id = bitsToInt(string.substring(GENRE_URL_PREFIX_2.length()));
-		else if (string.equalsIgnoreCase(GENRE_NEW_ID))
-			id = 0;
+		else if (string.equalsIgnoreCase(GENRE_NEW_ID_STRING))
+			id = GENRE_NEW_ID;
 		return id;
 	}
 
 	public String decodeGenreId(int id) {
 		String string = "";
-		if (id == 0)
-			string = GENRE_NEW_ID;
-		else if (id > 0 && id < "0".charAt(0))
+		if (id == GENRE_NEW_ID)
+			string = GENRE_NEW_ID_STRING;
+		else if (id > GENRE_NEW_ID && id < "0".charAt(0))
 			string = GENRE_URL_PREFIX_1.replace('/', '-') + id;
 		else if (id >= "0".charAt(0))
 			string = GENRE_URL_PREFIX_2.replace('/', '-') + intToBits(id);

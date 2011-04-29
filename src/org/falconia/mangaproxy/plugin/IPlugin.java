@@ -17,9 +17,17 @@ public interface IPlugin {
 
 	String getUrlBase();
 
+	boolean hasGenreList();
+
+	boolean hasSearchEngine();
+
 	String getGenreListUrl();
 
+	String getGenreUrl(int genreId, int page);
+
 	String getGenreUrl(int genreId);
+
+	String getGenreAllUrl(int page);
 
 	String getGenreAllUrl();
 
@@ -29,21 +37,15 @@ public interface IPlugin {
 
 	String getMangaUrlPostfix();
 
-	boolean hasGenreList();
-
-	boolean hasSearchEngine();
-
 	GenreList getGenreList(String source);
-
-	MangaList getMangaList(String source, int genreId);
 
 	MangaList getMangaList(String source, int genreId, int page);
 
-	String getAllMangaListUrl();
-
-	MangaList getAllMangaList(String source);
+	MangaList getMangaList(String source, int genreId);
 
 	MangaList getAllMangaList(String source, int page);
+
+	MangaList getAllMangaList(String source);
 
 	Manga getComic(int comicId);
 

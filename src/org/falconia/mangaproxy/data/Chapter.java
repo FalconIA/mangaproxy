@@ -1,17 +1,21 @@
 package org.falconia.mangaproxy.data;
 
-public class Chapter {
+import java.io.Serializable;
 
-	public final int iSiteId;
-	public final int iChapterId;
-	public final String sDisplayName;
-	public final String sUrl;
+public class Chapter implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	public final int siteId;
+	public final int chapterId;
+	public final String displayname;
+	public final String url;
 
 	public Chapter(int chapterId, String displayname, String url, int siteId) {
-		this.iChapterId = chapterId;
-		this.sDisplayName = displayname;
-		this.sUrl = url;
-		this.iSiteId = siteId;
+		this.chapterId = chapterId;
+		this.displayname = displayname;
+		this.url = url;
+		this.siteId = siteId;
 	}
 
 }

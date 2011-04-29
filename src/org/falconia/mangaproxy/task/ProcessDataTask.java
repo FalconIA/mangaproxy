@@ -4,7 +4,7 @@ import org.falconia.mangaproxy.ActivityBase;
 
 import android.os.AsyncTask;
 
-public class ProcessDataTask extends AsyncTask<String, Void, Void> {
+public class ProcessDataTask extends AsyncTask<String, Void, Integer> {
 
 	ActivityBase mhActivity;
 
@@ -13,9 +13,8 @@ public class ProcessDataTask extends AsyncTask<String, Void, Void> {
 	}
 
 	@Override
-	protected Void doInBackground(String... params) {
-		this.mhActivity.onProcess(params[0]);
-		return null;
+	protected Integer doInBackground(String... params) {
+		return this.mhActivity.onProcess(params[0]);
 	}
 
 	@Override
@@ -24,8 +23,8 @@ public class ProcessDataTask extends AsyncTask<String, Void, Void> {
 	}
 
 	@Override
-	protected void onPostExecute(Void result) {
-		this.mhActivity.onPostProcess();
+	protected void onPostExecute(Integer result) {
+		this.mhActivity.onPostProcess(result);
 	}
 
 }

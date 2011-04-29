@@ -4,6 +4,8 @@ import org.falconia.mangaproxy.data.MangaList;
 import org.falconia.mangaproxy.helper.HttpHelper;
 import org.falconia.mangaproxy.helper.Regex;
 
+import android.util.Log;
+
 public abstract class PluginBase implements IPlugin {
 	protected static final String CHARSET_GBK = HttpHelper.CHARSET_GBK;
 	protected static final String CHARSET_UTF8 = HttpHelper.CHARSET_UTF8;
@@ -23,9 +25,13 @@ public abstract class PluginBase implements IPlugin {
 	}
 
 	@Override
-	public String getMangaUrl(int mangaId) {
-		return getUrlBase() + getMangaUrlPrefix() + mangaId
-				+ getMangaUrlPostfix();
+	public String getGenreUrl(int genreId) {
+		return getGenreUrl(genreId, 1);
+	}
+
+	@Override
+	public String getGenreAllUrl() {
+		return getGenreAllUrl(1);
 	}
 
 	protected String getGenreUrl(String genreId) {
@@ -33,13 +39,14 @@ public abstract class PluginBase implements IPlugin {
 	}
 
 	@Override
-	public MangaList getMangaList(String source, int genreId) {
-		return getMangaList(source, genreId, 1);
+	public String getMangaUrl(int mangaId) {
+		return getUrlBase() + getMangaUrlPrefix() + mangaId
+				+ getMangaUrlPostfix();
 	}
 
 	@Override
-	public String getAllMangaListUrl() {
-		return getGenreAllUrl();
+	public MangaList getMangaList(String source, int genreId) {
+		return getMangaList(source, genreId, 1);
 	}
 
 	@Override
@@ -75,6 +82,34 @@ public abstract class PluginBase implements IPlugin {
 			i /= 256;
 		}
 		return new String(bits);
+	}
+
+	protected String getTag() {
+		return getClass().getSimpleName();
+	}
+
+	protected void log(int priority, String msg) {
+		Log.println(priority, getTag(), msg);
+	}
+
+	protected void logV(String msg) {
+		// VERBOSE = 2
+		Log.v(getTag(), msg);
+	}
+
+	protected void logD(String msg) {
+		// DEBUG = 3
+		Log.d(getTag(), msg);
+	}
+
+	protected void logI(String msg) {
+		// INFO = 4
+		Log.i(getTag(), msg);
+	}
+
+	protected void logE(String msg) {
+		// ERROR = 6
+		Log.e(getTag(), msg);
 	}
 
 }

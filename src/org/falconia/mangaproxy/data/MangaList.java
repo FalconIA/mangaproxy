@@ -1,54 +1,57 @@
 package org.falconia.mangaproxy.data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class MangaList implements ISiteId, Collection<Manga> {
+public class MangaList implements Serializable, ISiteId, Collection<Manga> {
+
+	private static final long serialVersionUID = 1L;
 
 	private static final int DEFAULT_PAGE_CURRENT = 1;
 	private static final int DEFAULT_PAGE_MAX = 1;
 
-	private ArrayList<Integer> marrMangaKey;
-	private HashMap<Integer, Manga> marrManga;
-	private final int miSiteId;
+	private ArrayList<Integer> mMangaKeyList;
+	private HashMap<Integer, Manga> mMangaList;
+	private final int mSiteId;
 
-	private int miPageIndexCurrent;
-	private int miPageIndexMax;
+	private int mPageIndexCurrent;
+	private int mPageIndexMax;
 
 	public MangaList(int siteId) {
 		this(siteId, DEFAULT_PAGE_CURRENT, DEFAULT_PAGE_MAX);
 	}
 
 	public MangaList(int siteId, int pageCurrent, int pageMax) {
-		this.marrMangaKey = new ArrayList<Integer>();
-		this.marrManga = new HashMap<Integer, Manga>();
-		this.miSiteId = siteId;
+		this.mMangaKeyList = new ArrayList<Integer>();
+		this.mMangaList = new HashMap<Integer, Manga>();
+		this.mSiteId = siteId;
 
-		this.miPageIndexCurrent = pageCurrent;
-		this.miPageIndexMax = pageMax;
+		this.mPageIndexCurrent = pageCurrent;
+		this.mPageIndexMax = pageMax;
 	}
 
 	@Override
 	public int getSiteId() {
-		return this.miSiteId;
+		return this.mSiteId;
 	}
 
 	public int getPageIndexCurrent() {
-		return this.miPageIndexCurrent;
+		return this.mPageIndexCurrent;
 	}
 
 	public int getPageIndexMax() {
-		return this.miPageIndexMax;
+		return this.mPageIndexMax;
 	}
 
 	public int getMangaId(int position) {
-		return this.marrMangaKey.get(position);
+		return this.mMangaKeyList.get(position);
 	}
 
 	public Manga get(int mangaId) {
-		return this.marrManga.get(mangaId);
+		return this.mMangaList.get(mangaId);
 	}
 
 	public Manga getAt(int position) {
@@ -57,16 +60,16 @@ public class MangaList implements ISiteId, Collection<Manga> {
 
 	@Override
 	public boolean add(Manga manga) {
-		int key = manga.iMangaId;
+		int key = manga.mangaId;
 		if (contains(key))
 			return false;
-		this.marrManga.put(key, manga);
-		this.marrMangaKey.add(key);
+		this.mMangaList.put(key, manga);
+		this.mMangaKeyList.add(key);
 		return true;
 	}
 
 	public boolean add(int mangaId, String displayname, String inital) {
-		return add(new Manga(mangaId, displayname, inital, this.miSiteId));
+		return add(new Manga(mangaId, displayname, inital, this.mSiteId));
 	}
 
 	@Override
@@ -79,9 +82,9 @@ public class MangaList implements ISiteId, Collection<Manga> {
 	}
 
 	public Manga update(Manga manga) {
-		int key = manga.iMangaId;
+		int key = manga.mangaId;
 		if (contains(key))
-			return this.marrManga.put(key, manga);
+			return this.mMangaList.put(key, manga);
 		else {
 			add(manga);
 			return null;
@@ -89,7 +92,7 @@ public class MangaList implements ISiteId, Collection<Manga> {
 	}
 
 	public Manga update(int mangaId, String displayname, String inital) {
-		return update(new Manga(mangaId, displayname, inital, this.miSiteId));
+		return update(new Manga(mangaId, displayname, inital, this.mSiteId));
 	}
 
 	public ArrayList<Manga> updateAll(Collection<? extends Manga> mangas) {
@@ -101,19 +104,19 @@ public class MangaList implements ISiteId, Collection<Manga> {
 
 	@Override
 	public void clear() {
-		this.marrMangaKey.clear();
-		this.marrManga.clear();
-		this.miPageIndexCurrent = DEFAULT_PAGE_CURRENT;
-		this.miPageIndexMax = DEFAULT_PAGE_MAX;
+		this.mMangaKeyList.clear();
+		this.mMangaList.clear();
+		this.mPageIndexCurrent = DEFAULT_PAGE_CURRENT;
+		this.mPageIndexMax = DEFAULT_PAGE_MAX;
 	}
 
 	@Override
 	public boolean contains(Object object) {
-		return contains(((Manga) object).iMangaId);
+		return contains(((Manga) object).mangaId);
 	}
 
 	public boolean contains(int mangaId) {
-		return this.marrManga.containsKey(mangaId);
+		return this.mMangaList.containsKey(mangaId);
 	}
 
 	@Override
@@ -126,14 +129,14 @@ public class MangaList implements ISiteId, Collection<Manga> {
 
 	@Override
 	public boolean isEmpty() {
-		return this.marrMangaKey.isEmpty();
+		return this.mMangaKeyList.isEmpty();
 	}
 
 	@Override
 	public Iterator<Manga> iterator() {
 		return new Iterator<Manga>() {
 
-			Iterator<Integer> keys = MangaList.this.marrMangaKey.iterator();
+			Iterator<Integer> keys = MangaList.this.mMangaKeyList.iterator();
 
 			@Override
 			public boolean hasNext() {
@@ -155,15 +158,15 @@ public class MangaList implements ISiteId, Collection<Manga> {
 
 	@Override
 	public boolean remove(Object object) {
-		int key = ((Manga) object).iMangaId;
+		int key = ((Manga) object).mangaId;
 		return remove(key);
 	}
 
 	public boolean remove(int mangaId) {
 		if (!contains(mangaId))
 			return false;
-		this.marrManga.remove(mangaId);
-		this.marrMangaKey.remove((Object) mangaId);
+		this.mMangaList.remove(mangaId);
+		this.mMangaKeyList.remove((Object) mangaId);
 		return true;
 	}
 
@@ -184,8 +187,8 @@ public class MangaList implements ISiteId, Collection<Manga> {
 	public boolean retainAll(Collection<?> collection) {
 		ArrayList<Integer> mangaIds = new ArrayList<Integer>();
 		for (Object object : collection)
-			mangaIds.add(((Manga) object).iMangaId);
-		for (Integer mangaId : this.marrMangaKey)
+			mangaIds.add(((Manga) object).mangaId);
+		for (Integer mangaId : this.mMangaKeyList)
 			if (mangaIds.contains(mangaId))
 				remove(mangaId);
 		return false;
@@ -193,7 +196,7 @@ public class MangaList implements ISiteId, Collection<Manga> {
 
 	@Override
 	public int size() {
-		return this.marrMangaKey.size();
+		return this.mMangaKeyList.size();
 	}
 
 	@Override
@@ -208,8 +211,8 @@ public class MangaList implements ISiteId, Collection<Manga> {
 
 	public ArrayList<Manga> toArrayList() {
 		ArrayList<Manga> mangas = new ArrayList<Manga>();
-		for (int mangaId : this.marrMangaKey)
-			mangas.add(this.marrManga.get(mangaId));
+		for (int mangaId : this.mMangaKeyList)
+			mangas.add(this.mMangaList.get(mangaId));
 		return mangas;
 	}
 

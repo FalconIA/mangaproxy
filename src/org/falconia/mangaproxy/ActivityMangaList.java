@@ -2,46 +2,24 @@ package org.falconia.mangaproxy;
 
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.MangaList;
-import org.falconia.mangaproxy.menu.IOnMenuItemClickListener;
+import org.falconia.mangaproxy.task.GetSourceTask;
+import org.falconia.mangaproxy.task.ProcessDataTask;
 import org.falconia.mangaproxy.ui.MangaListAdapter;
-import org.falconia.mangaproxy.ui.ProgressView;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
 
-@SuppressWarnings("deprecation")
 public class ActivityMangaList extends ActivityBase {
-
-	private static final int WHAT_COMPLETED = -1;
-
-	@Deprecated
-	private static final int DIALOG_ID_CONTEXT_MENU = 0;
-	@Deprecated
-	private static final int DIALOG_ID_CONFIRM_REMOVE_FROM_FAVORITE = 1;
-	@Deprecated
-	private static final int DIALOG_ID_VIEW_SUMMARY = 2;
 
 	public final static class IntentHandler {
 
 		private static final String BUNDLE_KEY_GENRE_DATA = "BUNDLE_KEY_GENRE_DATA";
 
-		// @Deprecated
-		public static Intent getIntent(Context context, Genre genre) {
+		private static Intent getIntent(Context context, Genre genre) {
 			Bundle bundle = new Bundle();
 			bundle.putSerializable(BUNDLE_KEY_GENRE_DATA, genre);
 			Intent i = new Intent(context, ActivityMangaList.class);
@@ -54,181 +32,116 @@ public class ActivityMangaList extends ActivityBase {
 					.getSerializable(BUNDLE_KEY_GENRE_DATA);
 		}
 
+		public static void startActivityMangaList(Context context, Genre genre) {
+			context.startActivity(getIntent(context, genre));
+		}
+
+		public static void startActivityAllMangaList(Context context, int siteId) {
+			context.startActivity(getIntent(context, Genre.getGenreAll(siteId)));
+		}
+
 	}
 
-	private Genre mhGenre;
-	private MangaList mhMangaList;
-	private int miPageIndexCurrent;
-	private int miPageIndexMax;
+	protected static final String BUNDLE_KEY_MANGA_LIST = "BUNDLE_KEY_MANGA_LIST";
 
-	private OnItemClickListener mhOnListItemClick;
-	private OnItemLongClickListener mhOnListItemLongClick;
-	private OnScrollListener mhOnScroll;
+	private Genre mGenre;
+	private MangaList mMangaList;
+	private int mPageIndexMax;
+	private int mPageIndexCurrent;
+
 	// private FadeAnimation mhFadeAnim;
 	// private final IOnFadeEndListener mhOnFadeInEnd;
 	// private final IOnFadeEndListener mhOnFadeOutEnd;
-	private TextWatcher mhTextWatcher;
-	private OnClickListener mhOnClick;
-	@Deprecated
-	private final IOnMenuItemClickListener mhOnContextMenuItemClick;
-
-	private MangaListAdapter mhListAdapter;
-	private ListView mlvListView;
-	private TextView mtvIndex;
-	private EditText metSearch;
-	private View mibtnReload;
-	private View mvgPageIndex;
-	private TextView mtvPageIndex;
-	private View mbtnPageIndexPrev;
-	private View mbtnPageIndexNext;
 
 	public ActivityMangaList() {
-		this.miPageIndexCurrent = 1;
-		this.miPageIndexMax = 0;
+		this.mPageIndexCurrent = 1;
+		this.mPageIndexMax = 0;
+	}
 
-		this.mhOnListItemClick = new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
-		this.mhOnListItemLongClick = new OnItemLongClickListener() {
-			@Override
-			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-					int arg2, long arg3) {
-				// TODO Auto-generated method stub
-				return false;
-			}
-		};
-
-		this.mhOnScroll = new OnScrollListener() {
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem,
-					int visibleItemCount, int totalItemCount) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onScrollStateChanged(AbsListView view, int scrollState) {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
-		this.mhTextWatcher = new TextWatcher() {
-			@Override
-			public void afterTextChanged(Editable s) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
-		this.mhOnClick = new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
-		this.mhOnContextMenuItemClick = new IOnMenuItemClickListener() {
-			@Override
-			public void onMenuItemClick(int menuId) {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
+	@Override
+	public String getSiteName() {
+		return this.mGenre.getSiteName();
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_manga_list);
 
-		this.mhGenre = IntentHandler.getGenre(this);
-		if (this.mhGenre == null)
+		this.mGenre = IntentHandler.getGenre(this);
+		if (this.mGenre == null)
 			finish();
 
-		setTitle(this.mhGenre.sDisplayname + " - " + getString(R.string.genre));
-		setProgressView((ProgressView) findViewById(R.id.mvgProgress));
+		setContentView(R.layout.activity_manga_list);
+		setTitle(String.format("%s - %s", this.mGenre.getSiteDisplayname(),
+				this.mGenre.displayname));
 
-		this.mhListAdapter = new MangaListAdapter(this, this.mhGenre.iSiteId);
+		this.mGetSourceTask = new GetSourceTask(this.mGenre.siteId, this);
+		this.mProcessDataTask = new ProcessDataTask(this);
+		// this.mbShowProcessDialog = false;
 
-		this.mlvListView = (ListView) findViewById(R.id.mlvListView);
-		this.mlvListView.setOnItemClickListener(this.mhOnListItemClick);
-		this.mlvListView.setOnItemLongClickListener(this.mhOnListItemLongClick);
-		this.mlvListView.setOnScrollListener(this.mhOnScroll);
-		this.mlvListView.setAdapter(this.mhListAdapter);
-		this.mtvIndex = (TextView) findViewById(R.id.mtvIndex);
-		this.metSearch = (EditText) findViewById(R.id.metSearch);
-		this.metSearch.addTextChangedListener(this.mhTextWatcher);
-		this.mibtnReload = findViewById(R.id.mibtnReload);
-		this.mibtnReload.setOnClickListener(this.mhOnClick);
-		this.mvgPageIndex = findViewById(R.id.mvgDirectoryPageIndex);
-		this.mtvPageIndex = (TextView) findViewById(R.id.mtvDirectoryPageIndex);
-		this.mbtnPageIndexPrev = findViewById(R.id.mbtnDirectoryPageIndexPrev);
-		this.mbtnPageIndexPrev.setOnClickListener(this.mhOnClick);
-		this.mbtnPageIndexNext = findViewById(R.id.mbtnDirectoryPageIndexNext);
-		this.mbtnPageIndexNext.setOnClickListener(this.mhOnClick);
+		setupListView(new MangaListAdapter(this, this.mGenre.siteId));
 
-		loadMangaList();
+		findViewById(R.id.mvgSearch).setVisibility(View.GONE);
+
+		if (!this.mProcessed)
+			loadMangaList();
 	}
 
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		this.mhListAdapter.onDestroy();
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable(BUNDLE_KEY_MANGA_LIST, this.mMangaList);
+		super.onSaveInstanceState(outState);
 	}
 
-	@Deprecated
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		this.mMangaList = (MangaList) savedInstanceState
+				.getSerializable(BUNDLE_KEY_MANGA_LIST);
+		((MangaListAdapter) this.mListAdapter).setMangaList(this.mMangaList);
+		super.onRestoreInstanceState(savedInstanceState);
+	}
+
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		Dialog dialog;
+		switch (id) {
+		case DIALOG_DOWNLOAD_ID:
+			dialog = createDownloadDialog(R.string.source_of_genre_list);
+			break;
+		case DIALOG_PROCESS_ID:
+			dialog = createProcessDialog(R.string.source_of_genre_list);
+			break;
+		default:
+			dialog = super.onCreateDialog(id);
+		}
+		return dialog;
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		showDialog(DIALOG_DOWNLOAD_ID);
+	}
+
+	@Override
+	public int onProcess(String source) {
+		this.mMangaList = this.mGenre.getMangaList(source,
+				this.mPageIndexCurrent);
+		if (this.mPageIndexMax == 0)
+			this.mPageIndexMax = this.mMangaList.getPageIndexMax();
+		return this.mMangaList.size();
+	}
+
+	@Override
+	public void onPostProcess(int result) {
+		super.onPostProcess(result);
+		((MangaListAdapter) this.mListAdapter).setMangaList(this.mMangaList);
+		getListView().requestFocus();
+	}
+
 	private void loadMangaList() {
-		showProgressView("Loading...");
-
-		final Handler messageHandler = new Handler() {
-			@Override
-			public void handleMessage(Message msg) {
-				if (ActivityMangaList.this.miPageIndexMax == 0)
-					ActivityMangaList.this.miPageIndexMax = ActivityMangaList.this.mhMangaList
-							.getPageIndexMax();
-
-				switch (msg.what) {
-				case WHAT_COMPLETED:
-					ActivityMangaList.this.mhListAdapter
-							.setMangaList(ActivityMangaList.this.mhMangaList);
-					hideProgressView();
-					break;
-				}
-			}
-		};
-		Runnable run = new Runnable() {
-			@Override
-			public void run() {
-				// ActivityMangaList.this.mhMangaList =
-				// ActivityMangaList.this.mhGenre
-				// .getMangaList(ActivityMangaList.this.miPageIndexCurrent);
-				messageHandler.sendEmptyMessage(WHAT_COMPLETED);
-			}
-		};
-		new Thread(run).start();
+		this.mGenre.getMangaListSource(this.mGetSourceTask,
+				this.mPageIndexCurrent);
 	}
 
 }

@@ -8,7 +8,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -18,59 +23,108 @@ public class ActivityInit extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.i(getTag(), "onCreate()");
+		setContentView(R.layout.main);
+
+		if (popWindow == null) {
+			View view = View.inflate(this, R.layout.debug_popup, null);
+			popWindow = new PopupWindow(view, LayoutParams.MATCH_PARENT,
+					LayoutParams.MATCH_PARENT);
+			popWindow.update(0, 0, 240, 600);
+			// popWindow.setTouchable(false);
+			tvDebug = (TextView) view.findViewById(R.id.mtvDebug);
+		}
+
 		onInit();
 	}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+		Log.i(getTag(), "onStart()");
+	}
+
+	@Override
 	protected void onResume() {
+		// System.gc();
 		super.onResume();
+		Log.i(getTag(), "onResume()");
+	}
+
+	@Override
+	protected void onPause() {
+		ActivityInit.popWindow.dismiss();
+		super.onPause();
+		Log.i(getTag(), "onPause()");
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.i(getTag(), "onStop()");
 		finish();
 	}
 
-	public void onInit() {
-		Genre.GENRE_TEXT_ALL = getString(R.string.genre_all);
-
-		debug = false;
-		if (debug) {
-			setContentView(R.layout.main);
-			txtDebug = (TextView) findViewById(R.id.txtDebug);
-
-			// org.falconia.mangaproxy.plugin.IPlugin plugin =
-			// org.falconia.mangaproxy.plugin.Plugins.getPlugin(1000);
-			// plugin.getGenreList();
-			// plugin.getAllMangaList();
-		} else
-			startActivity(new Intent(this, ActivityFavoriteList.class));
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		Log.i(getTag(), "onRestart()");
 	}
 
-	public static boolean debug = false;
-	public static TextView txtDebug;
+	@Override
+	protected void onDestroy() {
+		// System.gc();
+		super.onDestroy();
+		Log.i(getTag(), "onDestroy()");
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		Log.i(getTag(), "onSaveInstanceState()");
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		Log.i(getTag(), "onRestoreInstanceState()");
+	}
+
+	public void onInit() {
+		Genre.GENRE_ALL_TEXT = getString(R.string.genre_all);
+		findViewById(R.id.mtvDebug).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				popWindow.showAtLocation(findViewById(R.id.main),
+						Gravity.CENTER, 0, 0);
+			}
+		});
+
+		debugPrintLine("Debug:");
+		startActivity(new Intent(this, ActivityFavoriteList.class));
+	}
+
+	public static PopupWindow popWindow;
+	public static TextView tvDebug;
 	private final static int SATRT = 0;
 	private final static int LENGTH = 0;
 	private final static String DELIMITER = "\n";
 	private final static String DELIMITER2 = "\n";
 
 	public static void debugClear() {
-		if (!debug)
-			return;
-		txtDebug.clearComposingText();
+		tvDebug.clearComposingText();
 	}
 
-	public static void debugPrint(String text) {
-		if (!debug)
-			return;
-		txtDebug.append(text);
-		final ScrollView scroller = (ScrollView) txtDebug.getParent();
+	public static void debugPrintLine(String text) {
+		tvDebug.append(text + "\n");
+		Log.i("DEBUG", text);
+		final ScrollView scroller = (ScrollView) tvDebug.getParent();
 		scroller.post(new Runnable() {
 			@Override
 			public void run() {
 				scroller.fullScroll(View.FOCUS_DOWN);
 			}
 		});
-	}
-
-	public static void debugPrintLine(String text) {
-		debugPrint(text + "\n");
 	}
 
 	public static void debugPrintArrayList(ArrayList<String> array) {
@@ -117,7 +171,8 @@ public class ActivityInit extends Activity {
 		ArrayList<String> tokens = new ArrayList<String>();
 		for (int i = start; i < array.size() && i < length; i++)
 			tokens.add(array.get(i));
-		debugPrint(TextUtils.join(delimiter, tokens) + delimiter2);
+		debugPrintLine(TextUtils.join(delimiter, tokens)
+				+ (delimiter2 == DELIMITER2 ? "" : delimiter2));
 	}
 
 	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array) {
@@ -167,6 +222,10 @@ public class ActivityInit extends Activity {
 					delimiter2);
 		if (delimiter2 != DELIMITER2)
 			debugPrintLine("");
+	}
+
+	protected String getTag() {
+		return getClass().getSimpleName();
 	}
 
 }
