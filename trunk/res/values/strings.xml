@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, MangaProxy!</string>
-    <string name="app_name">Manga Proxy</string>
-    <string name="genre">分类</string>
-    <string name="genre_all">全部漫画</string>
-    <string name="menu_item_source">Source</string>
-    <string name="menu_item_preferences">Preferences</string>
-    <string name="menu_item_refresh">Refresh</string>
-    <string name="dialog_loading_title">Loading</string>
-    <string name="dialog_loading_message">Loading, please wait...</string><string name="dialog_loading_message_format">Loading %s...</string>
-    
-    <string name="dialog_download_title">Downloading</string><string name="dialog_download_message">Downloading, please wait...</string><string name="dialog_download_message_format">Downloading %s...</string>
-    
-    
-    <string name="dialog_process_title">Processing</string><string name="dialog_process_message">Processing, please wait...</string><string name="dialog_process_message_format">Processing %s...</string><string name="source_of_genre_list">the source of genre list</string>
-    <string name="no_items">No items</string>
-    
-    
-    
+	<string name="hello">Hello World, MangaProxy!</string>
+	<string name="app_name">Manga Proxy</string>
+	<string name="genre">分类</string>
+	<string name="genre_all">全部漫画</string>
+	<string name="menu_item_source">Source</string>
+	<string name="menu_item_refresh">Refresh</string>
+	<string name="menu_item_preferences">Preferences</string>
+	<string name="dialog_confirm_to_exit">Confirm to exit?</string>
+	<string name="dialog_ok">Ok</string>
+	<string name="dialog_cancel">Cancel</string>
+	<string name="dialog_loading_title">Loading</string>
+	<string name="dialog_loading_message">Loading, please wait...</string>
+	<string name="dialog_loading_message_format">Loading %s...</string>
+	<string name="dialog_download_title">Download data</string>
+	<string name="dialog_download_message">Downloading, please wait...</string>
+	<string name="dialog_download_message_format">Downloading %s...</string>
+	<string name="dialog_process_title">Process data</string>
+	<string name="dialog_process_message">Processing, please wait...</string>
+	<string name="dialog_process_message_format">Processing %s...</string>
+	<string name="source_of_genre_list">the source of genre list</string>
+	<string name="source_of_manga_list">the source of manga list</string>
+	<string name="no_items">No items.</string>
+	<string name="error_on_download">Cannot download data from %s.\nPlease try again later.</string>
+	<string name="error_on_process">Cannot process data of %s.\nPlease try again later,\nor update the app later.</string>
+	<string name="search_hint">Search</string>
 </resources>
