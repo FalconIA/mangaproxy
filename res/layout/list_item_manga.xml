@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout android:orientation="vertical"
-	android:padding="10.0dip" android:layout_width="fill_parent"
-	android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
-	<LinearLayout android:gravity="left|center"
-		android:orientation="horizontal" android:layout_width="fill_parent"
-		android:layout_height="wrap_content">
-		<TextView android:textAppearance="?android:textAppearanceMedium"
-			android:id="@+id/mtvDisplayname" android:paddingRight="10.0dip"
-			android:paddingBottom="3.0dip" android:layout_width="0.0dip"
-			android:layout_height="wrap_content" android:singleLine="true"
-			android:layout_weight="1.0" />
-		<ImageView android:id="@+id/mivDirectoryIcon"
-			android:layout_width="16.0dip" android:layout_height="16.0dip" />
+<LinearLayout android:padding="10.0dip"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="match_parent" android:orientation="horizontal"
+	android:layout_width="match_parent">
+	<LinearLayout android:orientation="vertical"
+		android:layout_height="wrap_content" android:layout_width="match_parent"
+		android:layout_weight="1.0">
+		<TextView android:layout_height="wrap_content"
+			android:layout_weight="1.0" android:id="@+id/mtvDisplayname"
+			android:paddingRight="10.0dip" android:paddingBottom="3.0dip"
+			android:maxLines="1" android:textAppearance="?android:textAppearanceMedium"
+			android:layout_width="match_parent" android:text="Displayname" />
+		<LinearLayout android:orientation="horizontal"
+			android:layout_height="wrap_content" android:layout_width="match_parent">
+			<TextView android:layout_height="wrap_content"
+				android:layout_weight="1.0" android:id="@+id/mtvChapterDisplayname"
+				android:layout_width="match_parent" android:text="-" />
+			<TextView android:layout_height="wrap_content" android:id="@+id/mtvCompleted"
+				android:textColor="#ffff00ff" android:text="Completed"
+				android:layout_width="wrap_content" />
+		</LinearLayout>
 	</LinearLayout>
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent" android:layout_height="wrap_content">
-		<TextView android:id="@+id/mtvChapterDisplayname"
-			android:layout_width="0.0dip" android:layout_height="wrap_content"
-			android:layout_weight="1.0" />
-		<TextView android:textColor="#ffff00ff" android:id="@+id/mtvCompleted"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:text="Completed" />
-	</LinearLayout>
+	<CheckBox android:layout_height="wrap_content" android:button="@android:drawable/btn_star"
+		android:id="@+id/mcbFavorite" android:layout_width="wrap_content"
+		android:layout_marginLeft="10.0dip" android:layout_marginRight="-5.0dip"
+		android:focusable="false" />
 </LinearLayout>
