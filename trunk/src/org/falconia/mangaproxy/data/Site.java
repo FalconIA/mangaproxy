@@ -1,12 +1,15 @@
 package org.falconia.mangaproxy.data;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugins;
 import org.falconia.mangaproxy.task.GetSourceTask;
 
-public class Site {
+public class Site implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public final static int SITE_ID_FAVORITE = -1;
 
@@ -31,40 +34,47 @@ public class Site {
 		return mSites.keySet().toArray(new Integer[0]);
 	}
 
-	private IPlugin mhPlugin;
-	private int miSiteId;
+	private IPlugin mPlugin;
+	private int mSiteId;
 
 	public Site(IPlugin plugin) {
-		this.mhPlugin = plugin;
-		this.miSiteId = plugin.getSiteId();
+		this.mPlugin = plugin;
+		this.mSiteId = plugin.getSiteId();
+	}
+
+	public String getName() {
+		return this.mPlugin.getName();
 	}
 
 	public String getDisplayname() {
-		return this.mhPlugin.getDisplayname();
+		return this.mPlugin.getDisplayname();
 	}
 
 	public void getGenreListSource(GetSourceTask task) {
-		task.execute(this.mhPlugin.getGenreListUrl());
+		task.execute(this.mPlugin.getGenreListUrl());
 	}
 
 	public GenreList getGenreList(String source) {
-		GenreList list = new GenreList(this.miSiteId);
-		list.add(Genre.getGenreAll(this.miSiteId));
-		list.addAll(this.mhPlugin.getGenreList(source).toArray());
+		GenreList list = new GenreList(this.mSiteId);
+		GenreList listParsed = this.mPlugin.getGenreList(source);
+		if (listParsed != null && listParsed.size() > 0) {
+			list.add(Genre.getGenreAll(this.mSiteId));
+			list.addAll(listParsed.toArray());
+		}
 
 		return list;
 	}
 
 	public int getSiteId() {
-		return this.miSiteId;
+		return this.mSiteId;
 	}
 
 	public boolean hasGenreList() {
-		return this.mhPlugin.hasGenreList();
+		return this.mPlugin.hasGenreList();
 	}
 
 	public boolean hasSearchEngine() {
-		return this.mhPlugin.hasSearchEngine();
+		return this.mPlugin.hasSearchEngine();
 	}
 
 }

@@ -45,7 +45,6 @@ public class GetSourceTask extends BasePluginTask<String, Void, String> {
 
 	@Override
 	protected String doInBackground(String... params) {
-		// TODO Auto-generated method stub
 		return parseHtml(params[0]);
 	}
 
