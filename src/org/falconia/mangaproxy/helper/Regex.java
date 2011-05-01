@@ -1,12 +1,13 @@
 package org.falconia.mangaproxy.helper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.TextUtils;
 
-public class Regex {
+public final class Regex {
 
 	public static ArrayList<String> match(String pattern, String subject) {
 		ArrayList<String> groups = new ArrayList<String>();
@@ -21,6 +22,32 @@ public class Regex {
 		}
 
 		return groups;
+	}
+
+	public static HashMap<String, String> matchGroup(String pattern,
+			String[] groupnames, String subject) {
+		HashMap<String, String> groups = new HashMap<String, String>();
+
+		Pattern p = Pattern.compile(pattern);
+		Matcher m = p.matcher(subject);
+
+		if (m.find()) {
+			int count = m.groupCount();
+			for (int i = 0; i < count; i++)
+				if (!TextUtils.isEmpty(groupnames[i]))
+					groups.put(groupnames[i], m.group(i + 1));
+		}
+
+		return groups;
+	}
+
+	public static HashMap<String, String> matchGroup(String pattern,
+			String subject) {
+		ArrayList<String> groups = Regex.match("^(.+)\\{(.+?)\\}$", pattern);
+		pattern = groups.get(1);
+		String[] groupnames = split("^\\s*'|'\\s*$|'\\s*,\\s*'", groups.get(2));
+
+		return matchGroup(pattern, groupnames, subject);
 	}
 
 	public static String matchString(String pattern, String subject) {
@@ -65,11 +92,13 @@ public class Regex {
 			return matchAll(pattern2, groups.get(1));
 	}
 
-	public static boolean isMatch(String pattern, String subject) {
-		Pattern p = Pattern.compile(pattern);
-		Matcher m = p.matcher(subject);
-
-		return m.find();
+	public static String[] split(String pattern, String subject) {
+		String[] result = subject.split(pattern);
+		if (result.length > 0 && TextUtils.isEmpty(result[0])) {
+			String[] resultFix = new String[result.length - 1];
+			System.arraycopy(result, 1, resultFix, 0, resultFix.length);
+			return resultFix;
+		}
+		return result;
 	}
-
 }

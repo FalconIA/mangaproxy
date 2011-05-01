@@ -44,7 +44,10 @@ public final class Genre implements Serializable {
 	}
 
 	public String getUrl(int page) {
-		return getPlugin().getGenreUrl(this.genreId, page);
+		if (isGenreAll())
+			return getPlugin().getGenreAllUrl(page);
+		else
+			return getPlugin().getGenreUrl(this.genreId, page);
 	}
 
 	public String getUrl() {
@@ -56,26 +59,19 @@ public final class Genre implements Serializable {
 	}
 
 	public void getMangaListSource(GetSourceTask task, int page) {
-		if (isGenreAll())
-			task.execute(getPlugin().getGenreAllUrl(page));
-		else
-			task.execute(getPlugin().getGenreUrl(this.genreId, page));
+		task.execute(getUrl(page));
 	}
 
 	public MangaList getMangaList(String source) {
-		return getMangaList(source, 1);
-	}
-
-	public MangaList getMangaList(String source, int page) {
 		if (isGenreAll())
-			return getPlugin().getAllMangaList(source, page);
+			return getPlugin().getAllMangaList(source);
 		else
-			return getPlugin().getMangaList(source, this.genreId, page);
+			return getPlugin().getMangaList(source, this);
 	}
 
 	@Override
 	public String toString() {
-		return this.displayname;
+		return String.format("{%d:%s}", this.genreId, this.displayname);
 	}
 
 }

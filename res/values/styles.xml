@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources>
-	<style name="CheckBoxBookmark" parent="@android:style/Widget.CompoundButton.CheckBox">
-		<item name="android:button">@drawable/cb_bookmark</item>
-	</style>
-</resources>

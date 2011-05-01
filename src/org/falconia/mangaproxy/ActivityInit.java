@@ -1,41 +1,33 @@
 package org.falconia.mangaproxy;
 
-import java.util.ArrayList;
-
 import org.falconia.mangaproxy.data.Genre;
+import org.falconia.mangaproxy.data.Manga;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.PopupWindow;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 public class ActivityInit extends Activity {
+
+	public static String APP_NAME;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+
+		// initialize static members
+		ActivityInit.APP_NAME = getString(R.string.app_name);
+		Genre.GENRE_ALL_TEXT = getString(R.string.genre_all);
+		Manga.UI_CHAPTER_COUNT = getString(R.string.ui_chapter_count);
+		Manga.UI_LAST_UPDATE = getString(R.string.ui_last_update);
+
 		super.onCreate(savedInstanceState);
 		Log.i(getTag(), "onCreate()");
 		setContentView(R.layout.main);
+		setTitle(String.format("%s (Alpha, Test only)", APP_NAME));
 
-		if (popWindow == null) {
-			View view = View.inflate(this, R.layout.debug_popup, null);
-			popWindow = new PopupWindow(view, LayoutParams.MATCH_PARENT,
-					LayoutParams.MATCH_PARENT);
-			popWindow.update(0, 0, 240, 600);
-			// popWindow.setTouchable(false);
-			tvDebug = (TextView) view.findViewById(R.id.mtvDebug);
-		}
-
-		onInit();
+		startActivity(new Intent(this, ActivityFavoriteList.class));
 	}
 
 	@Override
@@ -53,7 +45,6 @@ public class ActivityInit extends Activity {
 
 	@Override
 	protected void onPause() {
-		ActivityInit.popWindow.dismiss();
 		super.onPause();
 		Log.i(getTag(), "onPause()");
 	}
@@ -88,140 +79,6 @@ public class ActivityInit extends Activity {
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		Log.i(getTag(), "onRestoreInstanceState()");
-	}
-
-	public void onInit() {
-		Genre.GENRE_ALL_TEXT = getString(R.string.genre_all);
-		findViewById(R.id.mtvDebug).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				popWindow.showAtLocation(findViewById(R.id.main),
-						Gravity.CENTER, 0, 0);
-			}
-		});
-
-		debugPrintLine("Debug:");
-		startActivity(new Intent(this, ActivityFavoriteList.class));
-	}
-
-	public static PopupWindow popWindow;
-	public static TextView tvDebug;
-	private final static int SATRT = 0;
-	private final static int LENGTH = 0;
-	private final static String DELIMITER = "\n";
-	private final static String DELIMITER2 = "\n";
-
-	public static void debugClear() {
-		tvDebug.clearComposingText();
-	}
-
-	public static void debugPrintLine(String text) {
-		tvDebug.append(text + "\n");
-		Log.i("DEBUG", text);
-		final ScrollView scroller = (ScrollView) tvDebug.getParent();
-		scroller.post(new Runnable() {
-			@Override
-			public void run() {
-				scroller.fullScroll(View.FOCUS_DOWN);
-			}
-		});
-	}
-
-	public static void debugPrintArrayList(ArrayList<String> array) {
-		debugPrintArrayList(array, SATRT, LENGTH, DELIMITER, DELIMITER2);
-	}
-
-	public static void debugPrintArrayList(ArrayList<String> array, int start) {
-		debugPrintArrayList(array, start, LENGTH, DELIMITER, DELIMITER2);
-	}
-
-	public static void debugPrintArrayList(ArrayList<String> array, int start,
-			int length) {
-		debugPrintArrayList(array, start, length, DELIMITER, DELIMITER2);
-	}
-
-	public static void debugPrintArrayList(ArrayList<String> array,
-			String delimiter) {
-		debugPrintArrayList(array, SATRT, LENGTH, delimiter, DELIMITER2);
-	}
-
-	public static void debugPrintArrayList(ArrayList<String> array, int start,
-			String delimiter) {
-		debugPrintArrayList(array, start, LENGTH, delimiter, DELIMITER2);
-	}
-
-	public static void debugPrintArrayList(ArrayList<String> array, int start,
-			int length, String delimiter) {
-		debugPrintArrayList(array, start, length, delimiter, DELIMITER2);
-	}
-
-	public static void debugPrintArrayList(ArrayList<String> array,
-			String delimiter, String delimiter2) {
-		debugPrintArrayList(array, SATRT, LENGTH, delimiter, delimiter2);
-	}
-
-	public static void debugPrintArrayList(ArrayList<String> array, int start,
-			String delimiter, String delimiter2) {
-		debugPrintArrayList(array, start, LENGTH, delimiter, delimiter2);
-	}
-
-	public static void debugPrintArrayList(ArrayList<String> array, int start,
-			int length, String delimiter, String delimiter2) {
-		length = length > 0 ? start + length : array.size() + length;
-		ArrayList<String> tokens = new ArrayList<String>();
-		for (int i = start; i < array.size() && i < length; i++)
-			tokens.add(array.get(i));
-		debugPrintLine(TextUtils.join(delimiter, tokens)
-				+ (delimiter2 == DELIMITER2 ? "" : delimiter2));
-	}
-
-	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array) {
-		debugPrintMatchAll(array, SATRT, LENGTH, DELIMITER, DELIMITER2);
-	}
-
-	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array,
-			int start) {
-		debugPrintMatchAll(array, start, LENGTH, DELIMITER, DELIMITER2);
-	}
-
-	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array,
-			int start, int length) {
-		debugPrintMatchAll(array, start, length, DELIMITER, DELIMITER2);
-	}
-
-	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array,
-			String delimiter) {
-		debugPrintMatchAll(array, SATRT, LENGTH, delimiter, DELIMITER2);
-	}
-
-	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array,
-			int start, String delimiter) {
-		debugPrintMatchAll(array, start, LENGTH, delimiter, DELIMITER2);
-	}
-
-	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array,
-			int start, int length, String delimiter) {
-		debugPrintMatchAll(array, start, length, delimiter, DELIMITER2);
-	}
-
-	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array,
-			String delimiter, String delimiter2) {
-		debugPrintMatchAll(array, SATRT, LENGTH, delimiter, delimiter2);
-	}
-
-	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array,
-			int start, String delimiter, String delimiter2) {
-		debugPrintMatchAll(array, start, LENGTH, delimiter, delimiter2);
-	}
-
-	public static void debugPrintMatchAll(ArrayList<ArrayList<String>> array,
-			int start, int length, String delimiter, String delimiter2) {
-		// ArrayList<String> tokens = new ArrayList<String>();
-		for (int i = 0; i < array.size(); i++)
-			debugPrintArrayList(array.get(i), start, length, delimiter,
-					delimiter2);
-		if (delimiter2 != DELIMITER2)
-			debugPrintLine("");
 	}
 
 	protected String getTag() {

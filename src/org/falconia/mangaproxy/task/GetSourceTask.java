@@ -11,7 +11,9 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.falconia.mangaproxy.ActivityBase;
+import org.falconia.mangaproxy.ActivityInit;
+
+import android.util.Log;
 
 public class GetSourceTask extends BasePluginTask<String, Void, String> {
 
@@ -21,13 +23,13 @@ public class GetSourceTask extends BasePluginTask<String, Void, String> {
 		mhClient = new DefaultHttpClient();
 	}
 
-	private final ResponseHandler<String> mhResponseHandler;
-	private final ActivityBase mhActivity;
+	private final ResponseHandler<String> mResponseHandler;
+	private OnDownloadListener mListener;
 
-	public GetSourceTask(int siteId, ActivityBase activity) {
+	public GetSourceTask(int siteId, OnDownloadListener listener) {
 		super(siteId);
-		this.mhActivity = activity;
-		this.mhResponseHandler = new ResponseHandler<String>() {
+		this.mListener = listener;
+		this.mResponseHandler = new ResponseHandler<String>() {
 			@Override
 			public String handleResponse(final HttpResponse response)
 					throws HttpResponseException, IOException {
@@ -38,7 +40,7 @@ public class GetSourceTask extends BasePluginTask<String, Void, String> {
 
 				HttpEntity entity = response.getEntity();
 				return entity == null ? null : EntityUtils.toString(entity,
-						GetSourceTask.this.mhPlugin.getEncoding());
+						GetSourceTask.this.mhPlugin.getCharset());
 			}
 		};
 	}
@@ -50,23 +52,27 @@ public class GetSourceTask extends BasePluginTask<String, Void, String> {
 
 	@Override
 	protected void onPreExecute() {
-		this.mhActivity.onPreDownload();
+		this.mListener.onPreDownload();
 	}
 
 	@Override
-	protected void onPostExecute(String result) {
-		this.mhActivity.onPostDownload(result);
+	protected void onPostExecute(String source) {
+		this.mListener.onPostDownload(source);
 	}
 
 	private String parseHtml(String url) {
 		String html = "";
-		HttpGet request = new HttpGet(url);
 		try {
-			html = mhClient.execute(request, this.mhResponseHandler);
+			HttpGet request = new HttpGet(url);
+			html = mhClient.execute(request, this.mResponseHandler);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
+			Log.e(ActivityInit.APP_NAME, String.format(
+					"[%s] Fail to execute HTTP client.", getClass().getName()));
 		} catch (IOException e) {
 			e.printStackTrace();
+			Log.e(ActivityInit.APP_NAME, String.format(
+					"[%s] Fail to execute HTTP client.", getClass().getName()));
 		}
 		return html;
 	}

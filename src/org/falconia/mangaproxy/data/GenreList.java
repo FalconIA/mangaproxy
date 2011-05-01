@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import android.text.TextUtils;
+
 public class GenreList implements Serializable, ISiteId, Iterable<Genre> {
 
 	private static final long serialVersionUID = 1L;
@@ -62,6 +64,14 @@ public class GenreList implements Serializable, ISiteId, Iterable<Genre> {
 
 	public ArrayList<Genre> toArray() {
 		return this.mGenreList;
+	}
+
+	@Override
+	public String toString() {
+		ArrayList<String> strings = new ArrayList<String>();
+		for (Genre genre : this.mGenreList)
+			strings.add(genre.toString());
+		return String.format("{ %s }", TextUtils.join(", ", strings));
 	}
 
 }

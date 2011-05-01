@@ -1,7 +1,9 @@
 package org.falconia.mangaproxy;
 
 import org.falconia.mangaproxy.task.GetSourceTask;
-import org.falconia.mangaproxy.task.ProcessDataTask;
+import org.falconia.mangaproxy.task.OnDownloadListener;
+import org.falconia.mangaproxy.task.OnSourceProcessListener;
+import org.falconia.mangaproxy.task.SourceProcessTask;
 import org.falconia.mangaproxy.ui.BaseListAdapter;
 import org.falconia.mangaproxy.ui.PinnedHeaderListView;
 
@@ -14,8 +16,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,12 +26,11 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 public abstract class ActivityBase extends ListActivity implements
 		OnFocusChangeListener, OnTouchListener, OnItemClickListener,
-		OnItemLongClickListener {
+		OnItemLongClickListener, OnDownloadListener, OnSourceProcessListener {
 
 	protected static final String BUNDLE_KEY_IS_PROCESSED = "BUNDLE_KEY_IS_PROCESSED";
 
@@ -41,27 +40,13 @@ public abstract class ActivityBase extends ListActivity implements
 	protected static final int DIALOG_PROCESS_ID = 2;
 
 	protected GetSourceTask mGetSourceTask;
-	protected ProcessDataTask mProcessDataTask;
+	protected SourceProcessTask mSourceProcessTask;
 	protected boolean mShowProcessDialog = true;
 	protected boolean mProcessed = false;
 
 	protected BaseListAdapter mListAdapter;
 
 	abstract String getSiteName();
-
-	@Override
-	public boolean dispatchKeyEvent(KeyEvent event) {
-		if (event.getKeyCode() == KeyEvent.KEYCODE_SEARCH
-				&& event.isLongPress()) {
-			showHideDebugWindow();
-			return true;
-		} else if (event.getKeyCode() == KeyEvent.KEYCODE_BACK
-				&& !event.isLongPress() && ActivityInit.popWindow.isShowing()) {
-			showHideDebugWindow();
-			return true;
-		}
-		return super.dispatchKeyEvent(event);
-	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +70,6 @@ public abstract class ActivityBase extends ListActivity implements
 
 	@Override
 	protected void onPause() {
-		ActivityInit.popWindow.dismiss();
 		super.onPause();
 		logI("onPause()");
 	}
@@ -174,6 +158,7 @@ public abstract class ActivityBase extends ListActivity implements
 			finish();
 	}
 
+	@Override
 	public void onPreDownload() {
 		if (this.mGetSourceTask == null) {
 			logE("GetSourceTask is not initialized.");
@@ -182,31 +167,31 @@ public abstract class ActivityBase extends ListActivity implements
 		showDialog(DIALOG_DOWNLOAD_ID);
 	}
 
+	@Override
 	public void onPostDownload(String source) {
 		if (this.mGetSourceTask == null) {
 			logE("GetSourceTask is not initialized.");
 			return;
 		}
-		dismissDialog(DIALOG_DOWNLOAD_ID);
 		if (TextUtils.isEmpty(source)) {
 			setNoItemsMessage(String.format(
 					getString(R.string.error_on_download), getSiteName()));
 			return;
 		}
+		dismissDialog(DIALOG_DOWNLOAD_ID);
 
-		if (this.mProcessDataTask == null) {
-			logE("ProcessDataTask is not initialized.");
-			return;
-		}
-		this.mProcessDataTask.execute(source);
+		this.mSourceProcessTask = new SourceProcessTask(this);
+		this.mSourceProcessTask.execute(source);
 	}
 
-	public int onProcess(String source) {
+	@Override
+	public int onSourceProcess(String source) {
 		return 0;
 	}
 
-	public void onPreProcess() {
-		if (this.mProcessDataTask == null) {
+	@Override
+	public void onPreSourceProcess() {
+		if (this.mSourceProcessTask == null) {
 			logE("ProcessDataTask is not initialized.");
 			return;
 		}
@@ -215,19 +200,18 @@ public abstract class ActivityBase extends ListActivity implements
 			showDialog(DIALOG_PROCESS_ID);
 	}
 
-	public void onPostProcess(int result) {
-		if (this.mProcessDataTask == null) {
+	@Override
+	public void onPostSourceProcess(int size) {
+		if (this.mSourceProcessTask == null) {
 			logE("ProcessDataTask is not initialized.");
 			return;
 		}
 		this.mProcessed = true;
-		if (this.mShowProcessDialog)
-			dismissDialog(DIALOG_PROCESS_ID);
-		if (result > 0) {
+		if (size <= 0)
 			setNoItemsMessage(String.format(
 					getString(R.string.error_on_process), getSiteName()));
-			return;
-		}
+		if (this.mShowProcessDialog)
+			dismissDialog(DIALOG_PROCESS_ID);
 	}
 
 	protected void setCustomTitle(String string) {
@@ -366,23 +350,6 @@ public abstract class ActivityBase extends ListActivity implements
 		InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		inputMethodManager.hideSoftInputFromWindow(getListView()
 				.getWindowToken(), 0);
-	}
-
-	protected void showHideDebugWindow() {
-		if (ActivityInit.popWindow.isShowing())
-			ActivityInit.popWindow.dismiss();
-		else {
-			ActivityInit.popWindow.showAtLocation(
-					findViewById(android.R.id.list), Gravity.CENTER, 60, 30);
-			final ScrollView scroller = (ScrollView) ActivityInit.tvDebug
-					.getParent();
-			scroller.post(new Runnable() {
-				@Override
-				public void run() {
-					scroller.fullScroll(View.FOCUS_DOWN);
-				}
-			});
-		}
 	}
 
 	protected String getTag() {

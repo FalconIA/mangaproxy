@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout android:padding="10.0dip"
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="match_parent" android:orientation="horizontal"
+	android:layout_height="wrap_content" android:orientation="vertical"
 	android:layout_width="match_parent">
-	<LinearLayout android:orientation="vertical"
-		android:layout_height="wrap_content" android:layout_width="match_parent"
-		android:layout_weight="1.0">
+	<LinearLayout android:layout_height="wrap_content"
+		android:layout_width="match_parent" android:id="@+id/linearLayout1"
+		android:orientation="horizontal">
 		<TextView android:layout_height="wrap_content"
-			android:layout_weight="1.0" android:id="@+id/mtvDisplayname"
-			android:paddingRight="10.0dip" android:paddingBottom="3.0dip"
-			android:maxLines="1" android:textAppearance="?android:textAppearanceMedium"
-			android:layout_width="match_parent" android:text="Displayname" />
-		<LinearLayout android:orientation="horizontal"
-			android:layout_height="wrap_content" android:layout_width="match_parent">
-			<TextView android:layout_height="wrap_content"
-				android:layout_weight="1.0" android:id="@+id/mtvChapterDisplayname"
-				android:layout_width="match_parent" android:text="-" />
-			<TextView android:layout_height="wrap_content" android:id="@+id/mtvCompleted"
-				android:textColor="#ffff00ff" android:text="Completed"
-				android:layout_width="wrap_content" />
-		</LinearLayout>
+			android:maxLines="1" android:paddingRight="10.0dip"
+			android:layout_width="match_parent" android:text="Displayname"
+			android:id="@+id/mtvDisplayname" android:textAppearance="?android:textAppearanceMedium"
+			android:paddingBottom="3.0dip" android:layout_weight="1.0" android:ellipsize="end"/>
+		<CheckBox android:button="@android:drawable/btn_star"
+			android:text="CheckBox" android:id="@+id/mcbFavorite"
+			android:focusable="false" android:layout_height="25.0dip"
+			android:layout_marginTop="-2.5dip" android:layout_width="30.0dip"
+			android:layout_marginLeft="5.0dip" />
 	</LinearLayout>
-	<CheckBox android:layout_height="wrap_content" android:button="@android:drawable/btn_star"
-		android:id="@+id/mcbFavorite" android:layout_width="wrap_content"
-		android:layout_marginLeft="10.0dip" android:layout_marginRight="-5.0dip"
-		android:focusable="false" />
+	<LinearLayout android:orientation="horizontal"
+		android:layout_height="wrap_content" android:layout_width="match_parent">
+		<TextView android:layout_height="wrap_content"
+			android:layout_weight="1.0" android:id="@+id/mtvDetails"
+			android:layout_width="match_parent" android:text="-" />
+		<TextView android:layout_height="wrap_content" android:id="@+id/mtvCompleted"
+			android:text="Completed" android:layout_width="wrap_content"
+			android:textColor="@color/keyguard_text_color_unlock" />
+	</LinearLayout>
 </LinearLayout>

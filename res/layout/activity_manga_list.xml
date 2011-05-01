@@ -21,7 +21,7 @@
 						android:maxLines="1" android:inputType="textNoSuggestions"
 						android:ellipsize="end" android:imeOptions="flagNoExtractUi"
 						android:freezesText="true" android:id="@+id/metSearch"
-						android:hint="@string/search_hint" />
+						android:hint="@string/ui_search_hint" />
 				</LinearLayout>
 			</LinearLayout>
 		</LinearLayout>
