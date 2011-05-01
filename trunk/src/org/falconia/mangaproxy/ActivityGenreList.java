@@ -4,7 +4,6 @@ import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.GenreList;
 import org.falconia.mangaproxy.data.Site;
 import org.falconia.mangaproxy.task.GetSourceTask;
-import org.falconia.mangaproxy.task.ProcessDataTask;
 import org.falconia.mangaproxy.ui.BaseListAdapter;
 
 import android.app.Dialog;
@@ -134,8 +133,6 @@ public class ActivityGenreList extends ActivityBase {
 		setTitle(String.format("%s - %s", this.mSite.getDisplayname(),
 				getString(R.string.genre)));
 
-		this.mGetSourceTask = new GetSourceTask(this.mSiteId, this);
-		this.mProcessDataTask = new ProcessDataTask(this);
 		// this.mShowProcessDialog = false;
 
 		setupListView(new GenreListAdapter());
@@ -187,19 +184,21 @@ public class ActivityGenreList extends ActivityBase {
 	}
 
 	@Override
-	public int onProcess(String source) {
+	public int onSourceProcess(String source) {
 		this.mGenreList = this.mSite.getGenreList(source);
 		return this.mGenreList.size();
 	}
 
 	@Override
-	public void onPostProcess(int result) {
-		super.onPostProcess(result);
+	public void onPostSourceProcess(int result) {
 		((GenreListAdapter) this.mListAdapter).setGenreList(this.mGenreList);
 		getListView().requestFocus();
+
+		super.onPostSourceProcess(result);
 	}
 
 	private void loadGenreList() {
+		this.mGetSourceTask = new GetSourceTask(this.mSiteId, this);
 		this.mSite.getGenreListSource(this.mGetSourceTask);
 	}
 

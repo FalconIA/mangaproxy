@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:title="@string/menu_item_source" android:icon="@drawable/ic_menu_archive" android:id="@+id/mmiSource">
+	<item android:title="@string/menu_item_source" android:icon="@drawable/ic_menu_list" android:id="@+id/mmiSource">
 		<menu>
 			<group android:id="@+id/mmgSourceGroup">
 			</group>

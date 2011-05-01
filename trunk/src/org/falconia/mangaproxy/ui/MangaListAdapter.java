@@ -6,7 +6,6 @@ import org.falconia.mangaproxy.data.MangaList;
 import org.falconia.mangaproxy.data.Site;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,14 +15,11 @@ import android.widget.TextView;
 
 public class MangaListAdapter extends BaseListAdapter {
 
-	class ViewHolderMangaList {
+	final class ViewHolder {
 		public TextView tvDisplayname;
-		public TextView tvChapterDisplayname;
+		public TextView tvDetails;
 		public TextView tvCompleted;
 		public CheckBox cbFavorite;
-
-		private ViewHolderMangaList() {
-		}
 	}
 
 	private MangaList mMangaList;
@@ -84,27 +80,25 @@ public class MangaListAdapter extends BaseListAdapter {
 	public View getMangaListView(int position, View convertView,
 			ViewGroup parent) {
 		Manga manga = getItem(position);
-		ViewHolderMangaList holder;
+		ViewHolder holder;
 
 		if (convertView == null) {
-			holder = new ViewHolderMangaList();
+			holder = new ViewHolder();
 			convertView = this.mInflater
 					.inflate(R.layout.list_item_manga, null);
 			holder.tvDisplayname = (TextView) convertView
 					.findViewById(R.id.mtvDisplayname);
-			holder.tvChapterDisplayname = (TextView) convertView
-					.findViewById(R.id.mtvChapterDisplayname);
+			holder.tvDetails = (TextView) convertView
+					.findViewById(R.id.mtvDetails);
 			holder.tvCompleted = (TextView) convertView
 					.findViewById(R.id.mtvCompleted);
 			holder.cbFavorite = (CheckBox) convertView
 					.findViewById(R.id.mcbFavorite);
 		} else
-			holder = (ViewHolderMangaList) convertView.getTag();
+			holder = (ViewHolder) convertView.getTag();
 
-		holder.tvDisplayname.setText(manga.displayName);
-		holder.tvChapterDisplayname.setText(TextUtils
-				.isEmpty(manga.chapterDisplayname) ? "-"
-				: manga.chapterDisplayname);
+		holder.tvDisplayname.setText(manga.displayname);
+		holder.tvDetails.setText(manga.getDetails());
 		holder.tvCompleted.setVisibility(manga.isCompleted ? View.VISIBLE
 				: View.GONE);
 		// holder.cbFavorite.setChecked(manga.bIsFavorite);

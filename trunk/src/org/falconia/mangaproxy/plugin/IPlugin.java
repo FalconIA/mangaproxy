@@ -1,6 +1,10 @@
 package org.falconia.mangaproxy.plugin;
 
+import java.util.TimeZone;
+
 import org.falconia.mangaproxy.data.Chapter;
+import org.falconia.mangaproxy.data.ChapterList;
+import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.GenreList;
 import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.data.MangaList;
@@ -13,7 +17,9 @@ public interface IPlugin {
 
 	String getDisplayname();
 
-	String getEncoding();
+	String getCharset();
+
+	TimeZone getTimeZone();
 
 	String getUrlBase();
 
@@ -39,16 +45,12 @@ public interface IPlugin {
 
 	GenreList getGenreList(String source);
 
-	MangaList getMangaList(String source, int genreId, int page);
-
-	MangaList getMangaList(String source, int genreId);
-
-	MangaList getAllMangaList(String source, int page);
+	MangaList getMangaList(String source, Genre genre);
 
 	MangaList getAllMangaList(String source);
 
-	Manga getComic(int comicId);
+	ChapterList getChapterList(Manga manga);
 
-	Chapter getChapter(int comicId, int chapterId);
+	Chapter getChapter(Manga manga, Chapter chapter);
 
 }

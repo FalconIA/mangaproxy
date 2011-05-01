@@ -1,26 +1,35 @@
 package org.falconia.mangaproxy.data;
 
 import java.io.Serializable;
+import java.util.GregorianCalendar;
 
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugins;
 
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 
 public class Manga implements Serializable {
+
+	public static String UI_CHAPTER_COUNT = "Chapters: %s";
+	public static String UI_LAST_UPDATE = "Update: %tF";
 
 	private static final long serialVersionUID = 1L;
 
 	public final int siteId;
 	public final int mangaId;
-	public final String displayName;
-	public final String section;
+	public final String displayname;
+
+	public String section;
+
+	public boolean isCompleted = false;
+	public GregorianCalendar updatedAt;
+	public int chapterCount;
+	public String details;
 
 	public String chapterDisplayname;
-	public String updatedAt;
-	public boolean isCompleted = false;
-	public boolean hasNewChapter = false;
 	public boolean isFavorite = false;
+	public boolean hasNewChapter = false;
 
 	public transient Bitmap extraInfoCoverBitmap = null;
 	public transient String extraInfoArtist = null;
@@ -28,12 +37,13 @@ public class Manga implements Serializable {
 	public transient String extraInfoGenre = null;
 	public transient String extraInfoSummary = null;
 
+	private String detailsTemplate;
 	private Chapter mLastReadChapter = null;
 	private Chapter mLatestChapter = null;
 
 	public Manga(int mangaId, String displayname, String section, int siteId) {
 		this.mangaId = mangaId;
-		this.displayName = displayname;
+		this.displayname = displayname;
 		this.section = section;
 		this.siteId = siteId;
 	}
@@ -44,6 +54,26 @@ public class Manga implements Serializable {
 
 	public String getUrl() {
 		return getPlugin().getMangaUrl(this.mangaId);
+	}
+
+	public String getDetails() {
+		if (!TextUtils.isEmpty(this.detailsTemplate)) {
+			String result = this.detailsTemplate;
+			result = result.replaceAll("%chapterDisplayname%",
+					this.chapterDisplayname);
+			result = result.replaceAll("%chapterCount%", String.format(
+					UI_CHAPTER_COUNT, this.chapterCount == 0 ? "??"
+							: this.chapterCount));
+			result = result.replaceAll("%updatedAt%",
+					String.format(UI_LAST_UPDATE, this.updatedAt));
+			result = result.replaceAll("%details%", this.details);
+			return result;
+		}
+		return TextUtils.isEmpty(this.details) ? "-" : this.details;
+	}
+
+	public String setDetailsTemplate(String template) {
+		return this.detailsTemplate = template;
 	}
 
 	public int getIconDrawableId() {
@@ -91,4 +121,16 @@ public class Manga implements Serializable {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return String.format("{%d:%s}", this.mangaId, this.displayname);
+	}
+
+	public String toLongString() {
+		return String
+				.format("{ SiteID:%d, MangaID:%d, Name:'%s', Section:'%s', UpdatedAt:'%tF', Chapter:'%s', ChapterCount:%d, IsCompleted:%b, HasNewChapter:%b }",
+						this.siteId, this.mangaId, this.displayname,
+						this.section, this.updatedAt, this.chapterDisplayname,
+						this.chapterCount, this.isCompleted, this.hasNewChapter);
+	}
 }
