@@ -101,4 +101,11 @@ public final class Regex {
 		}
 		return result;
 	}
+
+	public static boolean isMatch(String pattern, String subject) {
+		Pattern p = Pattern.compile(pattern);
+		Matcher m = p.matcher(subject);
+		return m.find();
+	}
+
 }

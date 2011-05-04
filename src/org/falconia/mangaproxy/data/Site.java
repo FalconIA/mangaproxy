@@ -5,9 +5,8 @@ import java.util.HashMap;
 
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugins;
-import org.falconia.mangaproxy.task.GetSourceTask;
 
-public class Site implements Serializable {
+public final class Site implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,8 +33,8 @@ public class Site implements Serializable {
 		return mSites.keySet().toArray(new Integer[0]);
 	}
 
-	private IPlugin mPlugin;
-	private int mSiteId;
+	private final IPlugin mPlugin;
+	private final int mSiteId;
 
 	public Site(IPlugin plugin) {
 		this.mPlugin = plugin;
@@ -50,8 +49,8 @@ public class Site implements Serializable {
 		return this.mPlugin.getDisplayname();
 	}
 
-	public void getGenreListSource(GetSourceTask task) {
-		task.execute(this.mPlugin.getGenreListUrl());
+	public String getGenreListUrl() {
+		return this.mPlugin.getGenreListUrl();
 	}
 
 	public GenreList getGenreList(String source) {

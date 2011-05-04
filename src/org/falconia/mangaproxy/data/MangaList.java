@@ -6,7 +6,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class MangaList implements Serializable, ISiteId, Collection<Manga> {
+import android.text.TextUtils;
+
+public final class MangaList implements Serializable, ISiteId,
+		Collection<Manga> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -14,8 +17,8 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 
 	public int pageIndexMax;
 
-	private ArrayList<Integer> mMangaKeyList;
-	private HashMap<Integer, Manga> mMangaList;
+	private final ArrayList<String> mMangaKeyList;
+	private final HashMap<String, Manga> mMangaList;
 	private final int mSiteId;
 
 	public MangaList(int siteId) {
@@ -25,8 +28,8 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 	public MangaList(int siteId, int pageMax) {
 		this.pageIndexMax = pageMax;
 
-		this.mMangaKeyList = new ArrayList<Integer>();
-		this.mMangaList = new HashMap<Integer, Manga>();
+		this.mMangaKeyList = new ArrayList<String>();
+		this.mMangaList = new HashMap<String, Manga>();
 		this.mSiteId = siteId;
 	}
 
@@ -35,11 +38,11 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 		return this.mSiteId;
 	}
 
-	public int getMangaId(int position) {
+	public String getMangaId(int position) {
 		return this.mMangaKeyList.get(position);
 	}
 
-	public Manga get(int mangaId) {
+	public Manga get(String mangaId) {
 		return this.mMangaList.get(mangaId);
 	}
 
@@ -53,18 +56,18 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 
 	@Override
 	public boolean add(Manga manga) {
-		int key = manga.mangaId;
+		String key = manga.mangaId;
 		return add(manga, key);
 	}
 
 	public boolean add(Manga manga, boolean dump) {
-		int key = manga.mangaId;
+		String key = manga.mangaId;
 		while (dump && contains(key))
-			key += 10000;
+			key += "_DUMP";
 		return add(manga, key);
 	}
 
-	public boolean add(Manga manga, int key) {
+	public boolean add(Manga manga, String key) {
 		if (contains(key))
 			return false;
 		this.mMangaList.put(key, manga);
@@ -72,11 +75,11 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 		return true;
 	}
 
-	public boolean add(int mangaId, String displayname, String inital) {
+	public boolean add(String mangaId, String displayname, String inital) {
 		return add(mangaId, displayname, inital, false);
 	}
 
-	public boolean add(int mangaId, String displayname, String inital,
+	public boolean add(String mangaId, String displayname, String inital,
 			boolean dump) {
 		return add(new Manga(mangaId, displayname, inital, this.mSiteId), dump);
 	}
@@ -95,7 +98,7 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 	}
 
 	public Manga update(Manga manga) {
-		int key = manga.mangaId;
+		String key = manga.mangaId;
 		if (contains(key))
 			return this.mMangaList.put(key, manga);
 		else {
@@ -104,7 +107,7 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 		}
 	}
 
-	public Manga update(int mangaId, String displayname, String inital) {
+	public Manga update(String mangaId, String displayname, String inital) {
 		return update(new Manga(mangaId, displayname, inital, this.mSiteId));
 	}
 
@@ -124,10 +127,12 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 
 	@Override
 	public boolean contains(Object object) {
-		return contains(((Manga) object).mangaId);
+		if (object instanceof Manga)
+			return contains(((Manga) object).mangaId);
+		throw new ClassCastException();
 	}
 
-	public boolean contains(int mangaId) {
+	public boolean contains(String mangaId) {
 		return this.mMangaList.containsKey(mangaId);
 	}
 
@@ -148,7 +153,7 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 	public Iterator<Manga> iterator() {
 		return new Iterator<Manga>() {
 
-			Iterator<Integer> keys = MangaList.this.mMangaKeyList.iterator();
+			Iterator<String> keys = MangaList.this.mMangaKeyList.iterator();
 
 			@Override
 			public boolean hasNext() {
@@ -170,7 +175,7 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 
 	@Override
 	public boolean remove(Object object) {
-		int key = ((Manga) object).mangaId;
+		String key = ((Manga) object).mangaId;
 		return remove(key);
 	}
 
@@ -197,10 +202,10 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 
 	@Override
 	public boolean retainAll(Collection<?> collection) {
-		ArrayList<Integer> mangaIds = new ArrayList<Integer>();
+		ArrayList<String> mangaIds = new ArrayList<String>();
 		for (Object object : collection)
 			mangaIds.add(((Manga) object).mangaId);
-		for (Integer mangaId : this.mMangaKeyList)
+		for (String mangaId : this.mMangaKeyList)
 			if (mangaIds.contains(mangaId))
 				remove(mangaId);
 		return false;
@@ -223,9 +228,21 @@ public class MangaList implements Serializable, ISiteId, Collection<Manga> {
 
 	public ArrayList<Manga> toArrayList() {
 		ArrayList<Manga> mangas = new ArrayList<Manga>();
-		for (int mangaId : this.mMangaKeyList)
+		for (String mangaId : this.mMangaKeyList)
 			mangas.add(this.mMangaList.get(mangaId));
 		return mangas;
+	}
+
+	@Override
+	public String toString() {
+		if (this.mMangaKeyList.size() > 24)
+			return String.format("{ SiteId:%d, Size:%d, MaxPage:%d }",
+					this.mSiteId, size(), this.pageIndexMax);
+
+		ArrayList<String> strings = new ArrayList<String>();
+		for (String mangaId : this.mMangaKeyList)
+			strings.add(get(mangaId).toString());
+		return String.format("{ %s }", TextUtils.join(", ", strings));
 	}
 
 }

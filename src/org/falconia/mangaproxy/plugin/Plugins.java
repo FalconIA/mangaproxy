@@ -2,7 +2,7 @@ package org.falconia.mangaproxy.plugin;
 
 import java.util.HashMap;
 
-public class Plugins {
+public final class Plugins {
 	private static HashMap<Integer, IPlugin> Plugins;
 
 	static {

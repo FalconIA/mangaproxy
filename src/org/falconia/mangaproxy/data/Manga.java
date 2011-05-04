@@ -3,45 +3,45 @@ package org.falconia.mangaproxy.data;
 import java.io.Serializable;
 import java.util.GregorianCalendar;
 
+import org.falconia.mangaproxy.AppConst;
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugins;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 
-public class Manga implements Serializable {
-
-	public static String UI_CHAPTER_COUNT = "Chapters: %s";
-	public static String UI_LAST_UPDATE = "Update: %tF";
+public final class Manga implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	public final int siteId;
-	public final int mangaId;
+	public final String mangaId;
 	public final String displayname;
 
 	public String section;
-
 	public boolean isCompleted = false;
 	public GregorianCalendar updatedAt;
 	public int chapterCount;
+	public String chapterDisplayname;
 	public String details;
 
-	public String chapterDisplayname;
+	private String mDetailsTemplate;
+
+	// for Favorite
 	public boolean isFavorite = false;
 	public boolean hasNewChapter = false;
 
+	private Chapter mLastReadChapter = null;
+	private Chapter mLatestChapter = null;
+
+	// for extra info
 	public transient Bitmap extraInfoCoverBitmap = null;
 	public transient String extraInfoArtist = null;
 	public transient String extraInfoAuthor = null;
 	public transient String extraInfoGenre = null;
 	public transient String extraInfoSummary = null;
 
-	private String detailsTemplate;
-	private Chapter mLastReadChapter = null;
-	private Chapter mLatestChapter = null;
-
-	public Manga(int mangaId, String displayname, String section, int siteId) {
+	public Manga(String mangaId, String displayname, String section, int siteId) {
 		this.mangaId = mangaId;
 		this.displayname = displayname;
 		this.section = section;
@@ -52,33 +52,43 @@ public class Manga implements Serializable {
 		return Plugins.getPlugin(this.siteId);
 	}
 
+	public String getSiteName() {
+		return getPlugin().getName();
+	}
+
+	public String getSiteDisplayname() {
+		return getPlugin().getDisplayname();
+	}
+
 	public String getUrl() {
-		return getPlugin().getMangaUrl(this.mangaId);
+		return getPlugin().getMangaUrl(this);
+	}
+
+	public boolean isDynamicImgServer() {
+		return getPlugin().isDynamicImgServer();
+	}
+
+	public String setDetailsTemplate(String template) {
+		return this.mDetailsTemplate = template;
 	}
 
 	public String getDetails() {
-		if (!TextUtils.isEmpty(this.detailsTemplate)) {
-			String result = this.detailsTemplate;
+		if (!TextUtils.isEmpty(this.mDetailsTemplate)) {
+			String result = this.mDetailsTemplate;
 			result = result.replaceAll("%chapterDisplayname%",
 					this.chapterDisplayname);
 			result = result.replaceAll("%chapterCount%", String.format(
-					UI_CHAPTER_COUNT, this.chapterCount == 0 ? "??"
+					AppConst.UI_CHAPTER_COUNT, this.chapterCount == 0 ? "??"
 							: this.chapterCount));
 			result = result.replaceAll("%updatedAt%",
-					String.format(UI_LAST_UPDATE, this.updatedAt));
+					String.format(AppConst.UI_LAST_UPDATE, this.updatedAt));
 			result = result.replaceAll("%details%", this.details);
 			return result;
 		}
 		return TextUtils.isEmpty(this.details) ? "-" : this.details;
 	}
 
-	public String setDetailsTemplate(String template) {
-		return this.detailsTemplate = template;
-	}
-
-	public int getIconDrawableId() {
-		throw new RuntimeException("Invalid directory id.");
-	}
+	// for Favorite
 
 	public void setLastReadChapter(Chapter chapter) {
 		this.mLastReadChapter = chapter;
@@ -110,6 +120,8 @@ public class Manga implements Serializable {
 			return null;
 	}
 
+	// for extra info
+
 	public void resetExtraInfo() {
 		this.extraInfoAuthor = null;
 		this.extraInfoArtist = null;
@@ -121,16 +133,21 @@ public class Manga implements Serializable {
 		}
 	}
 
+	public ChapterList getChapterList(String source) {
+		return getPlugin().getChapterList(source, this);
+	}
+
 	@Override
 	public String toString() {
-		return String.format("{%d:%s}", this.mangaId, this.displayname);
+		return String.format("{%s:%s}", this.mangaId, this.displayname);
 	}
 
 	public String toLongString() {
 		return String
-				.format("{ SiteID:%d, MangaID:%d, Name:'%s', Section:'%s', UpdatedAt:'%tF', Chapter:'%s', ChapterCount:%d, IsCompleted:%b, HasNewChapter:%b }",
+				.format("{ SiteID:%d, MangaID:'%s', Name:'%s', Section:'%s', UpdatedAt:'%tF', Chapter:'%s', ChapterCount:%d, IsCompleted:%b, HasNewChapter:%b }",
 						this.siteId, this.mangaId, this.displayname,
 						this.section, this.updatedAt, this.chapterDisplayname,
 						this.chapterCount, this.isCompleted, this.hasNewChapter);
 	}
+
 }

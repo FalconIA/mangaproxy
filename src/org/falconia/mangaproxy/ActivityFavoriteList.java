@@ -17,7 +17,17 @@ import android.view.SubMenu;
 public final class ActivityFavoriteList extends ActivityBase {
 
 	@Override
+	public int getSiteId() {
+		return Site.SITE_ID_FAVORITE;
+	}
+
+	@Override
 	public String getSiteName() {
+		return "";
+	}
+
+	@Override
+	String getSiteDisplayname() {
 		return "";
 	}
 
@@ -35,7 +45,7 @@ public final class ActivityFavoriteList extends ActivityBase {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_favorite_list);
 
-		setupListView(new MangaListAdapter(this, Site.SITE_ID_FAVORITE));
+		setupListView(new MangaListAdapter(this));
 	}
 
 	@Override

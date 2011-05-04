@@ -4,6 +4,10 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 
+import org.falconia.mangaproxy.AppConst;
+import org.falconia.mangaproxy.ITag;
+import org.falconia.mangaproxy.data.Genre;
+import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.helper.FormatHelper;
 import org.falconia.mangaproxy.helper.HttpHelper;
 import org.falconia.mangaproxy.helper.MathHelper;
@@ -12,39 +16,55 @@ import org.falconia.mangaproxy.helper.Regex;
 import android.text.TextUtils;
 import android.util.Log;
 
-public abstract class PluginBase implements IPlugin {
+public abstract class PluginBase implements ITag, IPlugin {
+
+	public static final String SOURCE_SEPERATOR_STRING = "\n##########SOURCE_SEPERATOR_STRING##########\n";
+
 
 	protected static final String Fail_to_process = "Fail to process data.";
 	protected static final String Fail_to_parse_Int = "Fail to parse int: '%s'.";
 	protected static final String Fail_to_parse_DateTime = "Fail to parse Date/Time: '%s'.";
 
-	protected static final String Get_URL_GenreList = "Get URL of GenreList: %s";
+	protected static final String Get_URL_of_GenreList = "Get URL of GenreList: %s";
 	protected static final String Get_URL_of_MangaList = "Get URL of MangaList(GenreID:%s): %s";
 	protected static final String Get_URL_of_AllMangaList = "Get URL of MangaList(All mangas): %s";
+	protected static final String Get_URL_of_ChapterList = "Get URL of ChapterList(MangaID:%s): %s";
+	protected static final String Get_URL_of_Chapter = "Get URL of Chapter(ChapterID:%s): %s";
+	protected static final String Get_URL_of_DynamicImgServerSource = "Get URL of DynamicImgServerSource: %s";
 
 	protected static final String Get_GenreList = "Get GenreList.";
-	protected static final String Get_MangaList = "Get MangaList(GenreID:%d).";
+	protected static final String Get_MangaList = "Get MangaList(GenreID:%s).";
 	protected static final String Get_AllMangaList = "Get MangaList(All mangas).";
+	protected static final String Get_ChapterList = "Get ChapterList(MangaID:%s).";
+	protected static final String Get_Chapter = "Get Chapter(ChapterID:%s).";
 
 	protected static final String Get_Source_Size_GenreList = "Get GenreList data of %s.";
 	protected static final String Get_Source_Size_MangaList = "Get MangaList data of %s.";
 	protected static final String Get_Source_Size_AllMangaList = "Get MangaList(All mangas) data of %s.";
+	protected static final String Get_Source_Size_ChapterList = "Get ChapterList data of %s.";
+	protected static final String Get_Source_Size_Chapter = "Get Chapter data of %s.";
 
-	protected static final String Process_MangaList = "Process MangaList(GenreID:%d).";
-	protected static final String Process_MangaList_New = "Process MangaList(New|GenreID:%d).";
+	protected static final String Process_MangaList = "Process MangaList(GenreID:%s).";
+	protected static final String Process_MangaList_New = "Process MangaList(New|GenreID:%s).";
 
 	protected static final String Catched_sections = "Catched %d section(s) of list.";
 	protected static final String Catched_count_in_section = "Catched %d in section '%s'.";
 	protected static final String Catched_total_page = "Catched total page of %d.";
+	protected static final String Catched_in_section = "Catched '%s' in section %d, { %s:%s }.";
 
 	protected static final String Process_Time_MangaList = "Process MangaList in %dms.";
 	protected static final String Process_Time_AllMangaList = "Process MangaList(All mangas) in %dms.";
+	protected static final String Process_Time_ChapterList = "Process ChapterList in %dms.";
+
+	protected static final String Source_is_empty = "Source is empty.";
+
 
 	protected static final String CHARSET_GBK = HttpHelper.CHARSET_GBK;
 	protected static final String CHARSET_UTF8 = HttpHelper.CHARSET_UTF8;
 
 	protected static final String DEFAULT_MANGA_URL_PREFIX = "comic/";
 	protected static final String DEFAULT_MANGA_URL_POSTFIX = "/";
+
 
 	protected int miSiteId;
 
@@ -58,8 +78,8 @@ public abstract class PluginBase implements IPlugin {
 	}
 
 	@Override
-	public String getGenreUrl(int genreId) {
-		return getGenreUrl(genreId, 1);
+	public String getGenreUrl(Genre genre) {
+		return getUrlBase() + genre.genreId.replace('-', '/') + "/";
 	}
 
 	@Override
@@ -67,14 +87,21 @@ public abstract class PluginBase implements IPlugin {
 		return getGenreAllUrl(1);
 	}
 
-	protected String getGenreUrl(String genreId) {
-		return getUrlBase() + genreId.replace('-', '/') + "/";
+	@Override
+	public String getMangaUrl(Manga manga) {
+		String url = getUrlBase() + getMangaUrlPrefix() + manga.mangaId
+				+ getMangaUrlPostfix();
+		logI(Get_URL_of_ChapterList, manga.mangaId, url);
+		return url;
 	}
 
 	@Override
-	public String getMangaUrl(int mangaId) {
-		return getUrlBase() + getMangaUrlPrefix() + mangaId
-				+ getMangaUrlPostfix();
+	public String getDynamicImgServerSourceUrl(String source) {
+		if (isDynamicImgServer())
+			throw new RuntimeException("The method should to be overrode.");
+		else
+			throw new RuntimeException(
+					"The site is unsupported of Dynamic Img Server.");
 	}
 
 	protected int parseInt(String string) {
@@ -120,6 +147,10 @@ public abstract class PluginBase implements IPlugin {
 		return cal;
 	}
 
+	protected String parseId(String string) {
+		return string.trim();
+	}
+
 	protected String parseGenreId(String string) {
 		string = Regex.match("^[\\s/]*(.+?)[\\s/]*$", string).get(1);
 		return string.trim().replace('/', '-');
@@ -139,6 +170,8 @@ public abstract class PluginBase implements IPlugin {
 		return string.indexOf("完") >= 0;
 	}
 
+	protected abstract int parseChapterType(String string);
+
 	protected int bitsToInt(String string) {
 		int result = 0;
 		byte[] bits = string.getBytes();
@@ -157,48 +190,34 @@ public abstract class PluginBase implements IPlugin {
 		return new String(bits);
 	}
 
-	protected String getTag() {
+	@Override
+	public String getTag() {
 		return getClass().getSimpleName();
 	}
 
-	protected void log(int priority, String msg) {
-		Log.println(priority, getTag(), msg);
-	}
-
-	protected void logV(String msg) {
-		// VERBOSE = 2
-		Log.v(getTag(), msg);
-	}
-
-	protected void logD(String msg) {
-		// DEBUG = 3
-		Log.d(getTag(), msg);
-	}
-
-	protected void logI(String msg) {
-		// INFO = 4
-		Log.i(getTag(), msg);
-	}
-
-	protected void logE(String msg) {
-		// ERROR = 6
-		Log.e(getTag(), msg);
+	private void log(int priority, String msg) {
+		Log.println(priority, AppConst.APP_NAME + " Plugin",
+				String.format("[%s] %s", getTag(), msg));
 	}
 
 	protected void logV(String format, Object... args) {
-		logV(String.format(format, args));
+		log(Log.VERBOSE, String.format(format, args));
 	}
 
 	protected void logD(String format, Object... args) {
-		logD(String.format(format, args));
+		log(Log.DEBUG, String.format(format, args));
 	}
 
 	protected void logI(String format, Object... args) {
-		logI(String.format(format, args));
+		log(Log.INFO, String.format(format, args));
+	}
+
+	protected void logW(String format, Object... args) {
+		log(Log.WARN, String.format(format, args));
 	}
 
 	protected void logE(String format, Object... args) {
-		logE(String.format(format, args));
+		log(Log.ERROR, String.format(format, args));
 	}
 
 }

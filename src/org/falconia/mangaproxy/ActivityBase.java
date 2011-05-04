@@ -1,6 +1,11 @@
 package org.falconia.mangaproxy;
 
-import org.falconia.mangaproxy.task.GetSourceTask;
+import java.io.UnsupportedEncodingException;
+
+import org.falconia.mangaproxy.helper.FormatHelper;
+import org.falconia.mangaproxy.helper.FormatHelper.FileSizeUnit;
+import org.falconia.mangaproxy.plugin.Plugins;
+import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
 import org.falconia.mangaproxy.task.OnSourceProcessListener;
 import org.falconia.mangaproxy.task.SourceProcessTask;
@@ -15,12 +20,12 @@ import android.content.DialogInterface.OnCancelListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -28,9 +33,106 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public abstract class ActivityBase extends ListActivity implements
+public abstract class ActivityBase extends ListActivity implements ITag,
 		OnFocusChangeListener, OnTouchListener, OnItemClickListener,
-		OnItemLongClickListener, OnDownloadListener, OnSourceProcessListener {
+		OnItemLongClickListener, OnSourceProcessListener {
+
+	protected final class SourceDownloader implements ITag, OnDownloadListener,
+			OnCancelListener {
+
+		private final DownloadTask mDownloader;
+		private final String mCharset;
+		private ProgressDialog mDownloadDialog;
+		private String mMessage;
+
+		public SourceDownloader() {
+			this.mDownloader = new DownloadTask(this);
+			this.mCharset = Plugins.getPlugin(getSiteId()).getCharset();
+		}
+
+		@Override
+		public void onPreDownload() {
+			AppUtils.logV(this, "onPreDownload()");
+			setProgressBarIndeterminateVisibility(true);
+			showDialog(DIALOG_DOWNLOAD_ID);
+		}
+
+		@Override
+		public void onPostDownload(byte[] result) {
+			AppUtils.logV(this, "onPostDownload()");
+			if (result == null || result.length == 0) {
+				setNoItemsMessage(String
+						.format(getString(R.string.ui_error_on_download),
+								getSiteName()));
+				return;
+			}
+			dismissDialog(DIALOG_DOWNLOAD_ID);
+			setProgressBarIndeterminateVisibility(false);
+
+			String source;
+			try {
+				source = new String(result, this.mCharset);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				AppUtils.logE(this, "Unsupported charset: " + e.getMessage());
+				return;
+			}
+			// AppUtils.logV(this, source);
+
+			ActivityBase.this.mSourceProcessTask = new SourceProcessTask(
+					ActivityBase.this);
+			ActivityBase.this.mSourceProcessTask.execute(source);
+		}
+
+		@Override
+		public void onDownloadProgressUpdate(int value, int total) {
+			this.mDownloadDialog.setMessage(String.format(this.mMessage,
+					FormatHelper.getFileSize(value, FileSizeUnit.B)));
+		}
+
+		@Override
+		public void onCancel(DialogInterface dialog) {
+			AppUtils.logV(this, "onCancel()");
+			if (this.mDownloader != null
+					&& this.mDownloader.getStatus() == AsyncTask.Status.RUNNING)
+				this.mDownloader.cancel(true);
+			if (!ActivityBase.this.mProcessed)
+				finish();
+		}
+
+		public ProgressDialog createDownloadDialog(CharSequence what) {
+			CharSequence title, message;
+			if (TextUtils.isEmpty(what)) {
+				title = null;
+				message = getString(R.string.dialog_download_message);
+			} else {
+				title = getString(R.string.dialog_download_title);
+				message = String.format(
+						getString(R.string.dialog_download_message_format),
+						what, "0.000B");
+			}
+			this.mMessage = String.format(
+					getString(R.string.dialog_download_message_format), what,
+					"%s");
+			ProgressDialog dialog = createProgressDialog(title, message, true);
+			dialog.setOnCancelListener(this);
+			this.mDownloadDialog = dialog;
+			return dialog;
+		}
+
+		public ProgressDialog createDownloadDialog(int whatResId) {
+			return createDownloadDialog(getString(whatResId));
+		}
+
+		public void download(String url) {
+			this.mDownloader.execute(url);
+		}
+
+		@Override
+		public String getTag() {
+			return getClass().getSimpleName();
+		}
+	}
 
 	protected static final String BUNDLE_KEY_IS_PROCESSED = "BUNDLE_KEY_IS_PROCESSED";
 
@@ -39,58 +141,63 @@ public abstract class ActivityBase extends ListActivity implements
 	protected static final int DIALOG_DOWNLOAD_ID = 1;
 	protected static final int DIALOG_PROCESS_ID = 2;
 
-	protected GetSourceTask mGetSourceTask;
+	protected SourceDownloader mSourceDownloader;
 	protected SourceProcessTask mSourceProcessTask;
 	protected boolean mShowProcessDialog = true;
 	protected boolean mProcessed = false;
 
 	protected BaseListAdapter mListAdapter;
 
+	abstract int getSiteId();
+
 	abstract String getSiteName();
+
+	abstract String getSiteDisplayname();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		this.mProcessed = getProcessed(savedInstanceState);
 		super.onCreate(savedInstanceState);
-		logI("onCreate()");
+		this.mProcessed = getProcessed(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		AppUtils.logV(this, "onCreate()");
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		logI("onStart()");
+		AppUtils.logV(this, "onStart()");
 	}
 
 	@Override
 	protected void onResume() {
 		// System.gc();
 		super.onResume();
-		logI("onResume()");
+		AppUtils.logV(this, "onResume()");
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		logI("onPause()");
+		AppUtils.logV(this, "onPause()");
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		logI("onStop()");
+		AppUtils.logV(this, "onStop()");
 	}
 
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		logI("onRestart()");
+		AppUtils.logV(this, "onRestart()");
 	}
 
 	@Override
 	protected void onDestroy() {
 		// System.gc();
 		super.onDestroy();
-		logI("onDestroy()");
+		AppUtils.logV(this, "onDestroy()");
 	}
 
 	@Override
@@ -99,7 +206,7 @@ public abstract class ActivityBase extends ListActivity implements
 		removeDialog(DIALOG_PROCESS_ID);
 		outState.putBoolean(BUNDLE_KEY_IS_PROCESSED, this.mProcessed);
 		super.onSaveInstanceState(outState);
-		Log.i(getTag(), "onSaveInstanceState()");
+		AppUtils.logV(this, "onSaveInstanceState()");
 	}
 
 	protected boolean getProcessed(Bundle savedInstanceState) {
@@ -113,7 +220,7 @@ public abstract class ActivityBase extends ListActivity implements
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-		Log.i(getTag(), "onRestoreInstanceState()");
+		AppUtils.logV(this, "onRestoreInstanceState()");
 	}
 
 	/**
@@ -150,74 +257,48 @@ public abstract class ActivityBase extends ListActivity implements
 		return false;
 	}
 
-	protected void onCancelDownload() {
-		if (this.mGetSourceTask != null
-				&& this.mGetSourceTask.getStatus() == AsyncTask.Status.RUNNING)
-			this.mGetSourceTask.cancel(true);
-		if (!this.mProcessed)
-			finish();
-	}
-
-	@Override
-	public void onPreDownload() {
-		if (this.mGetSourceTask == null) {
-			logE("GetSourceTask is not initialized.");
-			return;
-		}
-		showDialog(DIALOG_DOWNLOAD_ID);
-	}
-
-	@Override
-	public void onPostDownload(String source) {
-		if (this.mGetSourceTask == null) {
-			logE("GetSourceTask is not initialized.");
-			return;
-		}
-		if (TextUtils.isEmpty(source)) {
-			setNoItemsMessage(String.format(
-					getString(R.string.error_on_download), getSiteName()));
-			return;
-		}
-		dismissDialog(DIALOG_DOWNLOAD_ID);
-
-		this.mSourceProcessTask = new SourceProcessTask(this);
-		this.mSourceProcessTask.execute(source);
+	public void onCancelDownload() {
 	}
 
 	@Override
 	public int onSourceProcess(String source) {
+		AppUtils.logV(this, "onSourceProcess()");
 		return 0;
 	}
 
 	@Override
 	public void onPreSourceProcess() {
+		AppUtils.logV(this, "onPreSourceProcess()");
 		if (this.mSourceProcessTask == null) {
-			logE("ProcessDataTask is not initialized.");
+			AppUtils.logE(this, "ProcessDataTask is not initialized.");
 			return;
 		}
 		this.mProcessed = false;
 		if (this.mShowProcessDialog)
 			showDialog(DIALOG_PROCESS_ID);
+		setProgressBarIndeterminateVisibility(true);
 	}
 
 	@Override
 	public void onPostSourceProcess(int size) {
+		AppUtils.logV(this, "onPostSourceProcess()");
 		if (this.mSourceProcessTask == null) {
-			logE("ProcessDataTask is not initialized.");
+			AppUtils.logE(this, "ProcessDataTask is not initialized.");
 			return;
 		}
 		this.mProcessed = true;
 		if (size <= 0)
 			setNoItemsMessage(String.format(
-					getString(R.string.error_on_process), getSiteName()));
+					getString(R.string.ui_error_on_process), getSiteName()));
 		if (this.mShowProcessDialog)
 			dismissDialog(DIALOG_PROCESS_ID);
+		setProgressBarIndeterminateVisibility(false);
 	}
 
 	protected void setCustomTitle(String string) {
 		String str = getString(R.string.app_name);
 		if (!TextUtils.isEmpty(string))
-			str += string;
+			str = getSiteDisplayname() + " - " + string;
 		setTitle(str);
 	}
 
@@ -269,18 +350,17 @@ public abstract class ActivityBase extends ListActivity implements
 	}
 
 	protected ProgressDialog createProgressDialog(CharSequence title,
-			CharSequence message, boolean indeterminate, boolean cancelable) {
+			CharSequence message, boolean cancelable) {
 		ProgressDialog dialog = new ProgressDialog(this);
 		dialog.setTitle(title);
 		dialog.setMessage(message);
-		dialog.setIndeterminate(indeterminate);
 		dialog.setCancelable(cancelable);
 		return dialog;
 	}
 
 	protected ProgressDialog createProgressDialog(CharSequence title,
-			CharSequence message, boolean indeterminate) {
-		return createProgressDialog(title, message, indeterminate, false);
+			CharSequence message) {
+		return createProgressDialog(title, message, false);
 	}
 
 	protected ProgressDialog createLoadingDialog(CharSequence what) {
@@ -293,7 +373,7 @@ public abstract class ActivityBase extends ListActivity implements
 			message = String.format(
 					getString(R.string.dialog_loading_message_format), what);
 		}
-		return createProgressDialog(title, message, true, false);
+		return createProgressDialog(title, message, false);
 	}
 
 	protected ProgressDialog createLoadingDialog(int whatResId) {
@@ -302,30 +382,6 @@ public abstract class ActivityBase extends ListActivity implements
 
 	protected ProgressDialog createLoadingDialog() {
 		return createLoadingDialog(null);
-	}
-
-	protected ProgressDialog createDownloadDialog(CharSequence what) {
-		CharSequence title, message;
-		if (TextUtils.isEmpty(what)) {
-			title = null;
-			message = getString(R.string.dialog_download_message);
-		} else {
-			title = getString(R.string.dialog_download_title);
-			message = String.format(
-					getString(R.string.dialog_download_message_format), what);
-		}
-		ProgressDialog dialog = createProgressDialog(title, message, true, true);
-		dialog.setOnCancelListener(new OnCancelListener() {
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				onCancelDownload();
-			}
-		});
-		return dialog;
-	}
-
-	protected ProgressDialog createDownloadDialog(int whatResId) {
-		return createDownloadDialog(getString(whatResId));
 	}
 
 	protected ProgressDialog createProcessDialog(CharSequence what) {
@@ -338,7 +394,7 @@ public abstract class ActivityBase extends ListActivity implements
 			message = String.format(
 					getString(R.string.dialog_process_message_format), what);
 		}
-		return createProgressDialog(title, message, true, false);
+		return createProgressDialog(title, message, false);
 	}
 
 	protected ProgressDialog createProcessDialog(int whatResId) {
@@ -352,28 +408,9 @@ public abstract class ActivityBase extends ListActivity implements
 				.getWindowToken(), 0);
 	}
 
-	protected String getTag() {
+	@Override
+	public String getTag() {
 		return getClass().getSimpleName();
-	}
-
-	protected void log(int priority, String msg) {
-		Log.println(priority, getString(R.string.app_name),
-				String.format("[%s] %s", getTag(), msg));
-	}
-
-	protected void logD(String msg) {
-		// DEBUG = 3
-		log(Log.DEBUG, msg);
-	}
-
-	protected void logI(String msg) {
-		// INFO = 4
-		log(Log.INFO, msg);
-	}
-
-	protected void logE(String msg) {
-		// ERROR = 6
-		log(Log.ERROR, msg);
 	}
 
 }

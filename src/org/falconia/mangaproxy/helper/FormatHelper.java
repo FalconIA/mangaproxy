@@ -1,6 +1,9 @@
 package org.falconia.mangaproxy.helper;
 
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidParameterException;
+
+import org.falconia.mangaproxy.AppConst;
 
 import android.util.Log;
 
@@ -42,14 +45,14 @@ public final class FormatHelper {
 			size = file.getBytes(charset).length;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-			Log.e("", e.toString() + ": " + e.getMessage());
+			Log.e(AppConst.APP_NAME, e.toString() + ": " + e.getMessage());
 		}
 		return getFileSize(size, FileSizeUnit.B);
 	}
 
 	public static int year2to4(int year) {
 		if (year > 100)
-			throw new IllegalArgumentException();
+			throw new InvalidParameterException("Invalid year digits.");
 		return year < 50 ? year + 2000 : year + 1900;
 	}
 
