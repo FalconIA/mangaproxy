@@ -66,7 +66,11 @@ public abstract class ActivityBase extends ListActivity implements ITag,
 								getSiteName()));
 				return;
 			}
-			dismissDialog(DIALOG_DOWNLOAD_ID);
+			try {
+				dismissDialog(DIALOG_DOWNLOAD_ID);
+			} catch (Exception e) {
+				AppUtils.logE(this, "dismissDialog(DIALOG_DOWNLOAD_ID)");
+			}
 			setProgressBarIndeterminateVisibility(false);
 
 			String source;
@@ -92,10 +96,8 @@ public abstract class ActivityBase extends ListActivity implements ITag,
 
 		@Override
 		public void onCancel(DialogInterface dialog) {
-			AppUtils.logV(this, "onCancel()");
-			if (this.mDownloader != null
-					&& this.mDownloader.getStatus() == AsyncTask.Status.RUNNING)
-				this.mDownloader.cancel(true);
+			AppUtils.logD(this, "onCancel() @DownloadDialog");
+			cancelDownload();
 			if (!ActivityBase.this.mProcessed)
 				finish();
 		}
@@ -126,6 +128,14 @@ public abstract class ActivityBase extends ListActivity implements ITag,
 
 		public void download(String url) {
 			this.mDownloader.execute(url);
+		}
+
+		public void cancelDownload() {
+			if (this.mDownloader != null
+					&& this.mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
+				AppUtils.logD(this, "Cancel DownloadTask.");
+				this.mDownloader.cancel(true);
+			}
 		}
 
 		@Override
@@ -202,6 +212,10 @@ public abstract class ActivityBase extends ListActivity implements ITag,
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
+		if (this.mSourceDownloader != null)
+			this.mSourceDownloader.cancelDownload();
+		if (this.mSourceProcessTask != null)
+			this.mSourceProcessTask.cancel(true);
 		removeDialog(DIALOG_DOWNLOAD_ID);
 		removeDialog(DIALOG_PROCESS_ID);
 		outState.putBoolean(BUNDLE_KEY_IS_PROCESSED, this.mProcessed);
@@ -255,9 +269,6 @@ public abstract class ActivityBase extends ListActivity implements ITag,
 		// TODO Auto-generated method stub
 
 		return false;
-	}
-
-	public void onCancelDownload() {
 	}
 
 	@Override
