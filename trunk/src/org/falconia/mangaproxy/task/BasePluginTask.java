@@ -7,10 +7,10 @@ import android.os.AsyncTask;
 
 public abstract class BasePluginTask<T1, T2, T3> extends AsyncTask<T1, T2, T3> {
 
-	protected final IPlugin mhPlugin;
+	protected final IPlugin mPlugin;
 
 	public BasePluginTask(IPlugin plugin) {
-		this.mhPlugin = plugin;
+		this.mPlugin = plugin;
 	}
 
 	public BasePluginTask(int pluginId) {

@@ -7,11 +7,11 @@ import java.util.Iterator;
 
 import android.text.TextUtils;
 
-public class GenreList implements Serializable, ISiteId, Iterable<Genre> {
+public final class GenreList implements Serializable, ISiteId, Iterable<Genre> {
 
 	private static final long serialVersionUID = 1L;
 
-	private ArrayList<Genre> mGenreList;
+	private final ArrayList<Genre> mGenreList;
 	private final int mSiteId;
 
 	public GenreList(int siteId) {
@@ -37,7 +37,7 @@ public class GenreList implements Serializable, ISiteId, Iterable<Genre> {
 		this.mGenreList.add(genre);
 	}
 
-	public void add(int genreId, String displayname) {
+	public void add(String genreId, String displayname) {
 		this.mGenreList.add(new Genre(genreId, displayname, this.mSiteId));
 	}
 
@@ -45,13 +45,13 @@ public class GenreList implements Serializable, ISiteId, Iterable<Genre> {
 		this.mGenreList.addAll(genres);
 	}
 
-	public void add(int index, Genre genre) {
-		this.mGenreList.add(index, genre);
+	public void insert(int position, Genre genre) {
+		this.mGenreList.add(position, genre);
 	}
 
-	public void add(int index, int genreId, String displayname) {
-		this.mGenreList.add(index,
-				new Genre(genreId, displayname, this.mSiteId));
+	public void insert(int position, String genreId, String displayname) {
+		this.mGenreList.add(position, new Genre(genreId, displayname,
+				this.mSiteId));
 	}
 
 	public Genre getAt(int position) {

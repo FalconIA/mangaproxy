@@ -3,7 +3,6 @@ package org.falconia.mangaproxy;
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.GenreList;
 import org.falconia.mangaproxy.data.Site;
-import org.falconia.mangaproxy.task.GetSourceTask;
 import org.falconia.mangaproxy.ui.BaseListAdapter;
 
 import android.app.Dialog;
@@ -17,7 +16,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
-public class ActivityGenreList extends ActivityBase {
+public final class ActivityGenreList extends ActivityBase {
 
 	public final static class IntentHandler {
 
@@ -41,7 +40,8 @@ public class ActivityGenreList extends ActivityBase {
 
 	}
 
-	final class GenreListAdapter extends BaseListAdapter {
+	private final class GenreListAdapter extends BaseListAdapter {
+
 		final class ViewHolder {
 			public TextView tvDisplayname;
 		}
@@ -50,7 +50,6 @@ public class ActivityGenreList extends ActivityBase {
 		private LayoutInflater mInflater;
 
 		public GenreListAdapter() {
-			// this.mGenreList = new GenreList(ActivityGenreList.this.mSiteId);
 			this.mInflater = LayoutInflater.from(ActivityGenreList.this);
 		}
 
@@ -68,26 +67,28 @@ public class ActivityGenreList extends ActivityBase {
 
 		@Override
 		public long getItemId(int position) {
-			return getItem(position).genreId;
+			return getItem(position).genreId.hashCode();
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder holder;
+
 			if (convertView == null) {
 				holder = new ViewHolder();
 				convertView = this.mInflater.inflate(R.layout.list_item_genre,
 						null);
 				holder.tvDisplayname = (TextView) convertView
 						.findViewById(R.id.mtvDisplayname);
-				holder.tvDisplayname.setText(this.mGenreList
-						.getDisplayname(position));
-				convertView.setTag(holder);
-			} else {
+			} else
 				holder = (ViewHolder) convertView.getTag();
-				holder.tvDisplayname.setText(this.mGenreList
-						.getDisplayname(position));
-			}
+
+			holder.tvDisplayname.setText(this.mGenreList
+					.getDisplayname(position));
+
+			if (convertView.getTag() == null)
+				convertView.setTag(holder);
+
 			return convertView;
 		}
 
@@ -111,15 +112,25 @@ public class ActivityGenreList extends ActivityBase {
 
 	}
 
-	protected static final String BUNDLE_KEY_GENRE_LIST = "BUNDLE_KEY_GENRE_LIST";
+	private static final String BUNDLE_KEY_GENRE_LIST = "BUNDLE_KEY_GENRE_LIST";
 
 	private int mSiteId;
 	private Site mSite;
 	private GenreList mGenreList;
 
 	@Override
+	public int getSiteId() {
+		return this.mSiteId;
+	}
+
+	@Override
 	public String getSiteName() {
 		return this.mSite.getName();
+	}
+
+	@Override
+	String getSiteDisplayname() {
+		return this.mSite.getDisplayname();
 	}
 
 	@Override
@@ -130,8 +141,7 @@ public class ActivityGenreList extends ActivityBase {
 		this.mSite = Site.get(this.mSiteId);
 
 		setContentView(R.layout.activity_genre_list);
-		setTitle(String.format("%s - %s", this.mSite.getDisplayname(),
-				getString(R.string.genre)));
+		setCustomTitle(getString(R.string.genre));
 
 		// this.mShowProcessDialog = false;
 
@@ -165,7 +175,8 @@ public class ActivityGenreList extends ActivityBase {
 		Dialog dialog;
 		switch (id) {
 		case DIALOG_DOWNLOAD_ID:
-			dialog = createDownloadDialog(R.string.source_of_genre_list);
+			dialog = this.mSourceDownloader
+					.createDownloadDialog(R.string.source_of_genre_list);
 			break;
 		case DIALOG_PROCESS_ID:
 			dialog = createProcessDialog(R.string.source_of_genre_list);
@@ -198,8 +209,8 @@ public class ActivityGenreList extends ActivityBase {
 	}
 
 	private void loadGenreList() {
-		this.mGetSourceTask = new GetSourceTask(this.mSiteId, this);
-		this.mSite.getGenreListSource(this.mGetSourceTask);
+		this.mSourceDownloader = new SourceDownloader();
+		this.mSourceDownloader.download(this.mSite.getGenreListUrl());
 	}
 
 }

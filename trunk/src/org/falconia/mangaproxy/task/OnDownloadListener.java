@@ -2,8 +2,10 @@ package org.falconia.mangaproxy.task;
 
 public interface OnDownloadListener {
 
-	public void onPreDownload();
+	void onPreDownload();
 
-	public void onPostDownload(String result);
+	void onPostDownload(byte[] result);
+
+	void onDownloadProgressUpdate(int value, int total);
 
 }

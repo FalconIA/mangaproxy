@@ -23,25 +23,31 @@ public interface IPlugin {
 
 	String getUrlBase();
 
+	boolean hasSearchEngine();
+
 	boolean hasGenreList();
 
-	boolean hasSearchEngine();
+	boolean isDynamicImgServer();
 
 	String getGenreListUrl();
 
-	String getGenreUrl(int genreId, int page);
+	String getGenreUrl(Genre genre, int page);
 
-	String getGenreUrl(int genreId);
+	String getGenreUrl(Genre genre);
 
 	String getGenreAllUrl(int page);
 
 	String getGenreAllUrl();
 
-	String getMangaUrl(int mangaId);
+	String getMangaUrl(Manga manga);
 
 	String getMangaUrlPrefix();
 
 	String getMangaUrlPostfix();
+
+	String getChapterUrl(Chapter chapter, Manga manga);
+
+	String getDynamicImgServerSourceUrl(String source);
 
 	GenreList getGenreList(String source);
 
@@ -49,7 +55,7 @@ public interface IPlugin {
 
 	MangaList getAllMangaList(String source);
 
-	ChapterList getChapterList(Manga manga);
+	ChapterList getChapterList(String source, Manga manga);
 
 	Chapter getChapter(Manga manga, Chapter chapter);
 

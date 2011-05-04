@@ -1,8 +1,11 @@
 package org.falconia.mangaproxy;
 
+import java.io.UnsupportedEncodingException;
+
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.MangaList;
-import org.falconia.mangaproxy.task.GetSourceTask;
+import org.falconia.mangaproxy.plugin.Plugins;
+import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
 import org.falconia.mangaproxy.task.OnSourceProcessListener;
 import org.falconia.mangaproxy.task.SourceProcessTask;
@@ -11,14 +14,14 @@ import org.falconia.mangaproxy.ui.MangaListAdapter;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class ActivityMangaList extends ActivityBase {
+public final class ActivityMangaList extends ActivityBase {
 
 	public final static class IntentHandler {
 
@@ -47,7 +50,7 @@ public class ActivityMangaList extends ActivityBase {
 
 	}
 
-	private final class LoadNextPageItem implements OnDownloadListener,
+	private final class NextPageDownloader implements ITag, OnDownloadListener,
 			OnSourceProcessListener {
 
 		public static final int MODE_DEFAULT = 0;
@@ -55,6 +58,10 @@ public class ActivityMangaList extends ActivityBase {
 		public static final int MODE_PROCESS = 2;
 		public static final int MODE_DOWNLOAD_ERROR = 3;
 		public static final int MODE_PROCESS_ERROR = 4;
+		public static final int MODE_CHARSET_ERROR = 5;
+
+		private DownloadTask mDownloader;
+		private final String mCharset;
 
 		private View mListItem;
 		private ProgressBar mProgress;
@@ -63,7 +70,9 @@ public class ActivityMangaList extends ActivityBase {
 
 		private int mMode;
 
-		public LoadNextPageItem() {
+		public NextPageDownloader() {
+			this.mCharset = Plugins.getPlugin(getSiteId()).getCharset();
+
 			this.mListItem = getLayoutInflater().inflate(
 					R.layout.list_item_load, null);
 			this.mProgress = (ProgressBar) this.mListItem
@@ -75,26 +84,44 @@ public class ActivityMangaList extends ActivityBase {
 			setMode(MODE_DEFAULT);
 		}
 
-		public View getView() {
-			return this.mListItem;
-		}
-
 		@Override
 		public void onPreDownload() {
+			AppUtils.logV(this, "onPreDownload()");
 			setMode(MODE_DOWNLOAD);
 		}
 
 		@Override
-		public void onPostDownload(String source) {
-			if (TextUtils.isEmpty(source)) {
+		public void onPostDownload(byte[] result) {
+			AppUtils.logV(this, "onPostDownload()");
+			if (result == null || result.length == 0) {
+				setNoItemsMessage(String
+						.format(getString(R.string.ui_error_on_download),
+								getSiteName()));
 				setMode(MODE_DOWNLOAD_ERROR);
 				return;
 			}
+
+			String source;
+			try {
+				source = new String(result, this.mCharset);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				AppUtils.logE(this, "Unsupported charset: " + e.getMessage());
+				setMode(MODE_CHARSET_ERROR);
+				return;
+			}
+			// AppUtils.logV(this, source);
 
 			setMode(MODE_PROCESS);
 			ActivityMangaList.this.mSourceProcessTask = new SourceProcessTask(
 					this);
 			ActivityMangaList.this.mSourceProcessTask.execute(source);
+		}
+
+		@Override
+		public void onDownloadProgressUpdate(int value, int total) {
+			this.mMessage.setText(String.format(
+					getString(R.string.ui_download_page), (value) / 1024.0f));
 		}
 
 		@Override
@@ -109,49 +136,69 @@ public class ActivityMangaList extends ActivityBase {
 
 		@Override
 		public void onPreSourceProcess() {
-
+			AppUtils.logV(this, "onPreSourceProcess()");
 		}
 
 		@Override
 		public void onPostSourceProcess(int size) {
+			AppUtils.logV(this, "onPostSourceProcess()");
 			if (size > 0) {
 				ActivityMangaList.this.mPageIndexLoaded++;
 				((MangaListAdapter) ActivityMangaList.this.mListAdapter)
 						.setMangaList(ActivityMangaList.this.mMangaList);
+				AppUtils.popupMessage(ActivityMangaList.this, String.format(
+						getString(R.string.popup_loaded_page),
+						ActivityMangaList.this.mPageIndexLoaded));
 				setMode(MODE_DEFAULT);
 			} else {
 				setMode(MODE_PROCESS_ERROR);
 				return;
 			}
-			if (ActivityMangaList.this.mPageIndexLoaded == ActivityMangaList.this.mPageIndexMax)
-				getListView().removeFooterView(
-						ActivityMangaList.this.mFooter.getView());
+			if (ActivityMangaList.this.mPageIndexLoaded == ActivityMangaList.this.mPageIndexMax) {
+				getListView().removeFooterView(getFooter());
+				setCustomTitle(ActivityMangaList.this.mGenre.displayname);
+			}
+		}
+
+		public View getFooter() {
+			return this.mListItem;
 		}
 
 		public void setMode(int mode) {
 			this.mMode = mode;
 			switch (this.mMode) {
 			case MODE_DEFAULT:
+				if (ActivityMangaList.this.mPageIndexLoaded < ActivityMangaList.this.mPageIndexMax)
+					setCustomTitle(String.format("%s (%d/%d)",
+							ActivityMangaList.this.mGenre.displayname,
+							ActivityMangaList.this.mPageIndexLoaded,
+							ActivityMangaList.this.mPageIndexMax));
+				setProgressBarIndeterminateVisibility(false);
 				this.mProgress.setVisibility(View.GONE);
 				this.mMessage.setText(R.string.ui_load_next_page);
 				this.mDescribe.setText(String.format("(%d/%d)",
-						ActivityMangaList.this.mPageIndexLoaded,
+						ActivityMangaList.this.mPageIndexLoaded + 1,
 						ActivityMangaList.this.mPageIndexMax));
 				break;
 			case MODE_DOWNLOAD:
+				setProgressBarIndeterminateVisibility(true);
 				this.mProgress.setVisibility(View.VISIBLE);
-				this.mMessage.setText(R.string.ui_download_data);
+				this.mMessage.setText(String.format(
+						getString(R.string.ui_download_page), 0.0f));
 				this.mDescribe.setText(String.format("(%s)",
 						getString(R.string.ui_click_to_cancel)));
 				break;
 			case MODE_PROCESS:
+				setProgressBarIndeterminateVisibility(true);
 				this.mProgress.setVisibility(View.VISIBLE);
-				this.mMessage.setText(R.string.ui_process_data);
+				this.mMessage.setText(R.string.ui_process_page);
 				this.mDescribe.setText(String.format("(%d/%d)",
 						ActivityMangaList.this.mPageIndexLoaded + 1,
 						ActivityMangaList.this.mPageIndexMax));
 				break;
 			case MODE_DOWNLOAD_ERROR:
+			case MODE_CHARSET_ERROR:
+				setProgressBarIndeterminateVisibility(false);
 				this.mProgress.setVisibility(View.GONE);
 				this.mMessage.setText(R.string.ui_error);
 				this.mDescribe.setText(String.format("(%s)", String.format(
@@ -159,6 +206,7 @@ public class ActivityMangaList extends ActivityBase {
 						ActivityMangaList.this.mPageIndexLoaded + 1)));
 				break;
 			case MODE_PROCESS_ERROR:
+				setProgressBarIndeterminateVisibility(false);
 				this.mProgress.setVisibility(View.GONE);
 				this.mMessage.setText(R.string.ui_error);
 				this.mDescribe.setText(String.format("(%s)", String.format(
@@ -171,31 +219,43 @@ public class ActivityMangaList extends ActivityBase {
 		public void click() {
 			switch (this.mMode) {
 			case MODE_DEFAULT:
-			case MODE_DOWNLOAD_ERROR:
-			case MODE_PROCESS_ERROR:
-				ActivityMangaList.this.mGetSourceTask = new GetSourceTask(
-						ActivityMangaList.this.mGenre.siteId, this);
-				ActivityMangaList.this.mGenre.getMangaListSource(
-						ActivityMangaList.this.mGetSourceTask,
-						ActivityMangaList.this.mPageIndexLoaded + 1);
+				AppUtils.logV(this, "click() @MODE_DEFAULT");
+				AppUtils.logD(this, "Download Page "
+						+ (ActivityMangaList.this.mPageIndexLoaded + 1));
+				this.mDownloader = new DownloadTask(this);
+				this.mDownloader.execute(ActivityMangaList.this.mGenre
+						.getUrl(ActivityMangaList.this.mPageIndexLoaded + 1));
 				break;
 			case MODE_DOWNLOAD:
-				ActivityMangaList.this.mGetSourceTask.cancel(true);
+				AppUtils.logV(this, "click() @MODE_DOWNLOAD");
+				if (this.mDownloader != null
+						&& this.mDownloader.getStatus() == AsyncTask.Status.RUNNING)
+					this.mDownloader.cancel(true);
+				setMode(MODE_DEFAULT);
+				break;
+			case MODE_DOWNLOAD_ERROR:
+			case MODE_PROCESS_ERROR:
+			case MODE_CHARSET_ERROR:
+				AppUtils.logV(this, "click() @MODE_ERROR");
 				setMode(MODE_DEFAULT);
 				break;
 			}
 		}
 
+		@Override
+		public String getTag() {
+			return getClass().getSimpleName();
+		}
 	}
 
-	protected static final String BUNDLE_KEY_MANGA_LIST = "BUNDLE_KEY_MANGA_LIST";
+	private static final String BUNDLE_KEY_MANGA_LIST = "BUNDLE_KEY_MANGA_LIST";
 
 	private Genre mGenre;
 	private MangaList mMangaList;
 	private int mPageIndexMax;
 	private int mPageIndexLoaded;
 
-	private LoadNextPageItem mFooter;
+	private NextPageDownloader mNextPageDownloader;
 
 	// private FadeAnimation mhFadeAnim;
 	// private final IOnFadeEndListener mhOnFadeInEnd;
@@ -207,8 +267,18 @@ public class ActivityMangaList extends ActivityBase {
 	}
 
 	@Override
+	public int getSiteId() {
+		return this.mGenre.siteId;
+	}
+
+	@Override
 	public String getSiteName() {
 		return this.mGenre.getSiteName();
+	}
+
+	@Override
+	String getSiteDisplayname() {
+		return this.mGenre.getSiteDisplayname();
 	}
 
 	@Override
@@ -220,12 +290,11 @@ public class ActivityMangaList extends ActivityBase {
 			finish();
 
 		setContentView(R.layout.activity_manga_list);
-		setTitle(String.format("%s - %s", this.mGenre.getSiteDisplayname(),
-				this.mGenre.displayname));
+		setCustomTitle(this.mGenre.displayname);
 
 		// this.mbShowProcessDialog = false;
 
-		setupListView(new MangaListAdapter(this, this.mGenre.siteId));
+		setupListView(new MangaListAdapter(this));
 
 		findViewById(R.id.mvgSearch).setVisibility(View.GONE);
 
@@ -252,7 +321,8 @@ public class ActivityMangaList extends ActivityBase {
 		Dialog dialog;
 		switch (id) {
 		case DIALOG_DOWNLOAD_ID:
-			dialog = createDownloadDialog(R.string.source_of_genre_list);
+			dialog = this.mSourceDownloader
+					.createDownloadDialog(R.string.source_of_genre_list);
 			break;
 		case DIALOG_PROCESS_ID:
 			dialog = createProcessDialog(R.string.source_of_genre_list);
@@ -266,12 +336,17 @@ public class ActivityMangaList extends ActivityBase {
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
-		if (view == this.mFooter.getView())
-			this.mFooter.click();
+		if (this.mNextPageDownloader != null
+				&& view == this.mNextPageDownloader.getFooter())
+			this.mNextPageDownloader.click();
+		else
+			ActivityChapterList.IntentHandler.startActivityMangaList(this,
+					this.mMangaList.getAt(position));
 	}
 
 	@Override
 	public int onSourceProcess(String source) {
+		super.onSourceProcess(source);
 		this.mMangaList = this.mGenre.getMangaList(source);
 		if (this.mPageIndexMax == 0)
 			this.mPageIndexMax = this.mMangaList.pageIndexMax;
@@ -291,14 +366,14 @@ public class ActivityMangaList extends ActivityBase {
 	}
 
 	private void loadMangaList() {
-		this.mGetSourceTask = new GetSourceTask(this.mGenre.siteId, this);
-		this.mGenre.getMangaListSource(this.mGetSourceTask,
-				this.mPageIndexLoaded + 1);
+		this.mSourceDownloader = new SourceDownloader();
+		this.mSourceDownloader.download(this.mGenre.getUrl());
 	}
 
 	private void showFooter() {
-		this.mFooter = new LoadNextPageItem();
-		getListView().addFooterView(this.mFooter.getView(), null, true);
+		this.mNextPageDownloader = new NextPageDownloader();
+		getListView().addFooterView(this.mNextPageDownloader.getFooter(), null,
+				true);
 		setListAdapter(this.mListAdapter);
 	}
 

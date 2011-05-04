@@ -13,7 +13,7 @@ import android.widget.AbsListView;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-public class MangaListAdapter extends BaseListAdapter {
+public final class MangaListAdapter extends BaseListAdapter {
 
 	final class ViewHolder {
 		public TextView tvDisplayname;
@@ -25,8 +25,7 @@ public class MangaListAdapter extends BaseListAdapter {
 	private MangaList mMangaList;
 	private LayoutInflater mInflater;
 
-	public MangaListAdapter(Context context, int siteId) {
-		// this.mMangaList = new MangaList(siteId);
+	public MangaListAdapter(Context context) {
 		this.mInflater = LayoutInflater.from(context);
 	}
 
@@ -44,7 +43,7 @@ public class MangaListAdapter extends BaseListAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		return position;
+		return getItem(position).mangaId.hashCode();
 	}
 
 	@Override
