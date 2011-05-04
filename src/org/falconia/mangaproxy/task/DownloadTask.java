@@ -36,11 +36,13 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 
 	@Override
 	protected void onPreExecute() {
+		logD("Download start.");
 		this.mListener.onPreDownload();
 	}
 
 	@Override
 	protected void onPostExecute(byte[] result) {
+		logD("Download done.");
 		this.mListener.onPostDownload(result);
 	}
 
