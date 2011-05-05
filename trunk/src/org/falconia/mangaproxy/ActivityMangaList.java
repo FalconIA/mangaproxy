@@ -1,7 +1,6 @@
 package org.falconia.mangaproxy;
 
-import java.io.UnsupportedEncodingException;
-
+import org.apache.http.util.EncodingUtils;
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.MangaList;
 import org.falconia.mangaproxy.plugin.Plugins;
@@ -50,7 +49,7 @@ public final class ActivityMangaList extends ActivityBase {
 
 	}
 
-	private final class NextPageDownloader implements ITag, OnDownloadListener,
+	private final class NextPageDownloader implements OnDownloadListener,
 			OnSourceProcessListener {
 
 		public static final int MODE_DEFAULT = 0;
@@ -58,7 +57,6 @@ public final class ActivityMangaList extends ActivityBase {
 		public static final int MODE_PROCESS = 2;
 		public static final int MODE_DOWNLOAD_ERROR = 3;
 		public static final int MODE_PROCESS_ERROR = 4;
-		public static final int MODE_CHARSET_ERROR = 5;
 
 		private DownloadTask mDownloader;
 		private final String mCharset;
@@ -101,15 +99,8 @@ public final class ActivityMangaList extends ActivityBase {
 				return;
 			}
 
-			String source;
-			try {
-				source = new String(result, this.mCharset);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				AppUtils.logE(this, "Unsupported charset: " + e.getMessage());
-				setMode(MODE_CHARSET_ERROR);
-				return;
-			}
+			String source = EncodingUtils.getString(result, 0, result.length,
+					this.mCharset);
 			// AppUtils.logV(this, source);
 
 			setMode(MODE_PROCESS);
@@ -197,7 +188,6 @@ public final class ActivityMangaList extends ActivityBase {
 						ActivityMangaList.this.mPageMax));
 				break;
 			case MODE_DOWNLOAD_ERROR:
-			case MODE_CHARSET_ERROR:
 				setProgressBarIndeterminateVisibility(false);
 				this.mProgress.setVisibility(View.GONE);
 				this.mMessage.setText(R.string.ui_error);
@@ -235,7 +225,6 @@ public final class ActivityMangaList extends ActivityBase {
 				break;
 			case MODE_DOWNLOAD_ERROR:
 			case MODE_PROCESS_ERROR:
-			case MODE_CHARSET_ERROR:
 				AppUtils.logV(this, "click() @MODE_ERROR");
 				setMode(MODE_DEFAULT);
 				break;
@@ -249,11 +238,6 @@ public final class ActivityMangaList extends ActivityBase {
 				this.mDownloader.cancel(true);
 			}
 		}
-
-		@Override
-		public String getTag() {
-			return getClass().getSimpleName();
-		}
 	}
 
 	private static final String BUNDLE_KEY_PAGE_MAX = "BUNDLE_KEY_PAGE_MAX";
@@ -262,6 +246,7 @@ public final class ActivityMangaList extends ActivityBase {
 
 	private Genre mGenre;
 	private MangaList mMangaList;
+	private String mUrl;
 	private int mPageMax;
 	private int mPageLoaded;
 
@@ -324,9 +309,8 @@ public final class ActivityMangaList extends ActivityBase {
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		this.mPageMax = (int) savedInstanceState.getInt(BUNDLE_KEY_PAGE_MAX);
-		this.mPageLoaded = (int) savedInstanceState
-				.getInt(BUNDLE_KEY_PAGE_LOADED);
+		this.mPageMax = savedInstanceState.getInt(BUNDLE_KEY_PAGE_MAX);
+		this.mPageLoaded = savedInstanceState.getInt(BUNDLE_KEY_PAGE_LOADED);
 		this.mMangaList = (MangaList) savedInstanceState
 				.getSerializable(BUNDLE_KEY_MANGA_LIST);
 		if (this.mPageLoaded < this.mPageMax)
@@ -385,9 +369,26 @@ public final class ActivityMangaList extends ActivityBase {
 		super.onPostSourceProcess(size);
 	}
 
+	@Override
+	protected void startProcessSource(String source) {
+		startProcessSource(source, true);
+	}
+
+	private void startProcessSource(String source, boolean writeCache) {
+		if (writeCache)
+			AppCache.writeCacheForData(this.mUrl, source);
+		super.startProcessSource(source);
+	}
+
 	private void loadMangaList() {
-		this.mSourceDownloader = new SourceDownloader();
-		this.mSourceDownloader.download(this.mGenre.getUrl());
+		this.mUrl = this.mGenre.getUrl();
+		if (this.mGenre.isGenreAll() && AppCache.checkCacheForData(this.mUrl, 3600)) {
+			String source = AppCache.readCacheForData(this.mUrl);
+			startProcessSource(source, false);
+		} else {
+			this.mSourceDownloader = new SourceDownloader();
+			this.mSourceDownloader.download(this.mUrl);
+		}
 	}
 
 	private void showFooter() {

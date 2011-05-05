@@ -23,6 +23,7 @@
 	<string name="source_of_manga_list">the list of Manga</string>
 	<string name="source_of_chapter_list">the list of Chapter</string>
 	<string name="ui_no_items">No items</string>
+	<string name="ui_no_favorite_items">No favorite items</string>
 	<string name="ui_error_on_download">Cannot download data from %s.\nPlease try again later.</string>
 	<string name="ui_error_on_process">Cannot process data of %s.\nPlease try again later,\nor update the app if necessary.</string>
 	<string name="ui_chapter_count">Chapters: %s</string>
@@ -34,11 +35,12 @@
 	<string name="ui_download_page">Download: %.1fK</string>
 	<string name="ui_process_page">Process Page</string>
 	<string name="ui_error">Error</string>
-	<string name="ui_click_to_cancel">Click to Cancel</string>
+	<string name="ui_click_to_cancel">Tap to Cancel</string>
 	<string name="ui_please_wait">Please wait</string>
 	<string name="ui_fail_to_download">Fail to downlod Page %d</string>
 	<string name="ui_fail_to_process">Fail to process Page %d</string>
-	<string name="ui_page">Page - / -</string>
-	<string name="ui_page_format">Page %1$d / %2$d</string>
+	<string name="ui_pages">Page - / -</string>
+	<string name="ui_pages_format">Page %1$d / %2$d</string>
+	<string name="ui_page">Page %d</string>
 	<string name="popup_loaded_page">Page %d is loaded.</string>
 </resources>

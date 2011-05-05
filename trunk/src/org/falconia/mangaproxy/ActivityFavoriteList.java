@@ -44,6 +44,7 @@ public final class ActivityFavoriteList extends ActivityBase {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_favorite_list);
+		setNoItemsMessage(R.string.ui_no_favorite_items);
 
 		setupListView(new MangaListAdapter(this));
 	}

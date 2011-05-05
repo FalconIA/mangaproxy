@@ -8,12 +8,13 @@
 		android:orientation="horizontal" android:layout_height="wrap_content">
 		<ProgressBar android:layout_height="wrap_content"
 			android:layout_width="wrap_content" style="?android:attr/progressBarStyleSmall"
-			android:id="@+id/mpbProgress" android:layout_gravity="center_vertical" android:layout_marginRight="20.0dip"/>
+			android:id="@+id/mpbProgress" android:layout_gravity="center_vertical"
+			android:layout_marginRight="20.0dip" />
 		<RelativeLayout android:layout_width="match_parent"
 			android:layout_height="wrap_content" android:layout_weight="1.0">
 			<LinearLayout android:layout_height="wrap_content"
-				android:orientation="horizontal"
-				android:layout_width="wrap_content" android:layout_centerHorizontal="true">
+				android:orientation="horizontal" android:layout_width="wrap_content"
+				android:layout_centerHorizontal="true">
 				<TextView android:layout_height="wrap_content"
 					android:textAppearance="?android:textAppearanceMedium"
 					android:text="Loading..." android:layout_width="wrap_content"
@@ -21,7 +22,8 @@
 					android:paddingTop="11.0dip" />
 				<TextView android:layout_height="wrap_content"
 					android:layout_width="wrap_content" android:id="@+id/mtvDescribe"
-					android:text="@string/ui_click_to_cancel" android:layout_marginLeft="10.0dip"/>
+					android:text="@string/ui_click_to_cancel"
+					android:layout_marginLeft="10.0dip" />
 			</LinearLayout>
 		</RelativeLayout>
 	</LinearLayout>

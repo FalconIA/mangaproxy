@@ -21,33 +21,38 @@ public final class AppUtils {
 				String.format("[%s] %s", tag, msg));
 	}
 
-	public static void log(int priority, ITag tag, String msg) {
-		log(priority, tag.getTag(), msg);
+	public static void log(int priority, Object src, String msg) {
+		if (src instanceof String)
+			log(priority, ((String) src), msg);
+		else if (src instanceof ITag)
+			log(priority, ((ITag) src).getTag(), msg);
+		else
+			log(priority, src.getClass().getSimpleName(), msg);
 	}
 
-	public static void logV(ITag tag, String msg) {
+	public static void logV(Object src, String msg) {
 		// DEBUG = 2
-		log(Log.VERBOSE, tag, msg);
+		log(Log.VERBOSE, src, msg);
 	}
 
-	public static void logD(ITag tag, String msg) {
+	public static void logD(Object src, String msg) {
 		// DEBUG = 3
-		log(Log.DEBUG, tag, msg);
+		log(Log.DEBUG, src, msg);
 	}
 
-	public static void logI(ITag tag, String msg) {
+	public static void logI(Object src, String msg) {
 		// INFO = 4
-		log(Log.INFO, tag, msg);
+		log(Log.INFO, src, msg);
 	}
 
-	public static void logW(ITag tag, String msg) {
+	public static void logW(Object src, String msg) {
 		// WARN = 5
-		log(Log.WARN, tag, msg);
+		log(Log.WARN, src, msg);
 	}
 
-	public static void logE(ITag tag, String msg) {
+	public static void logE(Object src, String msg) {
 		// ERROR = 6
-		log(Log.ERROR, tag, msg);
+		log(Log.ERROR, src, msg);
 	}
 
 }

@@ -47,6 +47,11 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	}
 
 	@Override
+	protected void onCancelled() {
+		logD("Download cancelled.");
+	}
+
+	@Override
 	protected void onProgressUpdate(Integer... values) {
 		this.mListener.onDownloadProgressUpdate(values[0], this.mFileSize);
 	}
