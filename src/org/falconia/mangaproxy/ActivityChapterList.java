@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 public final class ActivityChapterList extends ActivityBase {
@@ -187,6 +188,13 @@ public final class ActivityChapterList extends ActivityBase {
 			dialog = super.onCreateDialog(id);
 		}
 		return dialog;
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		ActivityChapter.IntentHandler.startActivityChapter(this, this.mManga,
+				this.mChapterList.getAt(position));
 	}
 
 	@Override

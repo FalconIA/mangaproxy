@@ -1,7 +1,6 @@
 package org.falconia.mangaproxy;
 
-import java.io.UnsupportedEncodingException;
-
+import org.apache.http.util.EncodingUtils;
 import org.falconia.mangaproxy.helper.FormatHelper;
 import org.falconia.mangaproxy.helper.FormatHelper.FileSizeUnit;
 import org.falconia.mangaproxy.plugin.Plugins;
@@ -33,11 +32,11 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public abstract class ActivityBase extends ListActivity implements ITag,
+public abstract class ActivityBase extends ListActivity implements
 		OnFocusChangeListener, OnTouchListener, OnItemClickListener,
 		OnItemLongClickListener, OnSourceProcessListener {
 
-	protected final class SourceDownloader implements ITag, OnDownloadListener,
+	protected final class SourceDownloader implements OnDownloadListener,
 			OnCancelListener {
 
 		private final DownloadTask mDownloader;
@@ -73,19 +72,11 @@ public abstract class ActivityBase extends ListActivity implements ITag,
 			}
 			setProgressBarIndeterminateVisibility(false);
 
-			String source;
-			try {
-				source = new String(result, this.mCharset);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				AppUtils.logE(this, "Unsupported charset: " + e.getMessage());
-				return;
-			}
+			String source = EncodingUtils.getString(result, 0, result.length,
+					this.mCharset);
 			// AppUtils.logV(this, source);
 
-			ActivityBase.this.mSourceProcessTask = new SourceProcessTask(
-					ActivityBase.this);
-			ActivityBase.this.mSourceProcessTask.execute(source);
+			startProcessSource(source);
 		}
 
 		@Override
@@ -136,11 +127,6 @@ public abstract class ActivityBase extends ListActivity implements ITag,
 				AppUtils.logD(this, "Cancel DownloadTask.");
 				this.mDownloader.cancel(true);
 			}
-		}
-
-		@Override
-		public String getTag() {
-			return getClass().getSimpleName();
 		}
 	}
 
@@ -306,6 +292,12 @@ public abstract class ActivityBase extends ListActivity implements ITag,
 		setProgressBarIndeterminateVisibility(false);
 	}
 
+	protected void startProcessSource(String source) {
+		ActivityBase.this.mSourceProcessTask = new SourceProcessTask(
+				ActivityBase.this);
+		ActivityBase.this.mSourceProcessTask.execute(source);
+	}
+
 	protected void setCustomTitle(String string) {
 		String str = getString(R.string.app_name);
 		if (!TextUtils.isEmpty(string))
@@ -417,11 +409,6 @@ public abstract class ActivityBase extends ListActivity implements ITag,
 		InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		inputMethodManager.hideSoftInputFromWindow(getListView()
 				.getWindowToken(), 0);
-	}
-
-	@Override
-	public String getTag() {
-		return getClass().getSimpleName();
 	}
 
 }

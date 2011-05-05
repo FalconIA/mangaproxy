@@ -12,7 +12,7 @@
 			android:id="@+id/mtvDisplayname" />
 		<LinearLayout android:layout_height="wrap_content"
 			android:layout_width="match_parent" android:orientation="horizontal">
-			<TextView android:text="@string/ui_page"
+			<TextView android:text="@string/ui_pages"
 				android:layout_width="match_parent" android:layout_weight="1.0"
 				android:layout_height="wrap_content" android:id="@+id/mtvDetails" />
 			<TextView android:text="Volume" android:layout_width="wrap_content"

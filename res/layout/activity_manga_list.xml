@@ -3,7 +3,7 @@
 	android:layout_height="match_parent" android:layout_width="match_parent">
 	<LinearLayout android:gravity="center"
 		android:orientation="vertical" android:layout_width="match_parent"
-		android:layout_height="match_parent" android:background="@android:color/background_dark">
+		android:layout_height="match_parent">
 		<LinearLayout android:background="@drawable/bg_blk_search_contact"
 			android:descendantFocusability="afterDescendants" android:focusable="true"
 			android:orientation="vertical" android:layout_height="64dip"

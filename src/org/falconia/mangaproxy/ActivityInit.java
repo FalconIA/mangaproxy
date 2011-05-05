@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-public final class ActivityInit extends Activity implements ITag {
+public final class ActivityInit extends Activity {
 
 	/** Called when the activity is first created. */
 	@Override
@@ -74,11 +74,6 @@ public final class ActivityInit extends Activity implements ITag {
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		AppUtils.logV(this, "onRestoreInstanceState()");
-	}
-
-	@Override
-	public String getTag() {
-		return getClass().getSimpleName();
 	}
 
 }
