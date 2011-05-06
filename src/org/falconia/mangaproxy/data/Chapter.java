@@ -2,8 +2,12 @@ package org.falconia.mangaproxy.data;
 
 import java.io.Serializable;
 
+import org.falconia.mangaproxy.AppUtils;
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugins;
+import org.falconia.mangaproxy.utils.HttpUtils;
+
+import android.text.TextUtils;
 
 public final class Chapter implements Serializable {
 
@@ -22,6 +26,7 @@ public final class Chapter implements Serializable {
 
 	public int typeId = TYPE_ID_UNKNOW;
 
+	private String dynamicImgServersUrl;
 	private String[] dynamicImgServers;
 	private int dynamicImgServerId = IMG_SERVER_ID_NONE;
 
@@ -29,56 +34,84 @@ public final class Chapter implements Serializable {
 		this.chapterId = chapterId;
 		this.displayname = displayname;
 		this.manga = manga;
-		this.siteId = manga.siteId;
+		siteId = manga.siteId;
 	}
 
 	private IPlugin getPlugin() {
-		return Plugins.getPlugin(this.siteId);
+		return Plugins.getPlugin(siteId);
 	}
 
 	public String getUrl() {
-		return getPlugin().getChapterUrl(this, this.manga);
+		return getPlugin().getChapterUrl(this, manga);
+	}
+
+	public void setDynamicImgServersUrl(String spec) {
+		if (TextUtils.isEmpty(spec)) {
+			AppUtils.logE(this, "Invalid Dynamic ImgServers URL.");
+			return;
+		}
+		String url = HttpUtils.joinUrl(getPlugin().getUrlBase(), spec);
+		if (!TextUtils.isEmpty(url)) {
+			dynamicImgServersUrl = url.toString();
+		}
 	}
 
 	public void setDynamicImgServers(String[] imgServers) {
-		this.dynamicImgServers = imgServers;
+		dynamicImgServers = imgServers;
 	}
 
 	public void setDynamicImgServerId(int imgServerId) {
-		this.dynamicImgServerId = imgServerId;
+		dynamicImgServerId = imgServerId;
+	}
+
+	public boolean hasDynamicImgServersUrl() {
+		return TextUtils.isEmpty(dynamicImgServersUrl);
 	}
 
 	public boolean hasDynamicImgServers() {
-		return this.dynamicImgServers != null
-				&& this.dynamicImgServers.length > 0;
+		return dynamicImgServers != null && dynamicImgServers.length > 0;
 	}
 
 	public boolean hasDynamicImgServerId() {
-		return this.dynamicImgServerId != IMG_SERVER_ID_NONE;
+		return dynamicImgServerId != IMG_SERVER_ID_NONE;
 	}
 
 	public boolean hasDynamicImgServer() {
-		return hasDynamicImgServerId() && hasDynamicImgServers();
+		return hasDynamicImgServerId() && hasDynamicImgServers()
+				&& dynamicImgServerId >= 0
+				&& dynamicImgServerId < dynamicImgServers.length;
+	}
+
+	public String getDynamicImgServersUrl() {
+		return dynamicImgServersUrl;
 	}
 
 	public String getDynamicImgServer() {
-		if (!hasDynamicImgServer())
+		if (!hasDynamicImgServer()) {
 			throw new NullPointerException("Dynamic Img Server is not set.");
-		return this.dynamicImgServers[this.dynamicImgServerId];
+		}
+		return dynamicImgServers[dynamicImgServerId];
+	}
+
+	public String[] getPageUrls(String source) {
+		return getPlugin().getChapterPages(source, this);
+	}
+
+	public boolean setDynamicImgServers(String source) {
+		return getPlugin().setDynamicImgServers(source, this);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("{%s:%s}", this.chapterId, this.displayname);
+		return String.format("{%s:%s}", chapterId, displayname);
 	}
 
 	public String toLongString() {
 		return String
 				.format("{ SiteID:%d, MangaID:'%s', ChapterId:'%s', Name:'%s', TypeId:%d, ImgServerId:%d, ImgServers:%d }",
-						this.siteId, this.manga.mangaId, this.chapterId,
-						this.displayname, this.typeId, this.dynamicImgServerId,
-						(this.dynamicImgServers == null ? 0
-								: this.dynamicImgServers.length));
+						siteId, manga.mangaId, chapterId, displayname, typeId,
+						dynamicImgServerId, (dynamicImgServers == null ? 0
+								: dynamicImgServers.length));
 	}
 
 }

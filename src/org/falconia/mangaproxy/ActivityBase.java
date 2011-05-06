@@ -1,8 +1,6 @@
 package org.falconia.mangaproxy;
 
 import org.apache.http.util.EncodingUtils;
-import org.falconia.mangaproxy.helper.FormatHelper;
-import org.falconia.mangaproxy.helper.FormatHelper.FileSizeUnit;
 import org.falconia.mangaproxy.plugin.Plugins;
 import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
@@ -10,6 +8,8 @@ import org.falconia.mangaproxy.task.OnSourceProcessListener;
 import org.falconia.mangaproxy.task.SourceProcessTask;
 import org.falconia.mangaproxy.ui.BaseListAdapter;
 import org.falconia.mangaproxy.ui.PinnedHeaderListView;
+import org.falconia.mangaproxy.utils.FormatUtils;
+import org.falconia.mangaproxy.utils.FormatUtils.FileSizeUnit;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -45,8 +45,8 @@ public abstract class ActivityBase extends ListActivity implements
 		private String mMessage;
 
 		public SourceDownloader() {
-			this.mDownloader = new DownloadTask(this);
-			this.mCharset = Plugins.getPlugin(getSiteId()).getCharset();
+			mDownloader = new DownloadTask(this);
+			mCharset = Plugins.getPlugin(getSiteId()).getCharset();
 		}
 
 		@Override
@@ -59,7 +59,9 @@ public abstract class ActivityBase extends ListActivity implements
 		@Override
 		public void onPostDownload(byte[] result) {
 			AppUtils.logV(this, "onPostDownload()");
+			setProgressBarIndeterminateVisibility(false);
 			if (result == null || result.length == 0) {
+				AppUtils.logE(this, "Downloaded empty source.");
 				setNoItemsMessage(String
 						.format(getString(R.string.ui_error_on_download),
 								getSiteName()));
@@ -70,10 +72,9 @@ public abstract class ActivityBase extends ListActivity implements
 			} catch (Exception e) {
 				AppUtils.logE(this, "dismissDialog(DIALOG_DOWNLOAD_ID)");
 			}
-			setProgressBarIndeterminateVisibility(false);
 
 			String source = EncodingUtils.getString(result, 0, result.length,
-					this.mCharset);
+					mCharset);
 			// AppUtils.logV(this, source);
 
 			startProcessSource(source);
@@ -81,16 +82,17 @@ public abstract class ActivityBase extends ListActivity implements
 
 		@Override
 		public void onDownloadProgressUpdate(int value, int total) {
-			this.mDownloadDialog.setMessage(String.format(this.mMessage,
-					FormatHelper.getFileSize(value, FileSizeUnit.B)));
+			mDownloadDialog.setMessage(String.format(mMessage,
+					FormatUtils.getFileSize(value, FileSizeUnit.B)));
 		}
 
 		@Override
 		public void onCancel(DialogInterface dialog) {
 			AppUtils.logD(this, "onCancel() @DownloadDialog");
 			cancelDownload();
-			if (!ActivityBase.this.mProcessed)
+			if (!mProcessed) {
 				finish();
+			}
 		}
 
 		public ProgressDialog createDownloadDialog(CharSequence what) {
@@ -104,12 +106,12 @@ public abstract class ActivityBase extends ListActivity implements
 						getString(R.string.dialog_download_message_format),
 						what, "0.000B");
 			}
-			this.mMessage = String.format(
+			mMessage = String.format(
 					getString(R.string.dialog_download_message_format), what,
 					"%s");
 			ProgressDialog dialog = createProgressDialog(title, message, true);
 			dialog.setOnCancelListener(this);
-			this.mDownloadDialog = dialog;
+			mDownloadDialog = dialog;
 			return dialog;
 		}
 
@@ -118,14 +120,14 @@ public abstract class ActivityBase extends ListActivity implements
 		}
 
 		public void download(String url) {
-			this.mDownloader.execute(url);
+			mDownloader.execute(url);
 		}
 
 		public void cancelDownload() {
-			if (this.mDownloader != null
-					&& this.mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
+			if (mDownloader != null
+					&& mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
-				this.mDownloader.cancel(true);
+				mDownloader.cancel(true);
 			}
 		}
 	}
@@ -153,7 +155,7 @@ public abstract class ActivityBase extends ListActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.mProcessed = getProcessed(savedInstanceState);
+		mProcessed = getProcessed(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		AppUtils.logV(this, "onCreate()");
 	}
@@ -191,20 +193,22 @@ public abstract class ActivityBase extends ListActivity implements
 
 	@Override
 	protected void onDestroy() {
-		// System.gc();
+		System.gc();
 		super.onDestroy();
 		AppUtils.logV(this, "onDestroy()");
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		if (this.mSourceDownloader != null)
-			this.mSourceDownloader.cancelDownload();
-		if (this.mSourceProcessTask != null)
-			this.mSourceProcessTask.cancel(true);
+		if (mSourceDownloader != null) {
+			mSourceDownloader.cancelDownload();
+		}
+		if (mSourceProcessTask != null) {
+			mSourceProcessTask.cancel(true);
+		}
 		removeDialog(DIALOG_DOWNLOAD_ID);
 		removeDialog(DIALOG_PROCESS_ID);
-		outState.putBoolean(BUNDLE_KEY_IS_PROCESSED, this.mProcessed);
+		outState.putBoolean(BUNDLE_KEY_IS_PROCESSED, mProcessed);
 		super.onSaveInstanceState(outState);
 		AppUtils.logV(this, "onSaveInstanceState()");
 	}
@@ -212,8 +216,9 @@ public abstract class ActivityBase extends ListActivity implements
 	protected boolean getProcessed(Bundle savedInstanceState) {
 		boolean processed = false;
 		if (savedInstanceState != null
-				&& savedInstanceState.containsKey(BUNDLE_KEY_IS_PROCESSED))
+				&& savedInstanceState.containsKey(BUNDLE_KEY_IS_PROCESSED)) {
 			processed = savedInstanceState.getBoolean(BUNDLE_KEY_IS_PROCESSED);
+		}
 		return processed;
 	}
 
@@ -228,8 +233,9 @@ public abstract class ActivityBase extends ListActivity implements
 	 */
 	@Override
 	public void onFocusChange(View view, boolean hasFocus) {
-		if (view == getListView() && hasFocus)
+		if (view == getListView() && hasFocus) {
 			hideSoftKeyboard();
+		}
 	}
 
 	/**
@@ -237,8 +243,9 @@ public abstract class ActivityBase extends ListActivity implements
 	 */
 	@Override
 	public boolean onTouch(View view, MotionEvent event) {
-		if (view == getListView())
+		if (view == getListView()) {
 			hideSoftKeyboard();
+		}
 		return false;
 	}
 
@@ -266,42 +273,45 @@ public abstract class ActivityBase extends ListActivity implements
 	@Override
 	public void onPreSourceProcess() {
 		AppUtils.logV(this, "onPreSourceProcess()");
-		if (this.mSourceProcessTask == null) {
+		if (mSourceProcessTask == null) {
 			AppUtils.logE(this, "ProcessDataTask is not initialized.");
 			return;
 		}
-		this.mProcessed = false;
-		if (this.mShowProcessDialog)
+		mProcessed = false;
+		if (mShowProcessDialog) {
 			showDialog(DIALOG_PROCESS_ID);
+		}
 		setProgressBarIndeterminateVisibility(true);
 	}
 
 	@Override
 	public void onPostSourceProcess(int size) {
 		AppUtils.logV(this, "onPostSourceProcess()");
-		if (this.mSourceProcessTask == null) {
+		if (mSourceProcessTask == null) {
 			AppUtils.logE(this, "ProcessDataTask is not initialized.");
 			return;
 		}
-		this.mProcessed = true;
-		if (size <= 0)
+		mProcessed = true;
+		if (size <= 0) {
 			setNoItemsMessage(String.format(
 					getString(R.string.ui_error_on_process), getSiteName()));
-		if (this.mShowProcessDialog)
+		}
+		if (mShowProcessDialog) {
 			dismissDialog(DIALOG_PROCESS_ID);
+		}
 		setProgressBarIndeterminateVisibility(false);
 	}
 
 	protected void startProcessSource(String source) {
-		ActivityBase.this.mSourceProcessTask = new SourceProcessTask(
-				ActivityBase.this);
-		ActivityBase.this.mSourceProcessTask.execute(source);
+		mSourceProcessTask = new SourceProcessTask(ActivityBase.this);
+		mSourceProcessTask.execute(source);
 	}
 
 	protected void setCustomTitle(String string) {
 		String str = getString(R.string.app_name);
-		if (!TextUtils.isEmpty(string))
+		if (!TextUtils.isEmpty(string)) {
 			str = getSiteDisplayname() + " - " + string;
+		}
 		setTitle(str);
 	}
 
@@ -314,9 +324,9 @@ public abstract class ActivityBase extends ListActivity implements
 	}
 
 	protected void setupListView(BaseListAdapter adapter) {
-		this.mListAdapter = adapter;
+		mListAdapter = adapter;
 
-		setListAdapter(this.mListAdapter);
+		setListAdapter(mListAdapter);
 
 		final ListView list = getListView();
 		final LayoutInflater inflater = getLayoutInflater();
@@ -333,7 +343,7 @@ public abstract class ActivityBase extends ListActivity implements
 		list.setEmptyView(findViewById(R.id.mvgEmpty));
 
 		if (list instanceof PinnedHeaderListView
-				&& this.mListAdapter.getDisplaySectionHeadersEnabled()) {
+				&& mListAdapter.getDisplaySectionHeadersEnabled()) {
 			// mPinnedHeaderBackgroundColor =
 			// getResources().getColor(R.color.pinned_header_background);
 			PinnedHeaderListView pinnedHeaderList = (PinnedHeaderListView) list;
@@ -342,7 +352,7 @@ public abstract class ActivityBase extends ListActivity implements
 			pinnedHeaderList.setPinnedHeaderView(pinnedHeader);
 		}
 
-		list.setOnScrollListener(this.mListAdapter);
+		list.setOnScrollListener(mListAdapter);
 		list.setOnFocusChangeListener(this);
 		list.setOnTouchListener(this);
 		list.setOnItemClickListener(this);

@@ -34,7 +34,7 @@ public class SearchEditText extends EditText {
 
 	public SearchEditText(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		this.mMagnifyingGlass = getCompoundDrawables()[2];
+		mMagnifyingGlass = getCompoundDrawables()[2];
 	}
 
 	/**
@@ -44,12 +44,13 @@ public class SearchEditText extends EditText {
 	@Override
 	public boolean onPreDraw() {
 		boolean emptyText = TextUtils.isEmpty(getText());
-		if (this.mMagnifyingGlassShown != emptyText) {
-			this.mMagnifyingGlassShown = emptyText;
-			if (this.mMagnifyingGlassShown)
-				setCompoundDrawables(null, null, this.mMagnifyingGlass, null);
-			else
+		if (mMagnifyingGlassShown != emptyText) {
+			mMagnifyingGlassShown = emptyText;
+			if (mMagnifyingGlassShown) {
+				setCompoundDrawables(null, null, mMagnifyingGlass, null);
+			} else {
 				setCompoundDrawables(null, null, null, null);
+			}
 			return false;
 		}
 		return super.onPreDraw();

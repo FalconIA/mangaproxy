@@ -26,19 +26,20 @@ public final class MangaListAdapter extends BaseListAdapter {
 	private LayoutInflater mInflater;
 
 	public MangaListAdapter(Context context) {
-		this.mInflater = LayoutInflater.from(context);
+		mInflater = LayoutInflater.from(context);
 	}
 
 	@Override
 	public int getCount() {
-		if (this.mMangaList == null)
+		if (mMangaList == null) {
 			return 0;
-		return this.mMangaList.size();
+		}
+		return mMangaList.size();
 	}
 
 	@Override
 	public Manga getItem(int position) {
-		return this.mMangaList.getAt(position);
+		return mMangaList.getAt(position);
 	}
 
 	@Override
@@ -48,7 +49,7 @@ public final class MangaListAdapter extends BaseListAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		switch (this.mMangaList.getSiteId()) {
+		switch (mMangaList.getSiteId()) {
 		case (Site.SITE_ID_FAVORITE):
 			return getFavoriteListView(position, convertView, parent);
 		default:
@@ -83,8 +84,7 @@ public final class MangaListAdapter extends BaseListAdapter {
 
 		if (convertView == null) {
 			holder = new ViewHolder();
-			convertView = this.mInflater
-					.inflate(R.layout.list_item_manga, null);
+			convertView = mInflater.inflate(R.layout.list_item_manga, null);
 			holder.tvDisplayname = (TextView) convertView
 					.findViewById(R.id.mtvDisplayname);
 			holder.tvDetails = (TextView) convertView
@@ -93,8 +93,9 @@ public final class MangaListAdapter extends BaseListAdapter {
 					.findViewById(R.id.mtvCompleted);
 			holder.cbFavorite = (CheckBox) convertView
 					.findViewById(R.id.mcbFavorite);
-		} else
+		} else {
 			holder = (ViewHolder) convertView.getTag();
+		}
 
 		holder.tvDisplayname.setText(manga.displayname);
 		holder.tvDetails.setText(manga.getDetails());
@@ -102,14 +103,15 @@ public final class MangaListAdapter extends BaseListAdapter {
 				: View.GONE);
 		// holder.cbFavorite.setChecked(manga.bIsFavorite);
 
-		if (convertView.getTag() == null)
+		if (convertView.getTag() == null) {
 			convertView.setTag(holder);
+		}
 
 		return convertView;
 	}
 
 	public void setMangaList(MangaList mangaList) {
-		this.mMangaList = mangaList;
+		mMangaList = mangaList;
 		notifyDataSetChanged();
 	}
 

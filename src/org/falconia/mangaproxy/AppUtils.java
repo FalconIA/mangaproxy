@@ -22,12 +22,13 @@ public final class AppUtils {
 	}
 
 	public static void log(int priority, Object src, String msg) {
-		if (src instanceof String)
+		if (src instanceof String) {
 			log(priority, ((String) src), msg);
-		else if (src instanceof ITag)
+		} else if (src instanceof ITag) {
 			log(priority, ((ITag) src).getTag(), msg);
-		else
+		} else {
 			log(priority, src.getClass().getSimpleName(), msg);
+		}
 	}
 
 	public static void logV(Object src, String msg) {

@@ -28,7 +28,7 @@ public final class Genre implements Serializable {
 	}
 
 	private IPlugin getPlugin() {
-		return Plugins.getPlugin(this.siteId);
+		return Plugins.getPlugin(siteId);
 	}
 
 	public String getSiteName() {
@@ -40,10 +40,11 @@ public final class Genre implements Serializable {
 	}
 
 	public String getUrl(int page) {
-		if (isGenreAll())
+		if (isGenreAll()) {
 			return getPlugin().getGenreAllUrl(page);
-		else
+		} else {
 			return getPlugin().getGenreUrl(this, page);
+		}
 	}
 
 	public String getUrl() {
@@ -51,19 +52,20 @@ public final class Genre implements Serializable {
 	}
 
 	public boolean isGenreAll() {
-		return this.genreId.equals(GENRE_ALL_ID);
+		return genreId.equals(GENRE_ALL_ID);
 	}
 
 	public MangaList getMangaList(String source) {
-		if (isGenreAll())
+		if (isGenreAll()) {
 			return getPlugin().getAllMangaList(source);
-		else
+		} else {
 			return getPlugin().getMangaList(source, this);
+		}
 	}
 
 	@Override
 	public String toString() {
-		return String.format("{%s:%s}", this.genreId, this.displayname);
+		return String.format("{%s:%s}", genreId, displayname);
 	}
 
 }

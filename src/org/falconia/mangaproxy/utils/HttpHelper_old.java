@@ -1,4 +1,4 @@
-package org.falconia.mangaproxy.helper;
+package org.falconia.mangaproxy.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -115,13 +115,14 @@ public class HttpHelper_old {
 						if (contentEncodingHeader != null) {
 							HeaderElement[] codecs = contentEncodingHeader
 									.getElements();
-							for (int i = 0; i < codecs.length; i++)
+							for (int i = 0; i < codecs.length; i++) {
 								if (codecs[i].getName().equalsIgnoreCase(
 										HttpHelper_old.GZIP)) {
 									response.setEntity(new GzipDecompressingEntity(
 											response.getEntity()));
 									return;
 								}
+							}
 						}
 					}
 				});
@@ -134,7 +135,7 @@ public class HttpHelper_old {
 	 * 
 	 */
 	public HttpHelper_old() {
-		this.responseHandler = new BasicResponseHandler();
+		responseHandler = new BasicResponseHandler();
 	}
 
 	/**
@@ -142,14 +143,15 @@ public class HttpHelper_old {
 	 * 
 	 */
 	public HttpHelper_old(final String encoding) {
-		this.responseHandler = new ResponseHandler<String>() {
+		responseHandler = new ResponseHandler<String>() {
 			@Override
 			public String handleResponse(final HttpResponse response)
 					throws HttpResponseException, IOException {
 				StatusLine statusLine = response.getStatusLine();
-				if (statusLine.getStatusCode() >= 300)
+				if (statusLine.getStatusCode() >= 300) {
 					throw new HttpResponseException(statusLine.getStatusCode(),
 							statusLine.getReasonPhrase());
+				}
 
 				HttpEntity entity = response.getEntity();
 				return entity == null ? null : EntityUtils.toString(entity,
@@ -221,32 +223,39 @@ public class HttpHelper_old {
 			final Map<String, String> params, final int requestType) {
 
 		// add user and pass to client credentials if present
-		if ((user != null) && (pass != null))
+		if ((user != null) && (pass != null)) {
 			HttpHelper_old.client.getCredentialsProvider().setCredentials(
 					AuthScope.ANY, new UsernamePasswordCredentials(user, pass));
+		}
 
 		// process headers using request interceptor
 		final Map<String, String> sendHeaders = new HashMap<String, String>();
 		// add encoding header for gzip if not present
-		if (!sendHeaders.containsKey(HttpHelper_old.ACCEPT_ENCODING))
+		if (!sendHeaders.containsKey(HttpHelper_old.ACCEPT_ENCODING)) {
 			sendHeaders
 					.put(HttpHelper_old.ACCEPT_ENCODING, HttpHelper_old.GZIP);
-		if ((headers != null) && (headers.size() > 0))
+		}
+		if ((headers != null) && (headers.size() > 0)) {
 			sendHeaders.putAll(headers);
-		if (requestType == HttpHelper_old.POST_TYPE)
+		}
+		if (requestType == HttpHelper_old.POST_TYPE) {
 			sendHeaders.put(HttpHelper_old.CONTENT_TYPE, contentType);
-		if (sendHeaders.size() > 0)
+		}
+		if (sendHeaders.size() > 0) {
 			HttpHelper_old.client
 					.addRequestInterceptor(new HttpRequestInterceptor() {
 						@Override
 						public void process(final HttpRequest request,
 								final HttpContext context)
 								throws HttpException, IOException {
-							for (String key : sendHeaders.keySet())
-								if (!request.containsHeader(key))
+							for (String key : sendHeaders.keySet()) {
+								if (!request.containsHeader(key)) {
 									request.addHeader(key, sendHeaders.get(key));
+								}
+							}
 						}
 					});
+		}
 
 		// handle POST or GET request respectively
 		HttpRequestBase method = null;
@@ -256,11 +265,12 @@ public class HttpHelper_old {
 			List<NameValuePair> nvps = null;
 			if ((params != null) && (params.size() > 0)) {
 				nvps = new ArrayList<NameValuePair>();
-				for (Map.Entry<String, String> entry : params.entrySet())
+				for (Map.Entry<String, String> entry : params.entrySet()) {
 					nvps.add(new BasicNameValuePair(entry.getKey(), entry
 							.getValue()));
+				}
 			}
-			if (nvps != null)
+			if (nvps != null) {
 				try {
 					HttpPost methodPost = (HttpPost) method;
 					methodPost.setEntity(new UrlEncodedFormEntity(nvps,
@@ -269,8 +279,10 @@ public class HttpHelper_old {
 					throw new RuntimeException("Error peforming HTTP request: "
 							+ e.getMessage(), e);
 				}
-		} else if (requestType == HttpHelper_old.GET_TYPE)
+			}
+		} else if (requestType == HttpHelper_old.GET_TYPE) {
 			method = new HttpGet(url);
+		}
 
 		// execute request
 		return execute(method);
@@ -281,8 +293,7 @@ public class HttpHelper_old {
 		// execute method returns?!? (rather than async) - do it here sync, and
 		// wrap async elsewhere
 		try {
-			response = HttpHelper_old.client.execute(method,
-					this.responseHandler);
+			response = HttpHelper_old.client.execute(method, responseHandler);
 		} catch (ClientProtocolException e) {
 			response = HttpHelper_old.HTTP_RESPONSE_ERROR + " - "
 					+ e.getClass().getSimpleName() + " " + e.getMessage();
@@ -304,7 +315,7 @@ public class HttpHelper_old {
 		public InputStream getContent() throws IOException,
 				IllegalStateException {
 			// the wrapped entity's getContent() decides about repeatability
-			InputStream wrappedin = this.wrappedEntity.getContent();
+			InputStream wrappedin = wrappedEntity.getContent();
 			return new GZIPInputStream(wrappedin);
 		}
 
