@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent" android:layout_height="match_parent">
+	<ScrollView android:layout_height="match_parent"
+		android:layout_width="match_parent" android:background="#A0000000">
+		<TextView android:layout_height="match_parent" android:text="Debug:"
+			android:id="@+id/mtvDebug" android:layout_width="match_parent" />
+	</ScrollView>
+	<TextView android:layout_height="wrap_content"
+		android:layout_width="wrap_content" android:id="@+id/mtvMessage"
+		android:text="@string/ui_no_pages" android:background="#90000000"
+		android:padding="5.0dip" android:layout_centerInParent="true" />
+	<ScrollView android:layout_width="match_parent"
+		android:layout_height="match_parent">
+		<LinearLayout android:orientation="horizontal"
+			android:layout_height="wrap_content" android:layout_width="match_parent"
+			android:gravity="right">
+			<ImageView android:scaleType="matrix"
+				android:layout_height="wrap_content" android:src="@drawable/icon"
+				android:id="@+id/mivPage" android:layout_width="wrap_content" />
+		</LinearLayout>
+	</ScrollView>
 </RelativeLayout>

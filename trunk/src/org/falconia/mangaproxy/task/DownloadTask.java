@@ -24,9 +24,9 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	private OnDownloadListener mListener;
 
 	public DownloadTask(OnDownloadListener listener) {
-		this.mFileSize = 0;
-		this.mDownloaded = 0;
-		this.mListener = listener;
+		mFileSize = 0;
+		mDownloaded = 0;
+		mListener = listener;
 	}
 
 	@Override
@@ -37,13 +37,13 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	@Override
 	protected void onPreExecute() {
 		logD("Download start.");
-		this.mListener.onPreDownload();
+		mListener.onPreDownload();
 	}
 
 	@Override
 	protected void onPostExecute(byte[] result) {
 		logD("Download done.");
-		this.mListener.onPostDownload(result);
+		mListener.onPostDownload(result);
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 
 	@Override
 	protected void onProgressUpdate(Integer... values) {
-		this.mListener.onDownloadProgressUpdate(values[0], this.mFileSize);
+		mListener.onDownloadProgressUpdate(values[0], mFileSize);
 	}
 
 	protected byte[] download(String url) {
@@ -68,8 +68,9 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 			if (statusCode >= 400) {
 				logE("Invalid Status Code: " + statusCode);
 				return null;
-			} else
+			} else {
 				logD("Status Code: " + statusCode);
+			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 			logE("Invalid URL: " + e.getMessage());
@@ -89,23 +90,23 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 			return null;
 		}
 
-		this.mFileSize = connection.getContentLength();
-		logD(String.format("Content-Length: %d", this.mFileSize));
+		mFileSize = connection.getContentLength();
+		logD(String.format("Content-Length: %d", mFileSize));
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		publishProgress(0);
 
 		try {
 			int readed = 0;
-			while (readed != -1 || this.mFileSize > this.mDownloaded) {
+			while (readed != -1 || mFileSize > mDownloaded) {
 				byte[] buffer = new byte[MAX_BUFFER_SIZE];
 				readed = input.read(buffer);
 				if (readed == -1) {
-					publishProgress(this.mDownloaded);
+					publishProgress(mDownloaded);
 					break;
 				}
 				output.write(buffer, 0, readed);
-				this.mDownloaded += readed;
-				publishProgress(this.mDownloaded);
+				mDownloaded += readed;
+				publishProgress(mDownloaded);
 			}
 			byte[] result = output.toByteArray();
 			logD("Download length: " + result.length);

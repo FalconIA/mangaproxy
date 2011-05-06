@@ -51,19 +51,20 @@ public final class ActivityChapterList extends ActivityBase {
 		private LayoutInflater mInflater;
 
 		public ChapterListAdapter() {
-			this.mInflater = LayoutInflater.from(ActivityChapterList.this);
+			mInflater = LayoutInflater.from(ActivityChapterList.this);
 		}
 
 		@Override
 		public int getCount() {
-			if (this.mChapterList == null)
+			if (mChapterList == null) {
 				return 0;
-			return this.mChapterList.size();
+			}
+			return mChapterList.size();
 		}
 
 		@Override
 		public Chapter getItem(int position) {
-			return this.mChapterList.getAt(position);
+			return mChapterList.getAt(position);
 		}
 
 		@Override
@@ -77,24 +78,26 @@ public final class ActivityChapterList extends ActivityBase {
 
 			if (convertView == null) {
 				holder = new ViewHolder();
-				convertView = this.mInflater.inflate(R.layout.list_item_genre,
-						null);
+				convertView = mInflater.inflate(R.layout.list_item_genre, null);
 				holder.tvDisplayname = (TextView) convertView
 						.findViewById(R.id.mtvDisplayname);
-			} else
+			} else {
 				holder = (ViewHolder) convertView.getTag();
+			}
 
-			Chapter chapter = this.mChapterList.getAt(position);
+			Chapter chapter = mChapterList.getAt(position);
 			holder.tvDisplayname.setText(chapter.displayname);
-			if (chapter.typeId == Chapter.TYPE_ID_VOLUME)
+			if (chapter.typeId == Chapter.TYPE_ID_VOLUME) {
 				holder.tvDisplayname.setTextColor(getResources().getColor(
 						R.color.highlight));
-			else
+			} else {
 				holder.tvDisplayname.setTextColor(getResources().getColor(
 						android.R.color.primary_text_dark));
+			}
 
-			if (convertView.getTag() == null)
+			if (convertView.getTag() == null) {
 				convertView.setTag(holder);
+			}
 
 			return convertView;
 		}
@@ -113,7 +116,7 @@ public final class ActivityChapterList extends ActivityBase {
 		}
 
 		public void setChapterList(ChapterList chapterList) {
-			this.mChapterList = chapterList;
+			mChapterList = chapterList;
 			notifyDataSetChanged();
 		}
 
@@ -126,50 +129,51 @@ public final class ActivityChapterList extends ActivityBase {
 
 	@Override
 	public int getSiteId() {
-		return this.mManga.siteId;
+		return mManga.siteId;
 	}
 
 	@Override
 	String getSiteName() {
-		return this.mManga.getSiteName();
+		return mManga.getSiteName();
 	}
 
 	@Override
 	String getSiteDisplayname() {
-		return this.mManga.getSiteDisplayname();
+		return mManga.getSiteDisplayname();
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		this.mManga = IntentHandler.getManga(this);
-		if (this.mManga == null)
+		mManga = IntentHandler.getManga(this);
+		if (mManga == null) {
 			finish();
+		}
 
 		setContentView(R.layout.activity_chapter_list);
-		setCustomTitle(this.mManga.displayname);
+		setCustomTitle(mManga.displayname);
 
 		// this.mbShowProcessDialog = false;
 
 		setupListView(new ChapterListAdapter());
 
-		if (!this.mProcessed)
+		if (!mProcessed) {
 			loadChapterList();
+		}
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putSerializable(BUNDLE_KEY_CHAPTER_LIST, this.mChapterList);
+		outState.putSerializable(BUNDLE_KEY_CHAPTER_LIST, mChapterList);
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		this.mChapterList = (ChapterList) savedInstanceState
+		mChapterList = (ChapterList) savedInstanceState
 				.getSerializable(BUNDLE_KEY_CHAPTER_LIST);
-		((ChapterListAdapter) this.mListAdapter)
-				.setChapterList(this.mChapterList);
+		((ChapterListAdapter) mListAdapter).setChapterList(mChapterList);
 		super.onRestoreInstanceState(savedInstanceState);
 	}
 
@@ -178,7 +182,7 @@ public final class ActivityChapterList extends ActivityBase {
 		Dialog dialog;
 		switch (id) {
 		case DIALOG_DOWNLOAD_ID:
-			dialog = this.mSourceDownloader
+			dialog = mSourceDownloader
 					.createDownloadDialog(R.string.source_of_chapter_list);
 			break;
 		case DIALOG_PROCESS_ID:
@@ -193,28 +197,27 @@ public final class ActivityChapterList extends ActivityBase {
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
-		ActivityChapter.IntentHandler.startActivityChapter(this, this.mManga,
-				this.mChapterList.getAt(position));
+		ActivityChapter.IntentHandler.startActivityChapter(this, mManga,
+				mChapterList.getAt(position));
 	}
 
 	@Override
 	public int onSourceProcess(String source) {
-		this.mChapterList = this.mManga.getChapterList(source);
-		return this.mChapterList.size();
+		mChapterList = mManga.getChapterList(source);
+		return mChapterList.size();
 	}
 
 	@Override
 	public void onPostSourceProcess(int result) {
-		((ChapterListAdapter) this.mListAdapter)
-				.setChapterList(this.mChapterList);
+		((ChapterListAdapter) mListAdapter).setChapterList(mChapterList);
 		getListView().requestFocus();
 
 		super.onPostSourceProcess(result);
 	}
 
 	private void loadChapterList() {
-		this.mSourceDownloader = new SourceDownloader();
-		this.mSourceDownloader.download(this.mManga.getUrl());
+		mSourceDownloader = new SourceDownloader();
+		mSourceDownloader.download(mManga.getUrl());
 	}
 
 }

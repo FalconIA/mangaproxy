@@ -1,5 +1,7 @@
 package org.falconia.mangaproxy;
 
+import java.io.File;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Environment;
@@ -17,9 +19,13 @@ public final class AppEnv {
 				&& manager.getActiveNetworkInfo().isAvailable();
 	}
 
-	public static String getExternalDataDirectory() {
-		return String.format("%s/Android/data/%s/", Environment
-				.getExternalStorageDirectory().getPath(), AppConst.APP_PACKAGE);
+	public static File getExternalFilesDir() {
+		return new File(Environment.getExternalStorageDirectory(),
+				String.format("Android/data/%s", AppConst.APP_PACKAGE));
+	}
+
+	public static File getExternalCacheDir() {
+		return new File(getExternalFilesDir(), "cache");
 	}
 
 }

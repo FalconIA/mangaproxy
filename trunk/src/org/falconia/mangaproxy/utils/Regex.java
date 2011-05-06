@@ -1,4 +1,4 @@
-package org.falconia.mangaproxy.helper;
+package org.falconia.mangaproxy.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,8 +17,9 @@ public final class Regex {
 
 		if (m.find()) {
 			int count = m.groupCount();
-			for (int i = 0; i <= count; i++)
+			for (int i = 0; i <= count; i++) {
 				groups.add(m.group(i));
+			}
 		}
 
 		return groups;
@@ -33,9 +34,11 @@ public final class Regex {
 
 		if (m.find()) {
 			int count = m.groupCount();
-			for (int i = 0; i < count; i++)
-				if (!TextUtils.isEmpty(groupnames[i]))
+			for (int i = 0; i < count; i++) {
+				if (!TextUtils.isEmpty(groupnames[i])) {
 					groups.put(groupnames[i], m.group(i + 1));
+				}
+			}
 		}
 
 		return groups;
@@ -72,8 +75,9 @@ public final class Regex {
 		while (m.find()) {
 			ArrayList<String> groups = new ArrayList<String>();
 			int count = m.groupCount();
-			for (int i = 0; i <= count; i++)
+			for (int i = 0; i <= count; i++) {
 				groups.add(m.group(i));
+			}
 			matches.add(groups);
 		}
 
@@ -84,12 +88,13 @@ public final class Regex {
 			String pattern2, String subject) {
 		ArrayList<String> groups = match(pattern, subject);
 		if (groups.size() == 0
-				|| (groups.size() > 1 && TextUtils.isEmpty(groups.get(1))))
+				|| (groups.size() > 1 && TextUtils.isEmpty(groups.get(1)))) {
 			return new ArrayList<ArrayList<String>>();
-		else if (groups.size() == 1)
+		} else if (groups.size() == 1) {
 			return matchAll(pattern2, groups.get(0));
-		else
+		} else {
 			return matchAll(pattern2, groups.get(1));
+		}
 	}
 
 	public static String[] split(String pattern, String subject) {

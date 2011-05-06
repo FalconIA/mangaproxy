@@ -18,7 +18,6 @@
 		<activity android:name="ActivityMangaList" android:theme="@android:style/Theme.Black" />
 		<activity android:name="ActivityChapterList" android:theme="@android:style/Theme.Black" />
 		<activity android:name="ActivityChapter"
-			android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
-			android:screenOrientation="landscape" />
+			android:theme="@android:style/Theme.Black.NoTitleBar" android:screenOrientation="landscape"/>
 	</application>
 </manifest>

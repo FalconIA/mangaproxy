@@ -50,19 +50,20 @@ public final class ActivityGenreList extends ActivityBase {
 		private LayoutInflater mInflater;
 
 		public GenreListAdapter() {
-			this.mInflater = LayoutInflater.from(ActivityGenreList.this);
+			mInflater = LayoutInflater.from(ActivityGenreList.this);
 		}
 
 		@Override
 		public int getCount() {
-			if (this.mGenreList == null)
+			if (mGenreList == null) {
 				return 0;
-			return this.mGenreList.size();
+			}
+			return mGenreList.size();
 		}
 
 		@Override
 		public Genre getItem(int position) {
-			return this.mGenreList.getAt(position);
+			return mGenreList.getAt(position);
 		}
 
 		@Override
@@ -76,18 +77,18 @@ public final class ActivityGenreList extends ActivityBase {
 
 			if (convertView == null) {
 				holder = new ViewHolder();
-				convertView = this.mInflater.inflate(R.layout.list_item_genre,
-						null);
+				convertView = mInflater.inflate(R.layout.list_item_genre, null);
 				holder.tvDisplayname = (TextView) convertView
 						.findViewById(R.id.mtvDisplayname);
-			} else
+			} else {
 				holder = (ViewHolder) convertView.getTag();
+			}
 
-			holder.tvDisplayname.setText(this.mGenreList
-					.getDisplayname(position));
+			holder.tvDisplayname.setText(mGenreList.getDisplayname(position));
 
-			if (convertView.getTag() == null)
+			if (convertView.getTag() == null) {
 				convertView.setTag(holder);
+			}
 
 			return convertView;
 		}
@@ -106,7 +107,7 @@ public final class ActivityGenreList extends ActivityBase {
 		}
 
 		public void setGenreList(GenreList genreList) {
-			this.mGenreList = genreList;
+			mGenreList = genreList;
 			notifyDataSetChanged();
 		}
 
@@ -120,25 +121,25 @@ public final class ActivityGenreList extends ActivityBase {
 
 	@Override
 	public int getSiteId() {
-		return this.mSiteId;
+		return mSiteId;
 	}
 
 	@Override
 	public String getSiteName() {
-		return this.mSite.getName();
+		return mSite.getName();
 	}
 
 	@Override
 	String getSiteDisplayname() {
-		return this.mSite.getDisplayname();
+		return mSite.getDisplayname();
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		this.mSiteId = IntentHandler.getSiteId(this);
-		this.mSite = Site.get(this.mSiteId);
+		mSiteId = IntentHandler.getSiteId(this);
+		mSite = Site.get(mSiteId);
 
 		setContentView(R.layout.activity_genre_list);
 		setCustomTitle(getString(R.string.genre));
@@ -147,26 +148,28 @@ public final class ActivityGenreList extends ActivityBase {
 
 		setupListView(new GenreListAdapter());
 
-		if (this.mSite.hasSearchEngine())
+		if (mSite.hasSearchEngine()) {
 			findViewById(R.id.mvgSearch).setVisibility(View.VISIBLE);
-		else
+		} else {
 			findViewById(R.id.mvgSearch).setVisibility(View.GONE);
+		}
 
-		if (!this.mProcessed)
+		if (!mProcessed) {
 			loadGenreList();
+		}
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putSerializable(BUNDLE_KEY_GENRE_LIST, this.mGenreList);
+		outState.putSerializable(BUNDLE_KEY_GENRE_LIST, mGenreList);
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		this.mGenreList = (GenreList) savedInstanceState
+		mGenreList = (GenreList) savedInstanceState
 				.getSerializable(BUNDLE_KEY_GENRE_LIST);
-		((GenreListAdapter) this.mListAdapter).setGenreList(this.mGenreList);
+		((GenreListAdapter) mListAdapter).setGenreList(mGenreList);
 		super.onRestoreInstanceState(savedInstanceState);
 	}
 
@@ -175,7 +178,7 @@ public final class ActivityGenreList extends ActivityBase {
 		Dialog dialog;
 		switch (id) {
 		case DIALOG_DOWNLOAD_ID:
-			dialog = this.mSourceDownloader
+			dialog = mSourceDownloader
 					.createDownloadDialog(R.string.source_of_genre_list);
 			break;
 		case DIALOG_PROCESS_ID:
@@ -190,27 +193,27 @@ public final class ActivityGenreList extends ActivityBase {
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
-		Genre genre = this.mGenreList.getAt(position);
+		Genre genre = mGenreList.getAt(position);
 		ActivityMangaList.IntentHandler.startActivityMangaList(this, genre);
 	}
 
 	@Override
 	public int onSourceProcess(String source) {
-		this.mGenreList = this.mSite.getGenreList(source);
-		return this.mGenreList.size();
+		mGenreList = mSite.getGenreList(source);
+		return mGenreList.size();
 	}
 
 	@Override
 	public void onPostSourceProcess(int result) {
-		((GenreListAdapter) this.mListAdapter).setGenreList(this.mGenreList);
+		((GenreListAdapter) mListAdapter).setGenreList(mGenreList);
 		getListView().requestFocus();
 
 		super.onPostSourceProcess(result);
 	}
 
 	private void loadGenreList() {
-		this.mSourceDownloader = new SourceDownloader();
-		this.mSourceDownloader.download(this.mSite.getGenreListUrl());
+		mSourceDownloader = new SourceDownloader();
+		mSourceDownloader.download(mSite.getGenreListUrl());
 	}
 
 }

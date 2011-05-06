@@ -47,8 +47,6 @@ public interface IPlugin {
 
 	String getChapterUrl(Chapter chapter, Manga manga);
 
-	String getDynamicImgServerSourceUrl(String source);
-
 	GenreList getGenreList(String source);
 
 	MangaList getMangaList(String source, Genre genre);
@@ -57,6 +55,8 @@ public interface IPlugin {
 
 	ChapterList getChapterList(String source, Manga manga);
 
-	Chapter getChapter(Manga manga, Chapter chapter);
+	String[] getChapterPages(String source, Chapter chapter);
+
+	boolean setDynamicImgServers(String source, Chapter chapter);
 
 }

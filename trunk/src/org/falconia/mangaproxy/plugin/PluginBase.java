@@ -6,12 +6,13 @@ import java.util.HashMap;
 
 import org.falconia.mangaproxy.AppConst;
 import org.falconia.mangaproxy.ITag;
+import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.Manga;
-import org.falconia.mangaproxy.helper.FormatHelper;
-import org.falconia.mangaproxy.helper.HttpHelper;
-import org.falconia.mangaproxy.helper.MathHelper;
-import org.falconia.mangaproxy.helper.Regex;
+import org.falconia.mangaproxy.utils.FormatUtils;
+import org.falconia.mangaproxy.utils.HttpUtils;
+import org.falconia.mangaproxy.utils.MathUtils;
+import org.falconia.mangaproxy.utils.Regex;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -21,7 +22,8 @@ public abstract class PluginBase implements ITag, IPlugin {
 	public static final String SOURCE_SEPERATOR_STRING = "\n##########SOURCE_SEPERATOR_STRING##########\n";
 
 
-	protected static final String Fail_to_process = "Fail to process data.";
+	protected static final String Fail_to_process = "Fail to process %s.";
+	protected static final String Fail_to_process_data = "Fail to process data.";
 	protected static final String Fail_to_parse_Int = "Fail to parse int: '%s'.";
 	protected static final String Fail_to_parse_DateTime = "Fail to parse Date/Time: '%s'.";
 
@@ -30,19 +32,20 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected static final String Get_URL_of_AllMangaList = "Get URL of MangaList(All mangas): %s";
 	protected static final String Get_URL_of_ChapterList = "Get URL of ChapterList(MangaID:%s): %s";
 	protected static final String Get_URL_of_Chapter = "Get URL of Chapter(ChapterID:%s): %s";
-	protected static final String Get_URL_of_DynamicImgServerSource = "Get URL of DynamicImgServerSource: %s";
 
 	protected static final String Get_GenreList = "Get GenreList.";
 	protected static final String Get_MangaList = "Get MangaList(GenreID:%s).";
 	protected static final String Get_AllMangaList = "Get MangaList(All mangas).";
 	protected static final String Get_ChapterList = "Get ChapterList(MangaID:%s).";
 	protected static final String Get_Chapter = "Get Chapter(ChapterID:%s).";
+	protected static final String Get_DynamicImgServers = "Get DynamicImgServers.";
 
 	protected static final String Get_Source_Size_GenreList = "Get GenreList data of %s.";
 	protected static final String Get_Source_Size_MangaList = "Get MangaList data of %s.";
 	protected static final String Get_Source_Size_AllMangaList = "Get MangaList(All mangas) data of %s.";
 	protected static final String Get_Source_Size_ChapterList = "Get ChapterList data of %s.";
 	protected static final String Get_Source_Size_Chapter = "Get Chapter data of %s.";
+	protected static final String Get_Source_Size_DynamicImgServers = "Get DynamicImgServers data of %s.";
 
 	protected static final String Process_MangaList = "Process MangaList(GenreID:%s).";
 	protected static final String Process_MangaList_New = "Process MangaList(New|GenreID:%s).";
@@ -59,8 +62,8 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected static final String Source_is_empty = "Source is empty.";
 
 
-	protected static final String CHARSET_GBK = HttpHelper.CHARSET_GBK;
-	protected static final String CHARSET_UTF8 = HttpHelper.CHARSET_UTF8;
+	protected static final String CHARSET_GBK = HttpUtils.CHARSET_GBK;
+	protected static final String CHARSET_UTF8 = HttpUtils.CHARSET_UTF8;
 
 	protected static final String DEFAULT_MANGA_URL_PREFIX = "comic/";
 	protected static final String DEFAULT_MANGA_URL_POSTFIX = "/";
@@ -69,12 +72,12 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected int miSiteId;
 
 	public PluginBase(int siteId) {
-		this.miSiteId = siteId;
+		miSiteId = siteId;
 	}
 
 	@Override
 	public int getSiteId() {
-		return this.miSiteId;
+		return miSiteId;
 	}
 
 	@Override
@@ -96,17 +99,19 @@ public abstract class PluginBase implements ITag, IPlugin {
 	}
 
 	@Override
-	public String getDynamicImgServerSourceUrl(String source) {
-		if (isDynamicImgServer())
+	public boolean setDynamicImgServers(String source, Chapter chapter) {
+		if (isDynamicImgServer()) {
 			throw new RuntimeException("The method should to be overrode.");
-		else
+		} else {
 			throw new RuntimeException(
 					"The site is unsupported of Dynamic Img Server.");
+		}
 	}
 
 	protected int parseInt(String string) {
-		if (TextUtils.isEmpty(string) || TextUtils.isEmpty(string.trim()))
+		if (TextUtils.isEmpty(string) || TextUtils.isEmpty(string.trim())) {
 			return 0;
+		}
 		try {
 			return Integer.parseInt(string.trim());
 		} catch (Exception e) {
@@ -123,22 +128,29 @@ public abstract class PluginBase implements ITag, IPlugin {
 		try {
 			HashMap<String, String> groups = Regex.matchGroup(format, string);
 
-			if (groups.containsKey("YY"))
+			if (groups.containsKey("YY")) {
 				cal.set(Calendar.YEAR, parseInt(groups.get("YY")));
-			if (groups.containsKey("Y"))
+			}
+			if (groups.containsKey("Y")) {
 				cal.set(Calendar.YEAR,
-						FormatHelper.year2to4(parseInt(groups.get("Y"))));
-			if (groups.containsKey("M"))
+						FormatUtils.year2to4(parseInt(groups.get("Y"))));
+			}
+			if (groups.containsKey("M")) {
 				cal.set(Calendar.MONTH,
 						parseInt(Calendar.JANUARY + groups.get("M")) - 1);
-			if (groups.containsKey("D"))
+			}
+			if (groups.containsKey("D")) {
 				cal.set(Calendar.DAY_OF_MONTH, parseInt(groups.get("D")));
-			if (groups.containsKey("h"))
+			}
+			if (groups.containsKey("h")) {
 				cal.set(Calendar.HOUR_OF_DAY, parseInt(groups.get("h")));
-			if (groups.containsKey("m"))
+			}
+			if (groups.containsKey("m")) {
 				cal.set(Calendar.MINUTE, parseInt(groups.get("m")));
-			if (groups.containsKey("s"))
+			}
+			if (groups.containsKey("s")) {
 				cal.set(Calendar.SECOND, parseInt(groups.get("s")));
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -165,8 +177,9 @@ public abstract class PluginBase implements ITag, IPlugin {
 	}
 
 	protected boolean parseIsCompleted(String string) {
-		if (string.matches("\\s*经典\\s*"))
+		if (string.matches("\\s*经典\\s*")) {
 			return true;
+		}
 		return string.indexOf("完") >= 0;
 	}
 
@@ -175,13 +188,14 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected int bitsToInt(String string) {
 		int result = 0;
 		byte[] bits = string.getBytes();
-		for (int n = bits.length - 1; n >= 0; n--)
+		for (int n = bits.length - 1; n >= 0; n--) {
 			result = (result << 8) + bits[n];
+		}
 		return result;
 	}
 
 	protected String intToBits(int i) {
-		int digit = (int) MathHelper.logBase(i, 256) + 1;
+		int digit = (int) MathUtils.logBase(i, 256) + 1;
 		byte[] bits = new byte[digit];
 		for (int n = 0; n < digit; n++) {
 			bits[n] = (byte) (i % 256);

@@ -1,9 +1,13 @@
 package org.falconia.mangaproxy;
 
+import java.io.File;
+
 public final class AppConst {
 
 	public static String APP_NAME;
 	public static String APP_PACKAGE;
+	public static File APP_EXTERNAL_CACHE_DIR;
+	public static File APP_EXTERNAL_FILES_DIR;
 
 	// Genre
 	public static String GENRE_ALL_TEXT = "All";
@@ -12,4 +16,6 @@ public final class AppConst {
 	public static String UI_CHAPTER_COUNT = "Chapters: %s";
 	public static String UI_LAST_UPDATE = "Update: %tF";
 
+	// Settings
+	public static int IMG_PRELOAD_MAX = 2;
 }

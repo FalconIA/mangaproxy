@@ -55,9 +55,10 @@ public final class ActivityFavoriteList extends ActivityBase {
 		inflater.inflate(R.menu.menu_favorite_list, menu);
 		MenuItem menuSource = menu.findItem(R.id.mmiSource);
 		SubMenu submenuSource = menuSource.getSubMenu();
-		for (int pluginId : Plugins.getPluginIds())
+		for (int pluginId : Plugins.getPluginIds()) {
 			submenuSource.add(R.id.mmgSourceGroup, pluginId, Menu.NONE, Plugins
 					.getPlugin(pluginId).getDisplayname());
+		}
 		return true;
 	}
 
@@ -90,12 +91,13 @@ public final class ActivityFavoriteList extends ActivityBase {
 
 	private void onSourceSelected(int siteId) {
 		Site site = Site.get(siteId);
-		if (site.hasGenreList())
+		if (site.hasGenreList()) {
 			ActivityGenreList.IntentHandler
 					.startActivityGenreList(this, siteId);
-		else
+		} else {
 			ActivityMangaList.IntentHandler.startActivityAllMangaList(this,
 					siteId);
+		}
 	}
 
 	private Dialog createExitConfirmDialog() {

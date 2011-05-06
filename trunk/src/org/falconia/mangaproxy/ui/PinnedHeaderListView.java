@@ -96,31 +96,32 @@ public class PinnedHeaderListView extends ListView {
 	}
 
 	public void setPinnedHeaderView(View view) {
-		this.mHeaderView = view;
+		mHeaderView = view;
 
 		// Disable vertical fading when the pinned header is present
 		// TODO change ListView to allow separate measures for top and bottom
 		// fading edge;
 		// in this particular case we would like to disable the top, but not the
 		// bottom edge.
-		if (this.mHeaderView != null)
+		if (mHeaderView != null) {
 			setFadingEdgeLength(0);
+		}
 		requestLayout();
 	}
 
 	@Override
 	public void setAdapter(ListAdapter adapter) {
 		super.setAdapter(adapter);
-		this.mAdapter = (PinnedHeaderAdapter) adapter;
+		mAdapter = (PinnedHeaderAdapter) adapter;
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		if (this.mHeaderView != null) {
-			measureChild(this.mHeaderView, widthMeasureSpec, heightMeasureSpec);
-			this.mHeaderViewWidth = this.mHeaderView.getMeasuredWidth();
-			this.mHeaderViewHeight = this.mHeaderView.getMeasuredHeight();
+		if (mHeaderView != null) {
+			measureChild(mHeaderView, widthMeasureSpec, heightMeasureSpec);
+			mHeaderViewWidth = mHeaderView.getMeasuredWidth();
+			mHeaderViewHeight = mHeaderView.getMeasuredHeight();
 		}
 	}
 
@@ -128,31 +129,30 @@ public class PinnedHeaderListView extends ListView {
 	protected void onLayout(boolean changed, int left, int top, int right,
 			int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
-		if (this.mHeaderView != null) {
-			this.mHeaderView.layout(0, 0, this.mHeaderViewWidth,
-					this.mHeaderViewHeight);
+		if (mHeaderView != null) {
+			mHeaderView.layout(0, 0, mHeaderViewWidth, mHeaderViewHeight);
 			configureHeaderView(getFirstVisiblePosition());
 		}
 	}
 
 	public void configureHeaderView(int position) {
-		if (this.mHeaderView == null)
+		if (mHeaderView == null) {
 			return;
+		}
 
-		int state = this.mAdapter.getPinnedHeaderState(position);
+		int state = mAdapter.getPinnedHeaderState(position);
 		switch (state) {
 		case PinnedHeaderAdapter.PINNED_HEADER_GONE: {
-			this.mHeaderViewVisible = false;
+			mHeaderViewVisible = false;
 			break;
 		}
 
 		case PinnedHeaderAdapter.PINNED_HEADER_VISIBLE: {
-			this.mAdapter.configurePinnedHeader(this.mHeaderView, position,
-					MAX_ALPHA);
-			if (this.mHeaderView.getTop() != 0)
-				this.mHeaderView.layout(0, 0, this.mHeaderViewWidth,
-						this.mHeaderViewHeight);
-			this.mHeaderViewVisible = true;
+			mAdapter.configurePinnedHeader(mHeaderView, position, MAX_ALPHA);
+			if (mHeaderView.getTop() != 0) {
+				mHeaderView.layout(0, 0, mHeaderViewWidth, mHeaderViewHeight);
+			}
+			mHeaderViewVisible = true;
 			break;
 		}
 
@@ -160,7 +160,7 @@ public class PinnedHeaderListView extends ListView {
 			View firstView = getChildAt(0);
 			int bottom = firstView.getBottom();
 			// int itemHeight = firstView.getHeight();
-			int headerHeight = this.mHeaderView.getHeight();
+			int headerHeight = mHeaderView.getHeight();
 			int y;
 			int alpha;
 			if (bottom < headerHeight) {
@@ -170,12 +170,12 @@ public class PinnedHeaderListView extends ListView {
 				y = 0;
 				alpha = MAX_ALPHA;
 			}
-			this.mAdapter.configurePinnedHeader(this.mHeaderView, position,
-					alpha);
-			if (this.mHeaderView.getTop() != y)
-				this.mHeaderView.layout(0, y, this.mHeaderViewWidth,
-						this.mHeaderViewHeight + y);
-			this.mHeaderViewVisible = true;
+			mAdapter.configurePinnedHeader(mHeaderView, position, alpha);
+			if (mHeaderView.getTop() != y) {
+				mHeaderView.layout(0, y, mHeaderViewWidth, mHeaderViewHeight
+						+ y);
+			}
+			mHeaderViewVisible = true;
 			break;
 		}
 		}
@@ -184,7 +184,8 @@ public class PinnedHeaderListView extends ListView {
 	@Override
 	protected void dispatchDraw(Canvas canvas) {
 		super.dispatchDraw(canvas);
-		if (this.mHeaderViewVisible)
-			drawChild(canvas, this.mHeaderView, getDrawingTime());
+		if (mHeaderViewVisible) {
+			drawChild(canvas, mHeaderView, getDrawingTime());
+		}
 	}
 }

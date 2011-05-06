@@ -17,8 +17,9 @@ public final class Site implements Serializable {
 	static {
 		mSites = new HashMap<Integer, Site>();
 		Integer[] ids = Plugins.getPluginIds();
-		for (int i = 0; i < ids.length; i++)
+		for (int i = 0; i < ids.length; i++) {
 			mSites.put(ids[i], new Site(Plugins.getPlugin(ids[i])));
+		}
 	}
 
 	public static boolean contains(int id) {
@@ -37,27 +38,27 @@ public final class Site implements Serializable {
 	private final int mSiteId;
 
 	public Site(IPlugin plugin) {
-		this.mPlugin = plugin;
-		this.mSiteId = plugin.getSiteId();
+		mPlugin = plugin;
+		mSiteId = plugin.getSiteId();
 	}
 
 	public String getName() {
-		return this.mPlugin.getName();
+		return mPlugin.getName();
 	}
 
 	public String getDisplayname() {
-		return this.mPlugin.getDisplayname();
+		return mPlugin.getDisplayname();
 	}
 
 	public String getGenreListUrl() {
-		return this.mPlugin.getGenreListUrl();
+		return mPlugin.getGenreListUrl();
 	}
 
 	public GenreList getGenreList(String source) {
-		GenreList list = new GenreList(this.mSiteId);
-		GenreList listParsed = this.mPlugin.getGenreList(source);
+		GenreList list = new GenreList(mSiteId);
+		GenreList listParsed = mPlugin.getGenreList(source);
 		if (listParsed != null && listParsed.size() > 0) {
-			list.add(Genre.getGenreAll(this.mSiteId));
+			list.add(Genre.getGenreAll(mSiteId));
 			list.addAll(listParsed.toArray());
 		}
 
@@ -65,15 +66,15 @@ public final class Site implements Serializable {
 	}
 
 	public int getSiteId() {
-		return this.mSiteId;
+		return mSiteId;
 	}
 
 	public boolean hasGenreList() {
-		return this.mPlugin.hasGenreList();
+		return mPlugin.hasGenreList();
 	}
 
 	public boolean hasSearchEngine() {
-		return this.mPlugin.hasSearchEngine();
+		return mPlugin.hasSearchEngine();
 	}
 
 }

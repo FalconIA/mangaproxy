@@ -8,7 +8,7 @@ public abstract class BaseListAdapter extends BaseAdapter implements
 	private boolean mDisplaySectionHeaders = true;
 
 	public boolean getDisplaySectionHeadersEnabled() {
-		return this.mDisplaySectionHeaders;
+		return mDisplaySectionHeaders;
 	}
 
 }

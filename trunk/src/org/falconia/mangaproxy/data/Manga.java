@@ -49,7 +49,7 @@ public final class Manga implements Serializable {
 	}
 
 	private IPlugin getPlugin() {
-		return Plugins.getPlugin(this.siteId);
+		return Plugins.getPlugin(siteId);
 	}
 
 	public String getSiteName() {
@@ -69,67 +69,69 @@ public final class Manga implements Serializable {
 	}
 
 	public String setDetailsTemplate(String template) {
-		return this.mDetailsTemplate = template;
+		return mDetailsTemplate = template;
 	}
 
 	public String getDetails() {
-		if (!TextUtils.isEmpty(this.mDetailsTemplate)) {
-			String result = this.mDetailsTemplate;
+		if (!TextUtils.isEmpty(mDetailsTemplate)) {
+			String result = mDetailsTemplate;
 			result = result.replaceAll("%chapterDisplayname%",
-					this.chapterDisplayname);
+					chapterDisplayname);
 			result = result.replaceAll("%chapterCount%", String.format(
-					AppConst.UI_CHAPTER_COUNT, this.chapterCount == 0 ? "??"
-							: this.chapterCount));
+					AppConst.UI_CHAPTER_COUNT, chapterCount == 0 ? "??"
+							: chapterCount));
 			result = result.replaceAll("%updatedAt%",
-					String.format(AppConst.UI_LAST_UPDATE, this.updatedAt));
-			result = result.replaceAll("%details%", this.details);
+					String.format(AppConst.UI_LAST_UPDATE, updatedAt));
+			result = result.replaceAll("%details%", details);
 			return result;
 		}
-		return TextUtils.isEmpty(this.details) ? "-" : this.details;
+		return TextUtils.isEmpty(details) ? "-" : details;
 	}
 
 	// for Favorite
 
 	public void setLastReadChapter(Chapter chapter) {
-		this.mLastReadChapter = chapter;
+		mLastReadChapter = chapter;
 	}
 
 	public Chapter getLastReadChapter() {
-		return this.mLastReadChapter;
+		return mLastReadChapter;
 	}
 
 	public String getLastReadChapterDisplayname() {
-		if (this.mLastReadChapter != null)
-			return this.mLastReadChapter.displayname;
-		else
+		if (mLastReadChapter != null) {
+			return mLastReadChapter.displayname;
+		} else {
 			return null;
+		}
 	}
 
 	public void setLatestChapter(Chapter chapter) {
-		this.mLatestChapter = chapter;
+		mLatestChapter = chapter;
 	}
 
 	public Chapter getLatestChapter() {
-		return this.mLatestChapter;
+		return mLatestChapter;
 	}
 
 	public String getLatestChapterDisplayname() {
-		if (this.mLatestChapter != null)
-			return this.mLatestChapter.displayname;
-		else
+		if (mLatestChapter != null) {
+			return mLatestChapter.displayname;
+		} else {
 			return null;
+		}
 	}
 
 	// for extra info
 
 	public void resetExtraInfo() {
-		this.extraInfoAuthor = null;
-		this.extraInfoArtist = null;
-		this.extraInfoGenre = null;
-		this.extraInfoSummary = null;
-		if (this.extraInfoCoverBitmap != null) {
-			this.extraInfoCoverBitmap.recycle();
-			this.extraInfoCoverBitmap = null;
+		extraInfoAuthor = null;
+		extraInfoArtist = null;
+		extraInfoGenre = null;
+		extraInfoSummary = null;
+		if (extraInfoCoverBitmap != null) {
+			extraInfoCoverBitmap.recycle();
+			extraInfoCoverBitmap = null;
 		}
 	}
 
@@ -139,15 +141,15 @@ public final class Manga implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("{%s:%s}", this.mangaId, this.displayname);
+		return String.format("{%s:%s}", mangaId, displayname);
 	}
 
 	public String toLongString() {
 		return String
 				.format("{ SiteID:%d, MangaID:'%s', Name:'%s', Section:'%s', UpdatedAt:'%tF', Chapter:'%s', ChapterCount:%d, IsCompleted:%b, HasNewChapter:%b }",
-						this.siteId, this.mangaId, this.displayname,
-						this.section, this.updatedAt, this.chapterDisplayname,
-						this.chapterCount, this.isCompleted, this.hasNewChapter);
+						siteId, mangaId, displayname, section, updatedAt,
+						chapterDisplayname, chapterCount, isCompleted,
+						hasNewChapter);
 	}
 
 }
