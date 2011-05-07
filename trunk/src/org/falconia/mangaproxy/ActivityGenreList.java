@@ -78,8 +78,7 @@ public final class ActivityGenreList extends ActivityBase {
 			if (convertView == null) {
 				holder = new ViewHolder();
 				convertView = mInflater.inflate(R.layout.list_item_genre, null);
-				holder.tvDisplayname = (TextView) convertView
-						.findViewById(R.id.mtvDisplayname);
+				holder.tvDisplayname = (TextView) convertView.findViewById(R.id.mtvDisplayname);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
 			}
@@ -94,8 +93,8 @@ public final class ActivityGenreList extends ActivityBase {
 		}
 
 		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem,
-				int visibleItemCount, int totalItemCount) {
+		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+				int totalItemCount) {
 			// TODO Auto-generated method stub
 
 		}
@@ -135,7 +134,7 @@ public final class ActivityGenreList extends ActivityBase {
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		mSiteId = IntentHandler.getSiteId(this);
@@ -161,16 +160,17 @@ public final class ActivityGenreList extends ActivityBase {
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putSerializable(BUNDLE_KEY_GENRE_LIST, mGenreList);
 		super.onSaveInstanceState(outState);
+
+		outState.putSerializable(BUNDLE_KEY_GENRE_LIST, mGenreList);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		mGenreList = (GenreList) savedInstanceState
-				.getSerializable(BUNDLE_KEY_GENRE_LIST);
-		((GenreListAdapter) mListAdapter).setGenreList(mGenreList);
 		super.onRestoreInstanceState(savedInstanceState);
+
+		mGenreList = (GenreList) savedInstanceState.getSerializable(BUNDLE_KEY_GENRE_LIST);
+		((GenreListAdapter) mListAdapter).setGenreList(mGenreList);
 	}
 
 	@Override
@@ -178,8 +178,7 @@ public final class ActivityGenreList extends ActivityBase {
 		Dialog dialog;
 		switch (id) {
 		case DIALOG_DOWNLOAD_ID:
-			dialog = mSourceDownloader
-					.createDownloadDialog(R.string.source_of_genre_list);
+			dialog = mSourceDownloader.createDownloadDialog(R.string.source_of_genre_list);
 			break;
 		case DIALOG_PROCESS_ID:
 			dialog = createProcessDialog(R.string.source_of_genre_list);
@@ -191,8 +190,7 @@ public final class ActivityGenreList extends ActivityBase {
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position,
-			long id) {
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Genre genre = mGenreList.getAt(position);
 		ActivityMangaList.IntentHandler.startActivityMangaList(this, genre);
 	}

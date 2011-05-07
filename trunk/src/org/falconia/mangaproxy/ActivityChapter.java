@@ -27,8 +27,7 @@ public final class ActivityChapter extends Activity {
 		private static final String BUNDLE_KEY_MANGA_DATA = "BUNDLE_KEY_MANGA_DATA";
 		private static final String BUNDLE_KEY_CHAPTER_DATA = "BUNDLE_KEY_CHAPTER_DATA";
 
-		private static Intent getIntent(Context context, Manga manga,
-				Chapter chapter) {
+		private static Intent getIntent(Context context, Manga manga, Chapter chapter) {
 			Bundle bundle = new Bundle();
 			bundle.putSerializable(BUNDLE_KEY_MANGA_DATA, manga);
 			bundle.putSerializable(BUNDLE_KEY_CHAPTER_DATA, chapter);
@@ -38,8 +37,7 @@ public final class ActivityChapter extends Activity {
 		}
 
 		protected static Manga getManga(ActivityChapter activity) {
-			return (Manga) activity.getIntent().getExtras()
-					.getSerializable(BUNDLE_KEY_MANGA_DATA);
+			return (Manga) activity.getIntent().getExtras().getSerializable(BUNDLE_KEY_MANGA_DATA);
 		}
 
 		protected static Chapter getChapter(ActivityChapter activity) {
@@ -47,8 +45,7 @@ public final class ActivityChapter extends Activity {
 					.getSerializable(BUNDLE_KEY_CHAPTER_DATA);
 		}
 
-		public static void startActivityChapter(Context context, Manga manga,
-				Chapter chapter) {
+		public static void startActivityChapter(Context context, Manga manga, Chapter chapter) {
 			context.startActivity(getIntent(context, manga, chapter));
 		}
 
@@ -82,14 +79,11 @@ public final class ActivityChapter extends Activity {
 			setProgressBarIndeterminateVisibility(false);
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
-				setMessage(String
-						.format(getString(R.string.ui_error_on_download),
-								getSiteName()));
+				setMessage(String.format(getString(R.string.ui_error_on_download), getSiteName()));
 				return;
 			}
 
-			String source = EncodingUtils.getString(result, 0, result.length,
-					mCharset);
+			String source = EncodingUtils.getString(result, 0, result.length, mCharset);
 
 			switch (mMode) {
 			case MODE_CHAPTER:
@@ -110,8 +104,7 @@ public final class ActivityChapter extends Activity {
 		}
 
 		public void cancelDownload() {
-			if (mDownloader != null
-					&& mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
+			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
 				mDownloader.cancel(true);
 			}
@@ -151,11 +144,9 @@ public final class ActivityChapter extends Activity {
 		public void onPostDownload(byte[] result) {
 			AppUtils.logV(this, "onPostDownload()");
 			if (!AppCache.writeCacheForImage(result, mUrl, TYPE)) {
-				AppUtils.popupMessage(ActivityChapter.this, String.format(
-						getString(R.string.popup_fail_to_cache_page),
-						mPageIndex));
-				mBitmap = BitmapFactory.decodeByteArray(result, 0,
-						result.length);
+				AppUtils.popupMessage(ActivityChapter.this,
+						String.format(getString(R.string.popup_fail_to_cache_page), mPageIndex));
+				mBitmap = BitmapFactory.decodeByteArray(result, 0, result.length);
 			}
 			mIsDownloaded = true;
 			mIsDownloading = false;
@@ -200,6 +191,19 @@ public final class ActivityChapter extends Activity {
 			mDownloader.execute(mUrl);
 		}
 
+		public void cancelDownload() {
+			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
+				AppUtils.logD(this, "Cancel DownloadTask.");
+				mDownloader.cancel(true);
+			}
+		}
+
+		public void recycle() {
+			if (mBitmap != null) {
+				mBitmap.recycle();
+			}
+		}
+
 		public Bitmap getBitmap() {
 			if (mBitmap != null) {
 				return mBitmap;
@@ -239,8 +243,9 @@ public final class ActivityChapter extends Activity {
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		AppUtils.logV(this, "onCreate()");
 
 		mProcessed = getProcessed(savedInstanceState);
 		mManga = IntentHandler.getManga(this);
@@ -260,13 +265,35 @@ public final class ActivityChapter extends Activity {
 	}
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		if (mSourceDownloader != null) {
-			mSourceDownloader.cancelDownload();
+	protected void onStop() {
+		super.onDestroy();
+		AppUtils.logV(this, "onStop()");
+
+		stopTask();
+	}
+
+	@Override
+	protected void onDestroy() {
+		System.gc();
+
+		super.onDestroy();
+		AppUtils.logV(this, "onDestroy()");
+
+		if (mPages != null) {
+			for (int key : mPages.keySet()) {
+				Page page = mPages.get(key);
+				if (page != null) {
+					page.recycle();
+				}
+			}
 		}
-		outState.putBoolean(BUNDLE_KEY_IS_PROCESSED, mProcessed);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		AppUtils.logV(this, "onSaveInstanceState()");
+		outState.putBoolean(BUNDLE_KEY_IS_PROCESSED, mProcessed);
 	}
 
 	@Override
@@ -277,20 +304,31 @@ public final class ActivityChapter extends Activity {
 
 	private boolean getProcessed(Bundle savedInstanceState) {
 		boolean processed = false;
-		if (savedInstanceState != null
-				&& savedInstanceState.containsKey(BUNDLE_KEY_IS_PROCESSED)) {
+		if (savedInstanceState != null && savedInstanceState.containsKey(BUNDLE_KEY_IS_PROCESSED)) {
 			processed = savedInstanceState.getBoolean(BUNDLE_KEY_IS_PROCESSED);
 		}
 		return processed;
 	}
 
+	private void stopTask() {
+		if (mSourceDownloader != null) {
+			mSourceDownloader.cancelDownload();
+		}
+		if (mPages != null) {
+			for (int key : mPages.keySet()) {
+				Page page = mPages.get(key);
+				if (page != null) {
+					page.cancelDownload();
+				}
+			}
+		}
+	}
+
 	private String getCustomTitle() {
-		String title = String.format("%s - %s - %s",
-				mManga.getSiteDisplayname(), mManga.displayname,
-				mChapter.displayname);
+		String title = String.format("%s - %s - %s", mManga.getSiteDisplayname(),
+				mManga.displayname, mChapter.displayname);
 		if (mPageCurrent > 0) {
-			title = String.format("%s - " + getString(R.string.ui_page), title,
-					mPageCurrent);
+			title = String.format("%s - " + getString(R.string.ui_page), title, mPageCurrent);
 		}
 		return title;
 	}
@@ -312,8 +350,7 @@ public final class ActivityChapter extends Activity {
 		if (mPageUrls != null) {
 			mPageMax = mPageUrls.length;
 		} else {
-			setMessage(String.format(getString(R.string.ui_error_on_process),
-					getSiteName()));
+			setMessage(String.format(getString(R.string.ui_error_on_process), getSiteName()));
 			return;
 		}
 
@@ -324,11 +361,9 @@ public final class ActivityChapter extends Activity {
 		String urlImgServers = mChapter.getDynamicImgServersUrl();
 		if (TextUtils.isEmpty(urlImgServers)) {
 		} else {
-			((TextView) findViewById(R.id.mtvDebug)).append("\n"
-					+ urlImgServers);
+			((TextView) findViewById(R.id.mtvDebug)).append("\n" + urlImgServers);
 			mSourceDownloader.cancelDownload();
-			mSourceDownloader = new SourceDownloader(
-					SourceDownloader.MODE_IMG_SERVERS);
+			mSourceDownloader = new SourceDownloader(SourceDownloader.MODE_IMG_SERVERS);
 			mSourceDownloader.download(urlImgServers);
 		}
 	}
@@ -350,8 +385,7 @@ public final class ActivityChapter extends Activity {
 		((TextView) findViewById(R.id.mtvDebug)).append("\n" + imgServer);
 
 		for (int i = 0; i < mPageUrls.length; i++) {
-			String url = (imgServer + mPageUrls[i]).replaceAll("(?<!http:)//",
-					"/");
+			String url = (imgServer + mPageUrls[i]).replaceAll("(?<!http:)//", "/");
 			Page page = new Page(i + 1, url);
 			mPages.put(i + 1, page);
 			((TextView) findViewById(R.id.mtvDebug)).append("\n" + url);

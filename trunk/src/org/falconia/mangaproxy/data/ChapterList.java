@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-public final class ChapterList implements Serializable, ISiteId,
-		Iterable<Chapter> {
+public final class ChapterList implements Serializable, ISiteId, Iterable<Chapter> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -103,8 +102,8 @@ public final class ChapterList implements Serializable, ISiteId,
 	public String toString() {
 		return String
 				.format("{ SiteId:%d, MangaId:'%s', Size:%d, Volume:%d, Chapter:%d, Unknow:%d, HasDynamicImgServers:%b }",
-						mManga.siteId, mManga.mangaId, size(), sizeVolume,
-						sizeChapter, sizeUnknow, hasDynamicImgServers());
+						mManga.siteId, mManga.mangaId, size(), sizeVolume, sizeChapter, sizeUnknow,
+						hasDynamicImgServers());
 	}
 
 }

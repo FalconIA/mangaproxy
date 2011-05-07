@@ -119,8 +119,7 @@ public class Plugin99770 extends PluginBase {
 	@Override
 	public String getChapterUrl(Chapter chapter, Manga manga) {
 		String url = getUrlBase()
-				+ String.format("manhua/%s/%s/", manga.mangaId,
-						chapter.chapterId);
+				+ String.format("manhua/%s/%s/", manga.mangaId, chapter.chapterId);
 		logI(Get_URL_of_Chapter, chapter.chapterId, url);
 		return url;
 	}
@@ -155,8 +154,7 @@ public class Plugin99770 extends PluginBase {
 		GenreList list = new GenreList(getSiteId());
 
 		logI(Get_GenreList);
-		logD(Get_Source_Size_GenreList,
-				FormatUtils.getFileSize(source, getCharset()));
+		logD(Get_Source_Size_GenreList, FormatUtils.getFileSize(source, getCharset()));
 
 		if (TextUtils.isEmpty(source)) {
 			logE(Source_is_empty);
@@ -207,8 +205,7 @@ public class Plugin99770 extends PluginBase {
 		MangaList list = new MangaList(getSiteId());
 
 		logI(Get_MangaList, genre.genreId);
-		logD(Get_Source_Size_MangaList,
-				FormatUtils.getFileSize(source, getCharset()));
+		logD(Get_Source_Size_MangaList, FormatUtils.getFileSize(source, getCharset()));
 
 		if (TextUtils.isEmpty(source)) {
 			logE(Source_is_empty);
@@ -238,8 +235,8 @@ public class Plugin99770 extends PluginBase {
 
 					for (ArrayList<String> match : matches) {
 						// logV(match.get(0));
-						Manga manga = new Manga(parseId(match.get(1)),
-								match.get(2), section, getSiteId());
+						Manga manga = new Manga(parseId(match.get(1)), match.get(2), section,
+								getSiteId());
 						manga.chapterCount = parseInt(match.get(3));
 						manga.isCompleted = parseIsCompleted(match.get(4));
 						manga.updatedAt = parseDate(match.get(5));
@@ -256,8 +253,8 @@ public class Plugin99770 extends PluginBase {
 
 					for (ArrayList<String> match : matches) {
 						// logV(match.get(0));
-						Manga manga = new Manga(parseId(match.get(1)),
-								match.get(2), section, getSiteId());
+						Manga manga = new Manga(parseId(match.get(1)), match.get(2), section,
+								getSiteId());
 						manga.chapterCount = parseInt(match.get(3));
 						manga.isCompleted = parseIsCompleted(match.get(4));
 						manga.details = "Hit: " + parseInt(match.get(5));
@@ -285,8 +282,7 @@ public class Plugin99770 extends PluginBase {
 				logD(Catched_count_in_section, matches.size(), "ul");
 
 				for (ArrayList<String> match : matches) {
-					Manga manga = new Manga(parseId(match.get(1)),
-							match.get(5), null, getSiteId());
+					Manga manga = new Manga(parseId(match.get(1)), match.get(5), null, getSiteId());
 					manga.isCompleted = parseIsCompleted(match.get(3));
 					manga.chapterCount = parseInt(match.get(4));
 					manga.setDetailsTemplate("%chapterCount%");
@@ -314,8 +310,7 @@ public class Plugin99770 extends PluginBase {
 		MangaList list = new MangaList(getSiteId());
 
 		logI(Get_AllMangaList);
-		logD(Get_Source_Size_AllMangaList,
-				FormatUtils.getFileSize(source, getCharset()));
+		logD(Get_Source_Size_AllMangaList, FormatUtils.getFileSize(source, getCharset()));
 
 		if (TextUtils.isEmpty(source)) {
 			logE(Source_is_empty);
@@ -335,15 +330,12 @@ public class Plugin99770 extends PluginBase {
 			for (ArrayList<String> groups : matches) {
 				source2 = groups.get(1);
 				String sGenre = parseGenreName(groups.get(2));
-				pattern = "(?is)<a href=\"/" + getMangaUrlPrefix()
-						+ "(\\d+)\">(.*?)</a>";
-				ArrayList<ArrayList<String>> matches2 = Regex.matchAll(pattern,
-						source2);
+				pattern = "(?is)<a href=\"/" + getMangaUrlPrefix() + "(\\d+)\">(.*?)</a>";
+				ArrayList<ArrayList<String>> matches2 = Regex.matchAll(pattern, source2);
 				// logV(Catched_count_in_section, matches2.size(), sGenre);
 
 				for (ArrayList<String> groups2 : matches2) {
-					list.add(parseId(groups2.get(1)),
-							parseName(groups2.get(2)), sGenre);
+					list.add(parseId(groups2.get(1)), parseName(groups2.get(2)), sGenre);
 				}
 			}
 
@@ -365,8 +357,7 @@ public class Plugin99770 extends PluginBase {
 		ChapterList list = new ChapterList(manga);
 
 		logI(Get_ChapterList, manga.mangaId);
-		logD(Get_Source_Size_ChapterList,
-				FormatUtils.getFileSize(source, getCharset()));
+		logD(Get_Source_Size_ChapterList, FormatUtils.getFileSize(source, getCharset()));
 
 		if (TextUtils.isEmpty(source)) {
 			logE(Source_is_empty);
@@ -388,13 +379,11 @@ public class Plugin99770 extends PluginBase {
 
 			section = "ChapterCount";
 			manga.chapterCount = parseInt(groups.get(1));
-			logV(Catched_in_section, groups.get(1), 1, section,
-					manga.chapterCount);
+			logV(Catched_in_section, groups.get(1), 1, section, manga.chapterCount);
 
 			section = "IsCompleted";
 			manga.isCompleted = parseIsCompleted(groups.get(2));
-			logV(Catched_in_section, groups.get(2), 2, section,
-					manga.isCompleted);
+			logV(Catched_in_section, groups.get(2), 2, section, manga.isCompleted);
 
 			section = "ul";
 			// logV(groups.get(3));
@@ -403,8 +392,7 @@ public class Plugin99770 extends PluginBase {
 			logD(Catched_count_in_section, matches.size(), section);
 
 			for (ArrayList<String> groups2 : matches) {
-				Chapter chapter = new Chapter(groups2.get(1), groups2.get(3),
-						manga);
+				Chapter chapter = new Chapter(groups2.get(1), groups2.get(3), manga);
 				chapter.typeId = parseChapterType(chapter.displayname);
 				chapter.setDynamicImgServerId(parseInt(groups2.get(2)) - 1);
 				list.add(chapter);
@@ -429,8 +417,7 @@ public class Plugin99770 extends PluginBase {
 		String[] pageUrls = null;
 
 		logI(Get_Chapter, chapter.chapterId);
-		logD(Get_Source_Size_Chapter,
-				FormatUtils.getFileSize(source, getCharset()));
+		logD(Get_Source_Size_Chapter, FormatUtils.getFileSize(source, getCharset()));
 
 		if (TextUtils.isEmpty(source)) {
 			logE(Source_is_empty);
@@ -473,8 +460,7 @@ public class Plugin99770 extends PluginBase {
 	@Override
 	public boolean setDynamicImgServers(String source, Chapter chapter) {
 		logI(Get_DynamicImgServers);
-		logD(Get_Source_Size_DynamicImgServers,
-				FormatUtils.getFileSize(source, getCharset()));
+		logD(Get_Source_Size_DynamicImgServers, FormatUtils.getFileSize(source, getCharset()));
 
 		if (TextUtils.isEmpty(source)) {
 			logE(Source_is_empty);
@@ -488,8 +474,7 @@ public class Plugin99770 extends PluginBase {
 			ArrayList<ArrayList<String>> matches;
 
 			// Section Count
-			String count = Regex.match(
-					"var\\s+ServerList\\s*=\\s*new\\s+Array\\((\\d+)\\)\\s*;",
+			String count = Regex.match("var\\s+ServerList\\s*=\\s*new\\s+Array\\((\\d+)\\)\\s*;",
 					source).get(1);
 			logV(Catched_in_section, count, 0, "Count", parseInt(count));
 

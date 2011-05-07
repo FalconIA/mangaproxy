@@ -58,8 +58,8 @@ public final class MangaListAdapter extends BaseListAdapter {
 	}
 
 	@Override
-	public void onScroll(AbsListView view, int firstVisibleItem,
-			int visibleItemCount, int totalItemCount) {
+	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+			int totalItemCount) {
 		// TODO Auto-generated method stub
 
 	}
@@ -70,37 +70,30 @@ public final class MangaListAdapter extends BaseListAdapter {
 
 	}
 
-	public View getFavoriteListView(int position, View convertView,
-			ViewGroup parent) {
+	public View getFavoriteListView(int position, View convertView, ViewGroup parent) {
 		// TODO Auto-generated method stub
 
 		return null;
 	}
 
-	public View getMangaListView(int position, View convertView,
-			ViewGroup parent) {
+	public View getMangaListView(int position, View convertView, ViewGroup parent) {
 		Manga manga = getItem(position);
 		ViewHolder holder;
 
 		if (convertView == null) {
 			holder = new ViewHolder();
 			convertView = mInflater.inflate(R.layout.list_item_manga, null);
-			holder.tvDisplayname = (TextView) convertView
-					.findViewById(R.id.mtvDisplayname);
-			holder.tvDetails = (TextView) convertView
-					.findViewById(R.id.mtvDetails);
-			holder.tvCompleted = (TextView) convertView
-					.findViewById(R.id.mtvCompleted);
-			holder.cbFavorite = (CheckBox) convertView
-					.findViewById(R.id.mcbFavorite);
+			holder.tvDisplayname = (TextView) convertView.findViewById(R.id.mtvDisplayname);
+			holder.tvDetails = (TextView) convertView.findViewById(R.id.mtvDetails);
+			holder.tvCompleted = (TextView) convertView.findViewById(R.id.mtvCompleted);
+			holder.cbFavorite = (CheckBox) convertView.findViewById(R.id.mcbFavorite);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
 
 		holder.tvDisplayname.setText(manga.displayname);
 		holder.tvDetails.setText(manga.getDetails());
-		holder.tvCompleted.setVisibility(manga.isCompleted ? View.VISIBLE
-				: View.GONE);
+		holder.tvCompleted.setVisibility(manga.isCompleted ? View.VISIBLE : View.GONE);
 		// holder.cbFavorite.setChecked(manga.bIsFavorite);
 
 		if (convertView.getTag() == null) {

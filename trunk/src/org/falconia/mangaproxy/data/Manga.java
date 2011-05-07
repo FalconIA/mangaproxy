@@ -75,11 +75,9 @@ public final class Manga implements Serializable {
 	public String getDetails() {
 		if (!TextUtils.isEmpty(mDetailsTemplate)) {
 			String result = mDetailsTemplate;
-			result = result.replaceAll("%chapterDisplayname%",
-					chapterDisplayname);
-			result = result.replaceAll("%chapterCount%", String.format(
-					AppConst.UI_CHAPTER_COUNT, chapterCount == 0 ? "??"
-							: chapterCount));
+			result = result.replaceAll("%chapterDisplayname%", chapterDisplayname);
+			result = result.replaceAll("%chapterCount%", String.format(AppConst.UI_CHAPTER_COUNT,
+					chapterCount == 0 ? "??" : chapterCount));
 			result = result.replaceAll("%updatedAt%",
 					String.format(AppConst.UI_LAST_UPDATE, updatedAt));
 			result = result.replaceAll("%details%", details);
@@ -147,9 +145,8 @@ public final class Manga implements Serializable {
 	public String toLongString() {
 		return String
 				.format("{ SiteID:%d, MangaID:'%s', Name:'%s', Section:'%s', UpdatedAt:'%tF', Chapter:'%s', ChapterCount:%d, IsCompleted:%b, HasNewChapter:%b }",
-						siteId, mangaId, displayname, section, updatedAt,
-						chapterDisplayname, chapterCount, isCompleted,
-						hasNewChapter);
+						siteId, mangaId, displayname, section, updatedAt, chapterDisplayname,
+						chapterCount, isCompleted, hasNewChapter);
 	}
 
 }

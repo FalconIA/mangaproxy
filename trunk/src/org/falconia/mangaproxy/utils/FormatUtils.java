@@ -13,8 +13,7 @@ public final class FormatUtils {
 		b, B, KB, MB, GB, TB
 	}
 
-	public static final String[] FileSizeUnits = { "k", "B", "KB", "MB", "GB",
-			"TB" };
+	public static final String[] FileSizeUnits = { "k", "B", "KB", "MB", "GB", "TB" };
 
 	public static String getFileSize(double size, FileSizeUnit in) {
 		switch (in) {

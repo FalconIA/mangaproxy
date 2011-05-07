@@ -23,8 +23,7 @@ public final class AppCache {
 
 	public static boolean checkCacheForData(String url, long cacheMinutes) {
 		String key = hashKey(url);
-		cacheMinutes = (cacheMinutes <= 0 ? Long.MAX_VALUE
-				: cacheMinutes * 1000);
+		cacheMinutes = (cacheMinutes <= 0 ? Long.MAX_VALUE : cacheMinutes * 1000);
 		try {
 			File file = getExternalCacheFile(key);
 			return file.exists()
@@ -38,11 +37,9 @@ public final class AppCache {
 		return checkCacheForData(url, 0);
 	}
 
-	public static boolean checkCacheForImage(String url, String type,
-			long cacheMinutes) {
+	public static boolean checkCacheForImage(String url, String type, long cacheMinutes) {
 		String key = hashKey(url);
-		cacheMinutes = (cacheMinutes <= 0 ? Long.MAX_VALUE
-				: cacheMinutes * 1000);
+		cacheMinutes = (cacheMinutes <= 0 ? Long.MAX_VALUE : cacheMinutes * 1000);
 		try {
 			File file = getExternalCacheImageFile(key, type);
 			return file.exists()
@@ -70,24 +67,19 @@ public final class AppCache {
 		}
 		try {
 			FileWriter writer = new FileWriter(file);
-			AppUtils.logD(
-					TAG,
-					String.format("Writing file using %s.",
-							writer.getEncoding()));
+			AppUtils.logD(TAG, String.format("Writing file using %s.", writer.getEncoding()));
 			writer.write(data);
 			writer.close();
 			AppUtils.logD(TAG, String.format("Wrote file: %s", file.getPath()));
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
-			AppUtils.logE(TAG,
-					String.format("Cannot write cache: %s", file.getPath()));
+			AppUtils.logE(TAG, String.format("Cannot write cache: %s", file.getPath()));
 		}
 		return false;
 	}
 
-	public static boolean writeCacheForImage(byte[] data, String url,
-			String type) {
+	public static boolean writeCacheForImage(byte[] data, String url, String type) {
 		AppUtils.logD(TAG, String.format("Write cache for: %s", url));
 		String key = hashKey(url);
 		File file;
@@ -110,8 +102,7 @@ public final class AppCache {
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
-			AppUtils.logE(TAG,
-					String.format("Cannot write cache: %s", file.getPath()));
+			AppUtils.logE(TAG, String.format("Cannot write cache: %s", file.getPath()));
 		}
 		return false;
 	}
@@ -127,17 +118,13 @@ public final class AppCache {
 		}
 		try {
 			if (!file.exists()) {
-				AppUtils.logE(TAG,
-						String.format("File not exists: %s", file.getPath()));
+				AppUtils.logE(TAG, String.format("File not exists: %s", file.getPath()));
 				return null;
 			}
 			StringBuilder data = new StringBuilder();
 			FileReader fileReader = new FileReader(file);
 			BufferedReader reader = new BufferedReader(fileReader);
-			AppUtils.logD(
-					TAG,
-					String.format("Reading file using %s.",
-							fileReader.getEncoding()));
+			AppUtils.logD(TAG, String.format("Reading file using %s.", fileReader.getEncoding()));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				data.append(line + NEW_LINE);
@@ -148,8 +135,7 @@ public final class AppCache {
 			return data.toString();
 		} catch (IOException e) {
 			e.printStackTrace();
-			AppUtils.logE(TAG,
-					String.format("Cannot read cache: %s", file.getPath()));
+			AppUtils.logE(TAG, String.format("Cannot read cache: %s", file.getPath()));
 		}
 		return null;
 	}
@@ -165,8 +151,7 @@ public final class AppCache {
 		}
 		try {
 			if (!file.exists()) {
-				AppUtils.logE(TAG,
-						String.format("File not exists: %s", file.getPath()));
+				AppUtils.logE(TAG, String.format("File not exists: %s", file.getPath()));
 				return null;
 			}
 			// Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
@@ -180,14 +165,12 @@ public final class AppCache {
 			for (int i = 0; i < bytes.length; i++) {
 				bytes[i] = data.get(i);
 			}
-			Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0,
-					bytes.length);
+			Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 			AppUtils.logD(TAG, String.format("Read file: %s", file.getPath()));
 			return bitmap;
 		} catch (Exception e) {
 			e.printStackTrace();
-			AppUtils.logE(TAG,
-					String.format("Cannot read cache: %s", file.getPath()));
+			AppUtils.logE(TAG, String.format("Cannot read cache: %s", file.getPath()));
 		}
 		return null;
 	}
@@ -209,8 +192,7 @@ public final class AppCache {
 		return dir;
 	}
 
-	private static File getExternalCacheImageFile(String filename, String type)
-			throws IOException {
+	private static File getExternalCacheImageFile(String filename, String type) throws IOException {
 		File dir = getExternalCacheFile("images");
 		if (TextUtils.isEmpty(filename) || TextUtils.isEmpty(type)) {
 			return null;
@@ -221,10 +203,7 @@ public final class AppCache {
 
 	private static boolean createNewFileWithPath(File file) {
 		if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
-			AppUtils.logE(
-					TAG,
-					String.format("Cannot create path: %s",
-							file.getParentFile()));
+			AppUtils.logE(TAG, String.format("Cannot create path: %s", file.getParentFile()));
 			return false;
 		}
 		try {
@@ -232,8 +211,7 @@ public final class AppCache {
 			return file.createNewFile();
 		} catch (IOException e) {
 			e.printStackTrace();
-			AppUtils.logE(TAG,
-					String.format("Cannot create file: %s", file.getPath()));
+			AppUtils.logE(TAG, String.format("Cannot create file: %s", file.getPath()));
 			return false;
 		}
 	}

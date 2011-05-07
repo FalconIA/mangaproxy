@@ -20,8 +20,8 @@ public final class AppEnv {
 	}
 
 	public static File getExternalFilesDir() {
-		return new File(Environment.getExternalStorageDirectory(),
-				String.format("Android/data/%s", AppConst.APP_PACKAGE));
+		return new File(Environment.getExternalStorageDirectory(), String.format("Android/data/%s",
+				AppConst.APP_PACKAGE));
 	}
 
 	public static File getExternalCacheDir() {

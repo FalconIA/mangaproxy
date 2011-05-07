@@ -90,8 +90,7 @@ public class PinnedHeaderListView extends ListView {
 		super(context, attrs);
 	}
 
-	public PinnedHeaderListView(Context context, AttributeSet attrs,
-			int defStyle) {
+	public PinnedHeaderListView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 	}
 
@@ -126,8 +125,7 @@ public class PinnedHeaderListView extends ListView {
 	}
 
 	@Override
-	protected void onLayout(boolean changed, int left, int top, int right,
-			int bottom) {
+	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 		if (mHeaderView != null) {
 			mHeaderView.layout(0, 0, mHeaderViewWidth, mHeaderViewHeight);
@@ -172,8 +170,7 @@ public class PinnedHeaderListView extends ListView {
 			}
 			mAdapter.configurePinnedHeader(mHeaderView, position, alpha);
 			if (mHeaderView.getTop() != y) {
-				mHeaderView.layout(0, y, mHeaderViewWidth, mHeaderViewHeight
-						+ y);
+				mHeaderView.layout(0, y, mHeaderViewWidth, mHeaderViewHeight + y);
 			}
 			mHeaderViewVisible = true;
 			break;

@@ -8,8 +8,7 @@ import java.util.Iterator;
 
 import android.text.TextUtils;
 
-public final class MangaList implements Serializable, ISiteId,
-		Collection<Manga> {
+public final class MangaList implements Serializable, ISiteId, Collection<Manga> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -81,8 +80,7 @@ public final class MangaList implements Serializable, ISiteId,
 		return add(mangaId, displayname, inital, false);
 	}
 
-	public boolean add(String mangaId, String displayname, String inital,
-			boolean dump) {
+	public boolean add(String mangaId, String displayname, String inital, boolean dump) {
 		return add(new Manga(mangaId, displayname, inital, mSiteId), dump);
 	}
 
@@ -251,8 +249,8 @@ public final class MangaList implements Serializable, ISiteId,
 	@Override
 	public String toString() {
 		if (mMangaKeyList.size() > 24) {
-			return String.format("{ SiteId:%d, Size:%d, MaxPage:%d }", mSiteId,
-					size(), pageIndexMax);
+			return String.format("{ SiteId:%d, Size:%d, MaxPage:%d }", mSiteId, size(),
+					pageIndexMax);
 		}
 
 		ArrayList<String> strings = new ArrayList<String>();
