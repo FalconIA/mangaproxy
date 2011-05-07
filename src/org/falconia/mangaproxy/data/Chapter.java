@@ -77,8 +77,7 @@ public final class Chapter implements Serializable {
 	}
 
 	public boolean hasDynamicImgServer() {
-		return hasDynamicImgServerId() && hasDynamicImgServers()
-				&& dynamicImgServerId >= 0
+		return hasDynamicImgServerId() && hasDynamicImgServers() && dynamicImgServerId >= 0
 				&& dynamicImgServerId < dynamicImgServers.length;
 	}
 
@@ -109,9 +108,8 @@ public final class Chapter implements Serializable {
 	public String toLongString() {
 		return String
 				.format("{ SiteID:%d, MangaID:'%s', ChapterId:'%s', Name:'%s', TypeId:%d, ImgServerId:%d, ImgServers:%d }",
-						siteId, manga.mangaId, chapterId, displayname, typeId,
-						dynamicImgServerId, (dynamicImgServers == null ? 0
-								: dynamicImgServers.length));
+						siteId, manga.mangaId, chapterId, displayname, typeId, dynamicImgServerId,
+						(dynamicImgServers == null ? 0 : dynamicImgServers.length));
 	}
 
 }

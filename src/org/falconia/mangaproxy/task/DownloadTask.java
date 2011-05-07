@@ -127,8 +127,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	}
 
 	private void log(int priority, String msg) {
-		Log.println(priority, AppConst.APP_NAME,
-				String.format("[%s] %s", getTag(), msg));
+		Log.println(priority, AppConst.APP_NAME, String.format("[%s] %s", getTag(), msg));
 	}
 
 	private void logD(String msg) {

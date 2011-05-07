@@ -8,21 +8,25 @@ public final class ActivityInit extends Activity {
 
 	/** Called when the activity is first created. */
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 
 		// initialize static members
 		AppConst.APP_NAME = getString(R.string.app_name);
 		AppConst.APP_PACKAGE = getClass().getPackage().getName();
+		AppConst.APP_FILES_DIR = getFilesDir();
+		AppConst.APP_CACHE_DIR = getCacheDir();
 		AppConst.GENRE_ALL_TEXT = getString(R.string.genre_all);
 		AppConst.UI_CHAPTER_COUNT = getString(R.string.ui_chapter_count);
 		AppConst.UI_LAST_UPDATE = getString(R.string.ui_last_update);
 
 		super.onCreate(savedInstanceState);
 		AppUtils.logV(this, "onCreate()");
+
 		setContentView(R.layout.main);
 		setTitle(String.format("%s (Alpha, Test only)", AppConst.APP_NAME));
 
-		startActivity(new Intent(this, ActivityFavoriteList.class));
+		// startActivity(new Intent(this, ActivityFavoriteList.class));
+		startActivity(new Intent(this, DebugActivity.class));
 	}
 
 	@Override
@@ -33,7 +37,6 @@ public final class ActivityInit extends Activity {
 
 	@Override
 	protected void onResume() {
-		// System.gc();
 		super.onResume();
 		AppUtils.logV(this, "onResume()");
 	}
@@ -48,6 +51,7 @@ public final class ActivityInit extends Activity {
 	protected void onStop() {
 		super.onStop();
 		AppUtils.logV(this, "onStop()");
+
 		finish();
 	}
 
@@ -59,7 +63,8 @@ public final class ActivityInit extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		// System.gc();
+		System.gc();
+
 		super.onDestroy();
 		AppUtils.logV(this, "onDestroy()");
 	}

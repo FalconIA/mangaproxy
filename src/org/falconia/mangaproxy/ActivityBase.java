@@ -32,12 +32,10 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public abstract class ActivityBase extends ListActivity implements
-		OnFocusChangeListener, OnTouchListener, OnItemClickListener,
-		OnItemLongClickListener, OnSourceProcessListener {
+public abstract class ActivityBase extends ListActivity implements OnFocusChangeListener,
+		OnTouchListener, OnItemClickListener, OnItemLongClickListener, OnSourceProcessListener {
 
-	protected final class SourceDownloader implements OnDownloadListener,
-			OnCancelListener {
+	protected final class SourceDownloader implements OnDownloadListener, OnCancelListener {
 
 		private final DownloadTask mDownloader;
 		private final String mCharset;
@@ -62,9 +60,8 @@ public abstract class ActivityBase extends ListActivity implements
 			setProgressBarIndeterminateVisibility(false);
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
-				setNoItemsMessage(String
-						.format(getString(R.string.ui_error_on_download),
-								getSiteName()));
+				setNoItemsMessage(String.format(getString(R.string.ui_error_on_download),
+						getSiteName()));
 				return;
 			}
 			try {
@@ -73,8 +70,7 @@ public abstract class ActivityBase extends ListActivity implements
 				AppUtils.logE(this, "dismissDialog(DIALOG_DOWNLOAD_ID)");
 			}
 
-			String source = EncodingUtils.getString(result, 0, result.length,
-					mCharset);
+			String source = EncodingUtils.getString(result, 0, result.length, mCharset);
 			// AppUtils.logV(this, source);
 
 			startProcessSource(source);
@@ -102,13 +98,11 @@ public abstract class ActivityBase extends ListActivity implements
 				message = getString(R.string.dialog_download_message);
 			} else {
 				title = getString(R.string.dialog_download_title);
-				message = String.format(
-						getString(R.string.dialog_download_message_format),
-						what, "0.000B");
+				message = String.format(getString(R.string.dialog_download_message_format), what,
+						"0.000B");
 			}
-			mMessage = String.format(
-					getString(R.string.dialog_download_message_format), what,
-					"%s");
+			mMessage = String
+					.format(getString(R.string.dialog_download_message_format), what, "%s");
 			ProgressDialog dialog = createProgressDialog(title, message, true);
 			dialog.setOnCancelListener(this);
 			mDownloadDialog = dialog;
@@ -124,8 +118,7 @@ public abstract class ActivityBase extends ListActivity implements
 		}
 
 		public void cancelDownload() {
-			if (mDownloader != null
-					&& mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
+			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
 				mDownloader.cancel(true);
 			}
@@ -155,9 +148,10 @@ public abstract class ActivityBase extends ListActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		AppUtils.logV(this, "onCreate()");
+
 		mProcessed = getProcessed(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		AppUtils.logV(this, "onCreate()");
 	}
 
 	@Override
@@ -194,29 +188,33 @@ public abstract class ActivityBase extends ListActivity implements
 	@Override
 	protected void onDestroy() {
 		System.gc();
+
 		super.onDestroy();
 		AppUtils.logV(this, "onDestroy()");
+
+		stopTask();
+
+		final ListView list = getListView();
+		list.setOnScrollListener(null);
+		list.setOnFocusChangeListener(null);
+		list.setOnTouchListener(null);
+		list.setOnItemClickListener(null);
+		list.setOnItemLongClickListener(null);
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		if (mSourceDownloader != null) {
-			mSourceDownloader.cancelDownload();
-		}
-		if (mSourceProcessTask != null) {
-			mSourceProcessTask.cancel(true);
-		}
-		removeDialog(DIALOG_DOWNLOAD_ID);
-		removeDialog(DIALOG_PROCESS_ID);
-		outState.putBoolean(BUNDLE_KEY_IS_PROCESSED, mProcessed);
 		super.onSaveInstanceState(outState);
 		AppUtils.logV(this, "onSaveInstanceState()");
+
+		stopTask();
+
+		outState.putBoolean(BUNDLE_KEY_IS_PROCESSED, mProcessed);
 	}
 
 	protected boolean getProcessed(Bundle savedInstanceState) {
 		boolean processed = false;
-		if (savedInstanceState != null
-				&& savedInstanceState.containsKey(BUNDLE_KEY_IS_PROCESSED)) {
+		if (savedInstanceState != null && savedInstanceState.containsKey(BUNDLE_KEY_IS_PROCESSED)) {
 			processed = savedInstanceState.getBoolean(BUNDLE_KEY_IS_PROCESSED);
 		}
 		return processed;
@@ -250,15 +248,13 @@ public abstract class ActivityBase extends ListActivity implements
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position,
-			long id) {
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public boolean onItemLongClick(AdapterView<?> parent, View view,
-			int position, long id) {
+	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 		// TODO Auto-generated method stub
 
 		return false;
@@ -293,8 +289,7 @@ public abstract class ActivityBase extends ListActivity implements
 		}
 		mProcessed = true;
 		if (size <= 0) {
-			setNoItemsMessage(String.format(
-					getString(R.string.ui_error_on_process), getSiteName()));
+			setNoItemsMessage(String.format(getString(R.string.ui_error_on_process), getSiteName()));
 		}
 		if (mShowProcessDialog) {
 			dismissDialog(DIALOG_PROCESS_ID);
@@ -305,6 +300,17 @@ public abstract class ActivityBase extends ListActivity implements
 	protected void startProcessSource(String source) {
 		mSourceProcessTask = new SourceProcessTask(ActivityBase.this);
 		mSourceProcessTask.execute(source);
+	}
+
+	protected void stopTask() {
+		if (mSourceDownloader != null) {
+			mSourceDownloader.cancelDownload();
+		}
+		if (mSourceProcessTask != null) {
+			mSourceProcessTask.cancel(true);
+		}
+		removeDialog(DIALOG_DOWNLOAD_ID);
+		removeDialog(DIALOG_PROCESS_ID);
 	}
 
 	protected void setCustomTitle(String string) {
@@ -342,13 +348,11 @@ public abstract class ActivityBase extends ListActivity implements
 
 		list.setEmptyView(findViewById(R.id.mvgEmpty));
 
-		if (list instanceof PinnedHeaderListView
-				&& mListAdapter.getDisplaySectionHeadersEnabled()) {
+		if (list instanceof PinnedHeaderListView && mListAdapter.getDisplaySectionHeadersEnabled()) {
 			// mPinnedHeaderBackgroundColor =
 			// getResources().getColor(R.color.pinned_header_background);
 			PinnedHeaderListView pinnedHeaderList = (PinnedHeaderListView) list;
-			View pinnedHeader = inflater.inflate(R.layout.list_section, list,
-					false);
+			View pinnedHeader = inflater.inflate(R.layout.list_section, list, false);
 			pinnedHeaderList.setPinnedHeaderView(pinnedHeader);
 		}
 
@@ -362,8 +366,8 @@ public abstract class ActivityBase extends ListActivity implements
 		// list.setSaveEnabled(false);
 	}
 
-	protected ProgressDialog createProgressDialog(CharSequence title,
-			CharSequence message, boolean cancelable) {
+	protected ProgressDialog createProgressDialog(CharSequence title, CharSequence message,
+			boolean cancelable) {
 		ProgressDialog dialog = new ProgressDialog(this);
 		dialog.setTitle(title);
 		dialog.setMessage(message);
@@ -371,8 +375,7 @@ public abstract class ActivityBase extends ListActivity implements
 		return dialog;
 	}
 
-	protected ProgressDialog createProgressDialog(CharSequence title,
-			CharSequence message) {
+	protected ProgressDialog createProgressDialog(CharSequence title, CharSequence message) {
 		return createProgressDialog(title, message, false);
 	}
 
@@ -383,8 +386,7 @@ public abstract class ActivityBase extends ListActivity implements
 			message = getString(R.string.dialog_loading_message);
 		} else {
 			title = getString(R.string.dialog_loading_title);
-			message = String.format(
-					getString(R.string.dialog_loading_message_format), what);
+			message = String.format(getString(R.string.dialog_loading_message_format), what);
 		}
 		return createProgressDialog(title, message, false);
 	}
@@ -404,8 +406,7 @@ public abstract class ActivityBase extends ListActivity implements
 			message = getString(R.string.dialog_process_message);
 		} else {
 			title = getString(R.string.dialog_process_title);
-			message = String.format(
-					getString(R.string.dialog_process_message_format), what);
+			message = String.format(getString(R.string.dialog_process_message_format), what);
 		}
 		return createProgressDialog(title, message, false);
 	}
@@ -417,8 +418,7 @@ public abstract class ActivityBase extends ListActivity implements
 	private void hideSoftKeyboard() {
 		// Hide soft keyboard, if visible
 		InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		inputMethodManager.hideSoftInputFromWindow(getListView()
-				.getWindowToken(), 0);
+		inputMethodManager.hideSoftInputFromWindow(getListView().getWindowToken(), 0);
 	}
 
 }

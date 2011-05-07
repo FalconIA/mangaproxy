@@ -8,7 +8,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,21 +31,18 @@ public final class ActivityFavoriteList extends ActivityBase {
 	}
 
 	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && !event.isLongPress()) {
-			showDialog(DIALOG_CLOSE_ID);
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
-	}
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.activity_favorite_list);
 		setNoItemsMessage(R.string.ui_no_favorite_items);
 
 		setupListView(new MangaListAdapter(this));
+	}
+
+	@Override
+	public void onBackPressed() {
+		showDialog(DIALOG_CLOSE_ID);
 	}
 
 	@Override
@@ -56,8 +52,8 @@ public final class ActivityFavoriteList extends ActivityBase {
 		MenuItem menuSource = menu.findItem(R.id.mmiSource);
 		SubMenu submenuSource = menuSource.getSubMenu();
 		for (int pluginId : Plugins.getPluginIds()) {
-			submenuSource.add(R.id.mmgSourceGroup, pluginId, Menu.NONE, Plugins
-					.getPlugin(pluginId).getDisplayname());
+			submenuSource.add(R.id.mmgSourceGroup, pluginId, Menu.NONE, Plugins.getPlugin(pluginId)
+					.getDisplayname());
 		}
 		return true;
 	}
@@ -92,11 +88,9 @@ public final class ActivityFavoriteList extends ActivityBase {
 	private void onSourceSelected(int siteId) {
 		Site site = Site.get(siteId);
 		if (site.hasGenreList()) {
-			ActivityGenreList.IntentHandler
-					.startActivityGenreList(this, siteId);
+			ActivityGenreList.IntentHandler.startActivityGenreList(this, siteId);
 		} else {
-			ActivityMangaList.IntentHandler.startActivityAllMangaList(this,
-					siteId);
+			ActivityMangaList.IntentHandler.startActivityAllMangaList(this, siteId);
 		}
 	}
 

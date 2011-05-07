@@ -35,8 +35,7 @@ public final class ActivityMangaList extends ActivityBase {
 		}
 
 		protected static Genre getGenre(ActivityMangaList activity) {
-			return (Genre) activity.getIntent().getExtras()
-					.getSerializable(BUNDLE_KEY_GENRE_DATA);
+			return (Genre) activity.getIntent().getExtras().getSerializable(BUNDLE_KEY_GENRE_DATA);
 		}
 
 		public static void startActivityMangaList(Context context, Genre genre) {
@@ -49,8 +48,7 @@ public final class ActivityMangaList extends ActivityBase {
 
 	}
 
-	private final class NextPageDownloader implements OnDownloadListener,
-			OnSourceProcessListener {
+	private final class NextPageDownloader implements OnDownloadListener, OnSourceProcessListener {
 
 		public static final int MODE_DEFAULT = 0;
 		public static final int MODE_DOWNLOAD = 1;
@@ -71,8 +69,7 @@ public final class ActivityMangaList extends ActivityBase {
 		public NextPageDownloader() {
 			mCharset = Plugins.getPlugin(getSiteId()).getCharset();
 
-			mListItem = getLayoutInflater().inflate(R.layout.list_item_load,
-					null);
+			mListItem = getLayoutInflater().inflate(R.layout.list_item_load, null);
 			mProgress = (ProgressBar) mListItem.findViewById(R.id.mpbProgress);
 			mMessage = (TextView) mListItem.findViewById(R.id.mtvMessage);
 			mDescribe = (TextView) mListItem.findViewById(R.id.mtvDescribe);
@@ -90,27 +87,23 @@ public final class ActivityMangaList extends ActivityBase {
 			AppUtils.logV(this, "onPostDownload()");
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
-				setNoItemsMessage(String
-						.format(getString(R.string.ui_error_on_download),
-								getSiteName()));
+				setNoItemsMessage(String.format(getString(R.string.ui_error_on_download),
+						getSiteName()));
 				setMode(MODE_DOWNLOAD_ERROR);
 				return;
 			}
 
-			String source = EncodingUtils.getString(result, 0, result.length,
-					mCharset);
+			String source = EncodingUtils.getString(result, 0, result.length, mCharset);
 			// AppUtils.logV(this, source);
 
 			setMode(MODE_PROCESS);
-			ActivityMangaList.this.mSourceProcessTask = new SourceProcessTask(
-					this);
+			ActivityMangaList.this.mSourceProcessTask = new SourceProcessTask(this);
 			ActivityMangaList.this.mSourceProcessTask.execute(source);
 		}
 
 		@Override
 		public void onDownloadProgressUpdate(int value, int total) {
-			mMessage.setText(String.format(
-					getString(R.string.ui_download_page), (value) / 1024.0f));
+			mMessage.setText(String.format(getString(R.string.ui_download_page), (value) / 1024.0f));
 		}
 
 		@Override
@@ -132,11 +125,10 @@ public final class ActivityMangaList extends ActivityBase {
 		public void onPostSourceProcess(int size) {
 			AppUtils.logV(this, "onPostSourceProcess()");
 			if (size > 0) {
-				((MangaListAdapter) ActivityMangaList.this.mListAdapter)
-						.setMangaList(mMangaList);
+				((MangaListAdapter) ActivityMangaList.this.mListAdapter).setMangaList(mMangaList);
 				mPageLoaded++;
-				AppUtils.popupMessage(ActivityMangaList.this, String.format(
-						getString(R.string.popup_loaded_page), mPageLoaded));
+				AppUtils.popupMessage(ActivityMangaList.this,
+						String.format(getString(R.string.popup_loaded_page), mPageLoaded));
 				setMode(MODE_DEFAULT);
 			} else {
 				setMode(MODE_PROCESS_ERROR);
@@ -157,45 +149,39 @@ public final class ActivityMangaList extends ActivityBase {
 			switch (mMode) {
 			case MODE_DEFAULT:
 				if (mPageLoaded < mPageMax) {
-					setCustomTitle(String.format("%s (%d/%d)",
-							mGenre.displayname, mPageLoaded, mPageMax));
+					setCustomTitle(String.format("%s (%d/%d)", mGenre.displayname, mPageLoaded,
+							mPageMax));
 				}
 				setProgressBarIndeterminateVisibility(false);
 				mProgress.setVisibility(View.GONE);
 				mMessage.setText(R.string.ui_load_next_page);
-				mDescribe.setText(String.format("(%d/%d)", mPageLoaded + 1,
-						mPageMax));
+				mDescribe.setText(String.format("(%d/%d)", mPageLoaded + 1, mPageMax));
 				break;
 			case MODE_DOWNLOAD:
 				setProgressBarIndeterminateVisibility(true);
 				mProgress.setVisibility(View.VISIBLE);
-				mMessage.setText(String.format(
-						getString(R.string.ui_download_page), 0.0f));
-				mDescribe.setText(String.format("(%s)",
-						getString(R.string.ui_click_to_cancel)));
+				mMessage.setText(String.format(getString(R.string.ui_download_page), 0.0f));
+				mDescribe.setText(String.format("(%s)", getString(R.string.ui_click_to_cancel)));
 				break;
 			case MODE_PROCESS:
 				setProgressBarIndeterminateVisibility(true);
 				mProgress.setVisibility(View.VISIBLE);
 				mMessage.setText(R.string.ui_process_page);
-				mDescribe.setText(String.format("(%d/%d)", mPageLoaded + 1,
-						mPageMax));
+				mDescribe.setText(String.format("(%d/%d)", mPageLoaded + 1, mPageMax));
 				break;
 			case MODE_DOWNLOAD_ERROR:
 				setProgressBarIndeterminateVisibility(false);
 				mProgress.setVisibility(View.GONE);
 				mMessage.setText(R.string.ui_error);
-				mDescribe.setText(String.format("(%s)", String.format(
-						getString(R.string.ui_fail_to_download),
-						mPageLoaded + 1)));
+				mDescribe.setText(String.format("(%s)",
+						String.format(getString(R.string.ui_fail_to_download), mPageLoaded + 1)));
 				break;
 			case MODE_PROCESS_ERROR:
 				setProgressBarIndeterminateVisibility(false);
 				mProgress.setVisibility(View.GONE);
 				mMessage.setText(R.string.ui_error);
-				mDescribe.setText(String.format("(%s)", String
-						.format(getString(R.string.ui_fail_to_process),
-								mPageLoaded + 1)));
+				mDescribe.setText(String.format("(%s)",
+						String.format(getString(R.string.ui_fail_to_process), mPageLoaded + 1)));
 				break;
 			}
 		}
@@ -210,8 +196,7 @@ public final class ActivityMangaList extends ActivityBase {
 				break;
 			case MODE_DOWNLOAD:
 				AppUtils.logV(this, "click() @MODE_DOWNLOAD");
-				if (mDownloader != null
-						&& mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
+				if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 					mDownloader.cancel(true);
 				}
 				setMode(MODE_DEFAULT);
@@ -225,8 +210,7 @@ public final class ActivityMangaList extends ActivityBase {
 		}
 
 		public void cancelDownload() {
-			if (mDownloader != null
-					&& mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
+			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
 				mDownloader.cancel(true);
 			}
@@ -270,7 +254,7 @@ public final class ActivityMangaList extends ActivityBase {
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		mGenre = IntentHandler.getGenre(this);
@@ -294,26 +278,24 @@ public final class ActivityMangaList extends ActivityBase {
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		if (mNextPageDownloader != null) {
-			mNextPageDownloader.cancelDownload();
-		}
+		super.onSaveInstanceState(outState);
+
 		outState.putSerializable(BUNDLE_KEY_PAGE_MAX, mPageMax);
 		outState.putSerializable(BUNDLE_KEY_PAGE_LOADED, mPageLoaded);
 		outState.putSerializable(BUNDLE_KEY_MANGA_LIST, mMangaList);
-		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+
 		mPageMax = savedInstanceState.getInt(BUNDLE_KEY_PAGE_MAX);
 		mPageLoaded = savedInstanceState.getInt(BUNDLE_KEY_PAGE_LOADED);
-		mMangaList = (MangaList) savedInstanceState
-				.getSerializable(BUNDLE_KEY_MANGA_LIST);
+		mMangaList = (MangaList) savedInstanceState.getSerializable(BUNDLE_KEY_MANGA_LIST);
 		if (mPageLoaded < mPageMax) {
 			showFooter();
 		}
 		((MangaListAdapter) mListAdapter).setMangaList(mMangaList);
-		super.onRestoreInstanceState(savedInstanceState);
 	}
 
 	@Override
@@ -322,8 +304,7 @@ public final class ActivityMangaList extends ActivityBase {
 		Dialog dialog;
 		switch (id) {
 		case DIALOG_DOWNLOAD_ID:
-			dialog = mSourceDownloader
-					.createDownloadDialog(R.string.source_of_genre_list);
+			dialog = mSourceDownloader.createDownloadDialog(R.string.source_of_genre_list);
 			break;
 		case DIALOG_PROCESS_ID:
 			dialog = createProcessDialog(R.string.source_of_genre_list);
@@ -335,10 +316,8 @@ public final class ActivityMangaList extends ActivityBase {
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position,
-			long id) {
-		if (mNextPageDownloader != null
-				&& view == mNextPageDownloader.getFooter()) {
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		if (mNextPageDownloader != null && view == mNextPageDownloader.getFooter()) {
 			mNextPageDownloader.click();
 		} else {
 			ActivityChapterList.IntentHandler.startActivityMangaList(this,
@@ -383,12 +362,20 @@ public final class ActivityMangaList extends ActivityBase {
 		super.startProcessSource(source);
 	}
 
+	@Override
+	protected void stopTask() {
+		super.stopTask();
+
+		if (mNextPageDownloader != null) {
+			mNextPageDownloader.cancelDownload();
+		}
+	}
+
 	private void loadMangaList() {
 		mUrl = mGenre.getUrl();
 		if (mGenre.isGenreAll() && AppCache.checkCacheForData(mUrl, 3600)) {
 			String source = AppCache.readCacheForData(mUrl);
-			AppUtils.popupMessage(ActivityMangaList.this,
-					R.string.popup_cache_load_allmanga);
+			AppUtils.popupMessage(ActivityMangaList.this, R.string.popup_cache_load_allmanga);
 			startProcessSource(source, false);
 		} else {
 			mSourceDownloader = new SourceDownloader();
@@ -398,8 +385,7 @@ public final class ActivityMangaList extends ActivityBase {
 
 	private void showFooter() {
 		mNextPageDownloader = new NextPageDownloader();
-		getListView()
-				.addFooterView(mNextPageDownloader.getFooter(), null, true);
+		getListView().addFooterView(mNextPageDownloader.getFooter(), null, true);
 		setListAdapter(mListAdapter);
 	}
 

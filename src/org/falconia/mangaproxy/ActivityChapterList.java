@@ -31,8 +31,7 @@ public final class ActivityChapterList extends ActivityBase {
 		}
 
 		protected static Manga getManga(ActivityChapterList activity) {
-			return (Manga) activity.getIntent().getExtras()
-					.getSerializable(BUNDLE_KEY_MANGA_DATA);
+			return (Manga) activity.getIntent().getExtras().getSerializable(BUNDLE_KEY_MANGA_DATA);
 		}
 
 		public static void startActivityMangaList(Context context, Manga manga) {
@@ -79,8 +78,7 @@ public final class ActivityChapterList extends ActivityBase {
 			if (convertView == null) {
 				holder = new ViewHolder();
 				convertView = mInflater.inflate(R.layout.list_item_genre, null);
-				holder.tvDisplayname = (TextView) convertView
-						.findViewById(R.id.mtvDisplayname);
+				holder.tvDisplayname = (TextView) convertView.findViewById(R.id.mtvDisplayname);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
 			}
@@ -88,8 +86,7 @@ public final class ActivityChapterList extends ActivityBase {
 			Chapter chapter = mChapterList.getAt(position);
 			holder.tvDisplayname.setText(chapter.displayname);
 			if (chapter.typeId == Chapter.TYPE_ID_VOLUME) {
-				holder.tvDisplayname.setTextColor(getResources().getColor(
-						R.color.highlight));
+				holder.tvDisplayname.setTextColor(getResources().getColor(R.color.highlight));
 			} else {
 				holder.tvDisplayname.setTextColor(getResources().getColor(
 						android.R.color.primary_text_dark));
@@ -103,8 +100,8 @@ public final class ActivityChapterList extends ActivityBase {
 		}
 
 		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem,
-				int visibleItemCount, int totalItemCount) {
+		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+				int totalItemCount) {
 			// TODO Auto-generated method stub
 
 		}
@@ -143,7 +140,7 @@ public final class ActivityChapterList extends ActivityBase {
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		mManga = IntentHandler.getManga(this);
@@ -165,16 +162,17 @@ public final class ActivityChapterList extends ActivityBase {
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putSerializable(BUNDLE_KEY_CHAPTER_LIST, mChapterList);
 		super.onSaveInstanceState(outState);
+
+		outState.putSerializable(BUNDLE_KEY_CHAPTER_LIST, mChapterList);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		mChapterList = (ChapterList) savedInstanceState
-				.getSerializable(BUNDLE_KEY_CHAPTER_LIST);
-		((ChapterListAdapter) mListAdapter).setChapterList(mChapterList);
 		super.onRestoreInstanceState(savedInstanceState);
+
+		mChapterList = (ChapterList) savedInstanceState.getSerializable(BUNDLE_KEY_CHAPTER_LIST);
+		((ChapterListAdapter) mListAdapter).setChapterList(mChapterList);
 	}
 
 	@Override
@@ -182,8 +180,7 @@ public final class ActivityChapterList extends ActivityBase {
 		Dialog dialog;
 		switch (id) {
 		case DIALOG_DOWNLOAD_ID:
-			dialog = mSourceDownloader
-					.createDownloadDialog(R.string.source_of_chapter_list);
+			dialog = mSourceDownloader.createDownloadDialog(R.string.source_of_chapter_list);
 			break;
 		case DIALOG_PROCESS_ID:
 			dialog = createProcessDialog(R.string.source_of_chapter_list);
@@ -195,8 +192,7 @@ public final class ActivityChapterList extends ActivityBase {
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position,
-			long id) {
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		ActivityChapter.IntentHandler.startActivityChapter(this, mManga,
 				mChapterList.getAt(position));
 	}

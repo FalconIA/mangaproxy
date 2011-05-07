@@ -86,46 +86,35 @@ public class HttpHelper_old {
 	private static final DefaultHttpClient client;
 	static {
 		HttpParams params = new BasicHttpParams();
-		params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION,
-				HttpVersion.HTTP_1_1);
+		params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
 		params.setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, HTTP.UTF_8);
-		params.setParameter(CoreProtocolPNames.USER_AGENT,
-				"Apache-HttpClient/Android");
+		params.setParameter(CoreProtocolPNames.USER_AGENT, "Apache-HttpClient/Android");
 		params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15000);
 		params.setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", PlainSocketFactory
-				.getSocketFactory(), 80));
-		schemeRegistry.register(new Scheme("https", SSLSocketFactory
-				.getSocketFactory(), 443));
-		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(
-				params, schemeRegistry);
+		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+		schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
 		client = new DefaultHttpClient(cm, params);
 		// add gzip decompressor to handle gzipped content in responses
 		// (default we *do* always send accept encoding gzip header in request)
-		HttpHelper_old.client
-				.addResponseInterceptor(new HttpResponseInterceptor() {
-					@Override
-					public void process(final HttpResponse response,
-							final HttpContext context) throws HttpException,
-							IOException {
-						HttpEntity entity = response.getEntity();
-						Header contentEncodingHeader = entity
-								.getContentEncoding();
-						if (contentEncodingHeader != null) {
-							HeaderElement[] codecs = contentEncodingHeader
-									.getElements();
-							for (int i = 0; i < codecs.length; i++) {
-								if (codecs[i].getName().equalsIgnoreCase(
-										HttpHelper_old.GZIP)) {
-									response.setEntity(new GzipDecompressingEntity(
-											response.getEntity()));
-									return;
-								}
-							}
+		HttpHelper_old.client.addResponseInterceptor(new HttpResponseInterceptor() {
+			@Override
+			public void process(final HttpResponse response, final HttpContext context)
+					throws HttpException, IOException {
+				HttpEntity entity = response.getEntity();
+				Header contentEncodingHeader = entity.getContentEncoding();
+				if (contentEncodingHeader != null) {
+					HeaderElement[] codecs = contentEncodingHeader.getElements();
+					for (int i = 0; i < codecs.length; i++) {
+						if (codecs[i].getName().equalsIgnoreCase(HttpHelper_old.GZIP)) {
+							response.setEntity(new GzipDecompressingEntity(response.getEntity()));
+							return;
 						}
 					}
-				});
+				}
+			}
+		});
 	}
 
 	private final ResponseHandler<String> responseHandler;
@@ -145,8 +134,8 @@ public class HttpHelper_old {
 	public HttpHelper_old(final String encoding) {
 		responseHandler = new ResponseHandler<String>() {
 			@Override
-			public String handleResponse(final HttpResponse response)
-					throws HttpResponseException, IOException {
+			public String handleResponse(final HttpResponse response) throws HttpResponseException,
+					IOException {
 				StatusLine statusLine = response.getStatusLine();
 				if (statusLine.getStatusCode() >= 300) {
 					throw new HttpResponseException(statusLine.getStatusCode(),
@@ -154,8 +143,7 @@ public class HttpHelper_old {
 				}
 
 				HttpEntity entity = response.getEntity();
-				return entity == null ? null : EntityUtils.toString(entity,
-						encoding);
+				return entity == null ? null : EntityUtils.toString(entity, encoding);
 			}
 		};
 	}
@@ -165,16 +153,15 @@ public class HttpHelper_old {
 	 * 
 	 */
 	public String performGet(final String url) {
-		return performRequest(null, url, null, null, null, null,
-				HttpHelper_old.GET_TYPE);
+		return performRequest(null, url, null, null, null, null, HttpHelper_old.GET_TYPE);
 	}
 
 	/**
 	 * Perform an HTTP GET operation with user/pass and headers.
 	 * 
 	 */
-	public String performGet(final String url, final String user,
-			final String pass, final Map<String, String> additionalHeaders) {
+	public String performGet(final String url, final String user, final String pass,
+			final Map<String, String> additionalHeaders) {
 		return performRequest(null, url, user, pass, additionalHeaders, null,
 				HttpHelper_old.GET_TYPE);
 	}
@@ -184,8 +171,8 @@ public class HttpHelper_old {
 	 * 
 	 */
 	public String performPost(final String url, final Map<String, String> params) {
-		return performRequest(HttpHelper_old.MIME_FORM_ENCODED, url, null,
-				null, null, params, HttpHelper_old.POST_TYPE);
+		return performRequest(HttpHelper_old.MIME_FORM_ENCODED, url, null, null, null, params,
+				HttpHelper_old.POST_TYPE);
 	}
 
 	/**
@@ -194,11 +181,10 @@ public class HttpHelper_old {
 	 * "application/x-www-form-urlencoded."
 	 * 
 	 */
-	public String performPost(final String url, final String user,
-			final String pass, final Map<String, String> additionalHeaders,
-			final Map<String, String> params) {
-		return performRequest(HttpHelper_old.MIME_FORM_ENCODED, url, user,
-				pass, additionalHeaders, params, HttpHelper_old.POST_TYPE);
+	public String performPost(final String url, final String user, final String pass,
+			final Map<String, String> additionalHeaders, final Map<String, String> params) {
+		return performRequest(HttpHelper_old.MIME_FORM_ENCODED, url, user, pass, additionalHeaders,
+				params, HttpHelper_old.POST_TYPE);
 	}
 
 	/**
@@ -206,34 +192,31 @@ public class HttpHelper_old {
 	 * complicated/flexible version of the method).
 	 * 
 	 */
-	public String performPost(final String contentType, final String url,
-			final String user, final String pass,
-			final Map<String, String> additionalHeaders,
+	public String performPost(final String contentType, final String url, final String user,
+			final String pass, final Map<String, String> additionalHeaders,
 			final Map<String, String> params) {
-		return performRequest(contentType, url, user, pass, additionalHeaders,
-				params, HttpHelper_old.POST_TYPE);
+		return performRequest(contentType, url, user, pass, additionalHeaders, params,
+				HttpHelper_old.POST_TYPE);
 	}
 
 	//
 	// private methods
 	//
-	private String performRequest(final String contentType, final String url,
-			final String user, final String pass,
-			final Map<String, String> headers,
-			final Map<String, String> params, final int requestType) {
+	private String performRequest(final String contentType, final String url, final String user,
+			final String pass, final Map<String, String> headers, final Map<String, String> params,
+			final int requestType) {
 
 		// add user and pass to client credentials if present
 		if ((user != null) && (pass != null)) {
-			HttpHelper_old.client.getCredentialsProvider().setCredentials(
-					AuthScope.ANY, new UsernamePasswordCredentials(user, pass));
+			HttpHelper_old.client.getCredentialsProvider().setCredentials(AuthScope.ANY,
+					new UsernamePasswordCredentials(user, pass));
 		}
 
 		// process headers using request interceptor
 		final Map<String, String> sendHeaders = new HashMap<String, String>();
 		// add encoding header for gzip if not present
 		if (!sendHeaders.containsKey(HttpHelper_old.ACCEPT_ENCODING)) {
-			sendHeaders
-					.put(HttpHelper_old.ACCEPT_ENCODING, HttpHelper_old.GZIP);
+			sendHeaders.put(HttpHelper_old.ACCEPT_ENCODING, HttpHelper_old.GZIP);
 		}
 		if ((headers != null) && (headers.size() > 0)) {
 			sendHeaders.putAll(headers);
@@ -242,19 +225,17 @@ public class HttpHelper_old {
 			sendHeaders.put(HttpHelper_old.CONTENT_TYPE, contentType);
 		}
 		if (sendHeaders.size() > 0) {
-			HttpHelper_old.client
-					.addRequestInterceptor(new HttpRequestInterceptor() {
-						@Override
-						public void process(final HttpRequest request,
-								final HttpContext context)
-								throws HttpException, IOException {
-							for (String key : sendHeaders.keySet()) {
-								if (!request.containsHeader(key)) {
-									request.addHeader(key, sendHeaders.get(key));
-								}
-							}
+			HttpHelper_old.client.addRequestInterceptor(new HttpRequestInterceptor() {
+				@Override
+				public void process(final HttpRequest request, final HttpContext context)
+						throws HttpException, IOException {
+					for (String key : sendHeaders.keySet()) {
+						if (!request.containsHeader(key)) {
+							request.addHeader(key, sendHeaders.get(key));
 						}
-					});
+					}
+				}
+			});
 		}
 
 		// handle POST or GET request respectively
@@ -266,18 +247,15 @@ public class HttpHelper_old {
 			if ((params != null) && (params.size() > 0)) {
 				nvps = new ArrayList<NameValuePair>();
 				for (Map.Entry<String, String> entry : params.entrySet()) {
-					nvps.add(new BasicNameValuePair(entry.getKey(), entry
-							.getValue()));
+					nvps.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
 				}
 			}
 			if (nvps != null) {
 				try {
 					HttpPost methodPost = (HttpPost) method;
-					methodPost.setEntity(new UrlEncodedFormEntity(nvps,
-							HTTP.UTF_8));
+					methodPost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 				} catch (UnsupportedEncodingException e) {
-					throw new RuntimeException("Error peforming HTTP request: "
-							+ e.getMessage(), e);
+					throw new RuntimeException("Error peforming HTTP request: " + e.getMessage(), e);
 				}
 			}
 		} else if (requestType == HttpHelper_old.GET_TYPE) {
@@ -295,12 +273,12 @@ public class HttpHelper_old {
 		try {
 			response = HttpHelper_old.client.execute(method, responseHandler);
 		} catch (ClientProtocolException e) {
-			response = HttpHelper_old.HTTP_RESPONSE_ERROR + " - "
-					+ e.getClass().getSimpleName() + " " + e.getMessage();
+			response = HttpHelper_old.HTTP_RESPONSE_ERROR + " - " + e.getClass().getSimpleName()
+					+ " " + e.getMessage();
 			// e.printStackTrace();
 		} catch (IOException e) {
-			response = HttpHelper_old.HTTP_RESPONSE_ERROR + " - "
-					+ e.getClass().getSimpleName() + " " + e.getMessage();
+			response = HttpHelper_old.HTTP_RESPONSE_ERROR + " - " + e.getClass().getSimpleName()
+					+ " " + e.getMessage();
 			// e.printStackTrace();
 		}
 		return response;
@@ -312,8 +290,7 @@ public class HttpHelper_old {
 		}
 
 		@Override
-		public InputStream getContent() throws IOException,
-				IllegalStateException {
+		public InputStream getContent() throws IOException, IllegalStateException {
 			// the wrapped entity's getContent() decides about repeatability
 			InputStream wrappedin = wrappedEntity.getContent();
 			return new GZIPInputStream(wrappedin);

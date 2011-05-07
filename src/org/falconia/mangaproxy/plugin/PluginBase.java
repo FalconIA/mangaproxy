@@ -92,8 +92,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 
 	@Override
 	public String getMangaUrl(Manga manga) {
-		String url = getUrlBase() + getMangaUrlPrefix() + manga.mangaId
-				+ getMangaUrlPostfix();
+		String url = getUrlBase() + getMangaUrlPrefix() + manga.mangaId + getMangaUrlPostfix();
 		logI(Get_URL_of_ChapterList, manga.mangaId, url);
 		return url;
 	}
@@ -103,8 +102,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 		if (isDynamicImgServer()) {
 			throw new RuntimeException("The method should to be overrode.");
 		} else {
-			throw new RuntimeException(
-					"The site is unsupported of Dynamic Img Server.");
+			throw new RuntimeException("The site is unsupported of Dynamic Img Server.");
 		}
 	}
 
@@ -132,12 +130,10 @@ public abstract class PluginBase implements ITag, IPlugin {
 				cal.set(Calendar.YEAR, parseInt(groups.get("YY")));
 			}
 			if (groups.containsKey("Y")) {
-				cal.set(Calendar.YEAR,
-						FormatUtils.year2to4(parseInt(groups.get("Y"))));
+				cal.set(Calendar.YEAR, FormatUtils.year2to4(parseInt(groups.get("Y"))));
 			}
 			if (groups.containsKey("M")) {
-				cal.set(Calendar.MONTH,
-						parseInt(Calendar.JANUARY + groups.get("M")) - 1);
+				cal.set(Calendar.MONTH, parseInt(Calendar.JANUARY + groups.get("M")) - 1);
 			}
 			if (groups.containsKey("D")) {
 				cal.set(Calendar.DAY_OF_MONTH, parseInt(groups.get("D")));

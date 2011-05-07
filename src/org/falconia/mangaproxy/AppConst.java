@@ -6,8 +6,8 @@ public final class AppConst {
 
 	public static String APP_NAME;
 	public static String APP_PACKAGE;
-	public static File APP_EXTERNAL_CACHE_DIR;
-	public static File APP_EXTERNAL_FILES_DIR;
+	public static File APP_FILES_DIR;
+	public static File APP_CACHE_DIR;
 
 	// Genre
 	public static String GENRE_ALL_TEXT = "All";

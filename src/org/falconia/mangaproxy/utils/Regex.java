@@ -25,8 +25,8 @@ public final class Regex {
 		return groups;
 	}
 
-	public static HashMap<String, String> matchGroup(String pattern,
-			String[] groupnames, String subject) {
+	public static HashMap<String, String> matchGroup(String pattern, String[] groupnames,
+			String subject) {
 		HashMap<String, String> groups = new HashMap<String, String>();
 
 		Pattern p = Pattern.compile(pattern);
@@ -44,8 +44,7 @@ public final class Regex {
 		return groups;
 	}
 
-	public static HashMap<String, String> matchGroup(String pattern,
-			String subject) {
+	public static HashMap<String, String> matchGroup(String pattern, String subject) {
 		ArrayList<String> groups = Regex.match("^(.+)\\{(.+?)\\}$", pattern);
 		pattern = groups.get(1);
 		String[] groupnames = split("^\\s*'|'\\s*$|'\\s*,\\s*'", groups.get(2));
@@ -65,8 +64,7 @@ public final class Regex {
 		}
 	}
 
-	public static ArrayList<ArrayList<String>> matchAll(String pattern,
-			String subject) {
+	public static ArrayList<ArrayList<String>> matchAll(String pattern, String subject) {
 		ArrayList<ArrayList<String>> matches = new ArrayList<ArrayList<String>>();
 
 		Pattern p = Pattern.compile(pattern);
@@ -84,11 +82,10 @@ public final class Regex {
 		return matches;
 	}
 
-	public static ArrayList<ArrayList<String>> matchAll(String pattern,
-			String pattern2, String subject) {
+	public static ArrayList<ArrayList<String>> matchAll(String pattern, String pattern2,
+			String subject) {
 		ArrayList<String> groups = match(pattern, subject);
-		if (groups.size() == 0
-				|| (groups.size() > 1 && TextUtils.isEmpty(groups.get(1)))) {
+		if (groups.size() == 0 || (groups.size() > 1 && TextUtils.isEmpty(groups.get(1)))) {
 			return new ArrayList<ArrayList<String>>();
 		} else if (groups.size() == 1) {
 			return matchAll(pattern2, groups.get(0));
