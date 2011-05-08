@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="dummy_pic_md5">
+        <item>2623373D287D0190036EDEC0CFEECA17</item>
+    </string-array>
+    <string-array name="dummy_pic_crc32">
+        <item>E4DDB658</item>
+    </string-array>
+</resources>
