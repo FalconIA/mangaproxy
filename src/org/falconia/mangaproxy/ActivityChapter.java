@@ -90,6 +90,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		@Override
 		public void onPreDownload() {
 			AppUtils.logV(this, "onPreDownload()");
+
 			switch (mMode) {
 			case MODE_CHAPTER:
 				showDialog(DIALOG_LOADING_ID);
@@ -104,6 +105,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		@Override
 		public void onPostDownload(byte[] result) {
 			AppUtils.logV(this, "onPostDownload()");
+
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
 				setMessage(String.format(getString(R.string.ui_error_on_download), getSiteName()));
@@ -119,6 +121,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			case MODE_IMG_SERVERS:
 				// TODO Debug
 				printDebug(mUrl, "Caching");
+
 				AppCache.writeCacheForData(source, mUrl);
 				processImgServersSource(source);
 				break;
@@ -130,6 +133,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			if (mLoadingDialog != null && mLoadingDialog.isShowing()) {
 				String message = null;
 				String filesize = FormatUtils.getFileSizeBtoKB(value);
+
 				switch (mMode) {
 				case MODE_CHAPTER:
 					message = String.format(
@@ -140,6 +144,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 							getString(R.string.dialog_loading_imgsvrs_message_format), filesize);
 					break;
 				}
+
 				if (message != null) {
 					mLoadingDialog.setMessage(message);
 				}
@@ -185,7 +190,11 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		@Override
 		public void onPreDownload() {
 			AppUtils.logV(this, "onPreDownload()");
+
 			mIsDownloading = true;
+
+			// TODO Debug
+			printDebug(mUrl, "Downloading");
 
 			if (mPageIndex == mPageCurrent) {
 				mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page),
@@ -197,27 +206,37 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		@Override
 		public void onPostDownload(byte[] result) {
 			AppUtils.logV(this, "onPostDownload()");
+
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
 				setMessage(String.format(getString(R.string.ui_error_on_download), getSiteName()));
+
 				// TODO Retry to downlaod
+
 				return;
 			}
+
 			if (checkDummyPic(result)) {
 				AppUtils.logE(this, "Dummy picture: " + mUrl);
 			}
+
 			if (!AppCache.writeCacheForImage(result, mUrl, TYPE)) {
 				AppUtils.popupMessage(ActivityChapter.this,
 						String.format(getString(R.string.popup_fail_to_cache_page), mPageIndex));
+
 				mBitmap = BitmapFactory.decodeByteArray(result, 0, result.length);
 			}
+
 			mIsDownloaded = true;
 			mIsDownloading = false;
+
 			if (mPageIndex == mPageCurrent) {
 				mvgStatusBar.setVisibility(View.GONE);
 			}
+
 			// TODO Debug
 			printDebug(mUrl, "Downloaded");
+
 			notifyPageDownloaded(this);
 		}
 
@@ -259,10 +278,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			if (isDownloaded()) {
 				// TODO Debug
 				printDebug(mUrl, "Cached");
+
 				notifyPageDownloaded(this);
 				return;
 			}
+
 			AppUtils.logI(this, String.format("Download image: %s", mUrl));
+
 			mDownloader = new DownloadTask(this, mChapter.getUrl());
 			mDownloader.execute(mUrl);
 		}
@@ -270,6 +292,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		public void cancelDownload() {
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
+
 				mDownloader.cancel(true);
 			}
 		}
@@ -284,8 +307,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			if (mBitmap != null) {
 				return mBitmap;
 			}
+
 			// TODO Debug
 			printDebug(mUrl, "Loading");
+
 			return AppCache.readCacheForImage(mUrl, TYPE);
 		}
 	}
@@ -522,6 +547,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private void loadChapter() {
 		// TODO Debug
 		printDebug(mChapter.getUrl(), "Downloading");
+
 		mSourceDownloader = new SourceDownloader(SourceDownloader.MODE_CHAPTER);
 		mSourceDownloader.download(mChapter.getUrl());
 	}
@@ -541,11 +567,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			if (AppCache.checkCacheForData(urlImgServers, 3600)) {
 				// TODO Debug
 				printDebug(urlImgServers, "Loading");
+
 				source = AppCache.readCacheForData(urlImgServers);
 				processImgServersSource(source);
 			} else {
 				// TODO Debug
 				printDebug(urlImgServers, "Downloading");
+
 				mSourceDownloader.cancelDownload();
 				mSourceDownloader = new SourceDownloader(SourceDownloader.MODE_IMG_SERVERS);
 				mSourceDownloader.download(urlImgServers);
@@ -565,6 +593,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		mPages = new HashMap<Integer, Page>();
 		String imgServer = mChapter.getDynamicImgServer();
+
 		// TODO Debug
 		printDebug(imgServer, "Get DynamicImgServer");
 
@@ -591,6 +620,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 
 		AppUtils.logI(this, String.format("chagePage(%d)", pageIndex));
+
 		mPageCurrent = pageIndex;
 		mtvTitle.setText(getCustomTitle());
 		mvgTitleBar.setVisibility(View.VISIBLE);
