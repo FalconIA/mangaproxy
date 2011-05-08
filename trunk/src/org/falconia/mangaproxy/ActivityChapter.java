@@ -10,23 +10,35 @@ import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.plugin.Plugins;
 import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
+import org.falconia.mangaproxy.utils.FormatUtils;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-public final class ActivityChapter extends Activity {
+public final class ActivityChapter extends Activity implements OnClickListener, OnCancelListener {
 
 	public final static class IntentHandler {
 
@@ -78,13 +90,20 @@ public final class ActivityChapter extends Activity {
 		@Override
 		public void onPreDownload() {
 			AppUtils.logV(this, "onPreDownload()");
-			setProgressBarIndeterminateVisibility(true);
+			switch (mMode) {
+			case MODE_CHAPTER:
+				showDialog(DIALOG_LOADING_ID);
+				break;
+			case MODE_IMG_SERVERS:
+				mLoadingDialog.setMessage(String.format(
+						getString(R.string.dialog_loading_imgsvrs_message_format), "0.000KB"));
+				break;
+			}
 		}
 
 		@Override
 		public void onPostDownload(byte[] result) {
 			AppUtils.logV(this, "onPostDownload()");
-			setProgressBarIndeterminateVisibility(false);
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
 				setMessage(String.format(getString(R.string.ui_error_on_download), getSiteName()));
@@ -108,6 +127,23 @@ public final class ActivityChapter extends Activity {
 
 		@Override
 		public void onDownloadProgressUpdate(int value, int total) {
+			if (mLoadingDialog != null && mLoadingDialog.isShowing()) {
+				String message = null;
+				String filesize = FormatUtils.getFileSizeBtoKB(value);
+				switch (mMode) {
+				case MODE_CHAPTER:
+					message = String.format(
+							getString(R.string.dialog_loading_chapter_message_format), filesize);
+					break;
+				case MODE_IMG_SERVERS:
+					message = String.format(
+							getString(R.string.dialog_loading_imgsvrs_message_format), filesize);
+					break;
+				}
+				if (message != null) {
+					mLoadingDialog.setMessage(message);
+				}
+			}
 		}
 
 		public void download(String url) {
@@ -150,6 +186,12 @@ public final class ActivityChapter extends Activity {
 		public void onPreDownload() {
 			AppUtils.logV(this, "onPreDownload()");
 			mIsDownloading = true;
+
+			if (mPageIndex == mPageCurrent) {
+				mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page),
+						mPageCurrent));
+				mvgStatusBar.setVisibility(View.VISIBLE);
+			}
 		}
 
 		@Override
@@ -171,6 +213,9 @@ public final class ActivityChapter extends Activity {
 			}
 			mIsDownloaded = true;
 			mIsDownloading = false;
+			if (mPageIndex == mPageCurrent) {
+				mvgStatusBar.setVisibility(View.GONE);
+			}
 			// TODO Debug
 			printDebug(mUrl, "Downloaded");
 			notifyPageDownloaded(this);
@@ -178,17 +223,23 @@ public final class ActivityChapter extends Activity {
 
 		@Override
 		public void onDownloadProgressUpdate(int value, int total) {
-
+			if (mPageIndex == mPageCurrent) {
+				if (value == 0) {
+					mpbDownload.setMax(total);
+				}
+				mpbDownload.setProgress(value);
+				mtvDownloaded.setText(String.format("%s / %s", FormatUtils.getFileSizeBtoKB(value),
+						FormatUtils.getFileSizeBtoKB(total)));
+			}
 		}
 
 		public boolean checkCache() {
 			boolean cached = AppCache.checkCacheForImage(mUrl, TYPE);
-			AppUtils.logV(this, String.format("Cached: %b", cached));
 			// this.mIsDownloaded = this.mIsDownloaded || cached;
 			return cached;
 		}
 
-		public boolean isDownload() {
+		public boolean isDownloaded() {
 			if (mIsDownloading) {
 				return false;
 			}
@@ -205,7 +256,7 @@ public final class ActivityChapter extends Activity {
 			if (mIsDownloading) {
 				return;
 			}
-			if (isDownload()) {
+			if (isDownloaded()) {
 				// TODO Debug
 				printDebug(mUrl, "Cached");
 				notifyPageDownloaded(this);
@@ -234,12 +285,15 @@ public final class ActivityChapter extends Activity {
 				return mBitmap;
 			}
 			// TODO Debug
-			printDebug(mUrl, "Loading cache");
+			printDebug(mUrl, "Loading");
 			return AppCache.readCacheForImage(mUrl, TYPE);
 		}
 	}
 
 	private static final String BUNDLE_KEY_IS_PROCESSED = "BUNDLE_KEY_IS_PROCESSED";
+
+	private static final int DIALOG_LOADING_ID = 0;
+
 	private static final HashSet<String> DUMMY_PIC_CRC32 = new HashSet<String>();
 
 	private SourceDownloader mSourceDownloader;
@@ -251,9 +305,17 @@ public final class ActivityChapter extends Activity {
 	private HashMap<Integer, Page> mPages;
 	private int mPageCurrent;
 
-	private ImageView mPage;
 	private TextView mtvDebug;
 	private ScrollView msvScroller;
+	private ProgressDialog mLoadingDialog;
+	private ImageView mPageView;
+
+	private LinearLayout mvgTitleBar;
+	private TextView mtvTitle;
+	private LinearLayout mvgStatusBar;
+	private TextView mtvDownloading;
+	private TextView mtvDownloaded;
+	private ProgressBar mpbDownload;
 
 	private boolean mProcessed;
 
@@ -283,11 +345,48 @@ public final class ActivityChapter extends Activity {
 		}
 
 		setContentView(R.layout.activity_chapter);
-		setTitle(getCustomTitle());
+		// setTitle(getCustomTitle());
 
-		mPage = (ImageView) findViewById(R.id.mivPage);
+		// Debug controls
 		mtvDebug = (TextView) findViewById(R.id.mtvDebug);
+		mtvDebug.setClickable(true);
 		msvScroller = (ScrollView) findViewById(R.id.msvScroller);
+		// Page image
+		mPageView = (ImageView) findViewById(R.id.mivPage);
+		// Buttons
+		((Button) findViewById(R.id.mbtnNext)).setOnClickListener(this);
+		((Button) findViewById(R.id.mbtnPrev)).setOnClickListener(this);
+		// Title bar
+		mvgTitleBar = (LinearLayout) findViewById(R.id.mvgTitleBar);
+		mvgTitleBar.setVisibility(View.GONE);
+		mtvTitle = (TextView) findViewById(R.id.mtvTitle);
+		mtvTitle.setText(getCustomTitle());
+		// Status bar
+		mvgStatusBar = (LinearLayout) findViewById(R.id.mvgStatusBar);
+		mvgStatusBar.setVisibility(View.GONE);
+		mtvDownloading = (TextView) findViewById(R.id.mtvDownloading);
+		mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page), 0));
+		mtvDownloaded = (TextView) findViewById(R.id.mtvDownloaded);
+		mpbDownload = (ProgressBar) findViewById(R.id.mpbDownload);
+		mpbDownload.setProgress(0);
+
+		// Listener
+		mtvDebug.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// AppUtils.popupMessage(ActivityChapter.this, "onClick");
+				msvScroller.setVisibility(View.GONE);
+				mtvTitle.setClickable(true);
+				mtvTitle.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						// mtvTitle.setOnClickListener(null);
+						// mtvTitle.setClickable(false);
+						msvScroller.setVisibility(View.VISIBLE);
+					}
+				});
+			}
+		});
 
 		if (!mProcessed) {
 			loadChapter();
@@ -309,6 +408,8 @@ public final class ActivityChapter extends Activity {
 		super.onDestroy();
 		AppUtils.logV(this, "onDestroy()");
 
+		stopTask();
+
 		if (mPages != null) {
 			for (int key : mPages.keySet()) {
 				Page page = mPages.get(key);
@@ -323,6 +424,9 @@ public final class ActivityChapter extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		AppUtils.logV(this, "onSaveInstanceState()");
+
+		stopTask();
+
 		outState.putBoolean(BUNDLE_KEY_IS_PROCESSED, mProcessed);
 	}
 
@@ -330,6 +434,43 @@ public final class ActivityChapter extends Activity {
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		AppUtils.logV(this, "onRestoreInstanceState()");
+	}
+
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		Dialog dialog;
+		switch (id) {
+		case DIALOG_LOADING_ID:
+			mLoadingDialog = createLoadingDialog();
+			return mLoadingDialog;
+		default:
+			dialog = super.onCreateDialog(id);
+		}
+		return dialog;
+	}
+
+	@Override
+	public void onCancel(DialogInterface dialog) {
+		if (mSourceDownloader != null) {
+			mSourceDownloader.cancelDownload();
+		}
+		finish();
+	}
+
+	@Override
+	public void onClick(View v) {
+		if (mPageCurrent < 1 || mPageCurrent > mPages.size()) {
+			return;
+		}
+
+		switch (v.getId()) {
+		case R.id.mbtnNext:
+			AppUtils.popupMessage(this, "Goto Next page.");
+			break;
+		case R.id.mbtnPrev:
+			AppUtils.popupMessage(this, "Goto Previous page.");
+			break;
+		}
 	}
 
 	private boolean getProcessed(Bundle savedInstanceState) {
@@ -352,6 +493,7 @@ public final class ActivityChapter extends Activity {
 				}
 			}
 		}
+		removeDialog(DIALOG_LOADING_ID);
 	}
 
 	private String getCustomTitle() {
@@ -363,8 +505,18 @@ public final class ActivityChapter extends Activity {
 		return title;
 	}
 
-	protected void setMessage(String msg) {
+	private void setMessage(String msg) {
 		((TextView) findViewById(R.id.mtvMessage)).setText(msg);
+	}
+
+	private ProgressDialog createLoadingDialog() {
+		ProgressDialog dialog = new ProgressDialog(this);
+		dialog.setTitle(mChapter.displayname);
+		dialog.setMessage(String.format(getString(R.string.dialog_loading_chapter_message_format),
+				"0.000KB"));
+		dialog.setCancelable(true);
+		dialog.setOnCancelListener(this);
+		return dialog;
 	}
 
 	private void loadChapter() {
@@ -388,7 +540,7 @@ public final class ActivityChapter extends Activity {
 		} else {
 			if (AppCache.checkCacheForData(urlImgServers, 3600)) {
 				// TODO Debug
-				printDebug(urlImgServers, "Loading cache");
+				printDebug(urlImgServers, "Loading");
 				source = AppCache.readCacheForData(urlImgServers);
 				processImgServersSource(source);
 			} else {
@@ -414,7 +566,7 @@ public final class ActivityChapter extends Activity {
 		mPages = new HashMap<Integer, Page>();
 		String imgServer = mChapter.getDynamicImgServer();
 		// TODO Debug
-		printDebug(imgServer, "Get Img Server");
+		printDebug(imgServer, "Get DynamicImgServer");
 
 		for (int i = 0; i < mPageUrls.length; i++) {
 			String url = (imgServer + mPageUrls[i]).replaceAll("(?<!http:)//", "/");
@@ -422,12 +574,26 @@ public final class ActivityChapter extends Activity {
 			mPages.put(i + 1, page);
 		}
 
+		try {
+			dismissDialog(DIALOG_LOADING_ID);
+		} catch (Exception e) {
+			AppUtils.logE(this, "dismissDialog(DIALOG_LOADING_ID)");
+		}
+
+		mProcessed = true;
+
 		chagePage(1);
 	}
 
 	private void chagePage(int pageIndex) {
+		if (pageIndex <= 0 || pageIndex > mPages.size()) {
+			return;
+		}
+
 		AppUtils.logI(this, String.format("chagePage(%d)", pageIndex));
 		mPageCurrent = pageIndex;
+		mtvTitle.setText(getCustomTitle());
+		mvgTitleBar.setVisibility(View.VISIBLE);
 		Page page = mPages.get(mPageCurrent);
 		page.download();
 	}
@@ -435,6 +601,13 @@ public final class ActivityChapter extends Activity {
 	private void preloadPage(int pageIndex) {
 		if (pageIndex - mPageCurrent <= AppConst.IMG_PRELOAD_MAX && pageIndex < mPages.size()) {
 			mPages.get(pageIndex).download();
+		} else {
+			new Handler().postAtTime(new Runnable() {
+				@Override
+				public void run() {
+					msvScroller.setVisibility(View.GONE);
+				}
+			}, SystemClock.uptimeMillis() + 2000);
 		}
 	}
 
@@ -445,7 +618,13 @@ public final class ActivityChapter extends Activity {
 		if (page.mPageIndex == mPageCurrent) {
 			Bitmap bitmap = page.getBitmap();
 			if (bitmap != null) {
-				mPage.setImageBitmap(bitmap);
+				mPageView.setImageBitmap(bitmap);
+				new Handler().postAtTime(new Runnable() {
+					@Override
+					public void run() {
+						mvgTitleBar.setVisibility(View.GONE);
+					}
+				}, SystemClock.uptimeMillis() + 2000);
 			} else {
 				AppUtils.logE(this, "Invalid bitmap.");
 			}

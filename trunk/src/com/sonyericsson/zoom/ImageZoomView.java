@@ -189,9 +189,11 @@ public class ImageZoomView extends View implements Observer {
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 
-		mAspectQuotient.updateAspectQuotient(right - left, bottom - top, mBitmap.getWidth(),
-				mBitmap.getHeight());
-		mAspectQuotient.notifyObservers();
+		if (mBitmap != null) {
+			mAspectQuotient.updateAspectQuotient(right - left, bottom - top, mBitmap.getWidth(),
+					mBitmap.getHeight());
+			mAspectQuotient.notifyObservers();
+		}
 	}
 
 	// implements Observer

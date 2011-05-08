@@ -30,18 +30,14 @@ public final class ActivityInit extends Activity {
 		setContentView(R.layout.main);
 		setTitle(String.format("%s (Alpha, Test only)", AppConst.APP_NAME));
 
-		final int debug = 2;
+		final int debug = 1;
 		switch (debug) {
 		// normal
 		case 0:
 			startActivity(new Intent(this, ActivityFavoriteList.class));
 			break;
-		// start DebugActivity
-		case 1:
-			startActivity(new Intent(this, DebugActivity.class));
-			break;
 		// start ActivityChapter
-		case 2:
+		case 1:
 			Site site = new Site(Plugins.getPlugin(1000));
 			Manga manga = new Manga("174", "魔法先生", null, site.getSiteId());
 			manga.isCompleted = false;
@@ -50,6 +46,10 @@ public final class ActivityInit extends Activity {
 			chapter.typeId = Chapter.TYPE_ID_CHAPTER;
 			chapter.setDynamicImgServerId(3);
 			ActivityChapter.IntentHandler.startActivityChapter(this, manga, chapter);
+			break;
+		// start DebugActivity
+		case 2:
+			startActivity(new Intent(this, DebugActivity.class));
 			break;
 		}
 	}
