@@ -1,6 +1,8 @@
 package org.falconia.mangaproxy;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.zip.CRC32;
 
 import org.apache.http.util.EncodingUtils;
 import org.falconia.mangaproxy.data.Chapter;
@@ -14,10 +16,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.StyleSpan;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public final class ActivityChapter extends Activity {
@@ -61,6 +67,8 @@ public final class ActivityChapter extends Activity {
 		private final int mMode;
 		private final String mCharset;
 
+		private String mUrl;
+
 		public SourceDownloader(int mode) {
 			mDownloader = new DownloadTask(this);
 			mMode = mode;
@@ -90,6 +98,9 @@ public final class ActivityChapter extends Activity {
 				processChapterSource(source);
 				break;
 			case MODE_IMG_SERVERS:
+				// TODO Debug
+				printDebug(mUrl, "Caching");
+				AppCache.writeCacheForData(source, mUrl);
 				processImgServersSource(source);
 				break;
 			}
@@ -100,6 +111,7 @@ public final class ActivityChapter extends Activity {
 		}
 
 		public void download(String url) {
+			mUrl = url;
 			mDownloader.execute(url);
 		}
 
@@ -143,6 +155,15 @@ public final class ActivityChapter extends Activity {
 		@Override
 		public void onPostDownload(byte[] result) {
 			AppUtils.logV(this, "onPostDownload()");
+			if (result == null || result.length == 0) {
+				AppUtils.logE(this, "Downloaded empty source.");
+				setMessage(String.format(getString(R.string.ui_error_on_download), getSiteName()));
+				// TODO Retry to downlaod
+				return;
+			}
+			if (checkDummyPic(result)) {
+				AppUtils.logE(this, "Dummy picture: " + mUrl);
+			}
 			if (!AppCache.writeCacheForImage(result, mUrl, TYPE)) {
 				AppUtils.popupMessage(ActivityChapter.this,
 						String.format(getString(R.string.popup_fail_to_cache_page), mPageIndex));
@@ -150,6 +171,8 @@ public final class ActivityChapter extends Activity {
 			}
 			mIsDownloaded = true;
 			mIsDownloading = false;
+			// TODO Debug
+			printDebug(mUrl, "Downloaded");
 			notifyPageDownloaded(this);
 		}
 
@@ -160,7 +183,7 @@ public final class ActivityChapter extends Activity {
 
 		public boolean checkCache() {
 			boolean cached = AppCache.checkCacheForImage(mUrl, TYPE);
-			AppUtils.logI(this, String.format("Cached: %b", cached));
+			AppUtils.logV(this, String.format("Cached: %b", cached));
 			// this.mIsDownloaded = this.mIsDownloaded || cached;
 			return cached;
 		}
@@ -183,11 +206,13 @@ public final class ActivityChapter extends Activity {
 				return;
 			}
 			if (isDownload()) {
+				// TODO Debug
+				printDebug(mUrl, "Cached");
 				notifyPageDownloaded(this);
 				return;
 			}
-			AppUtils.logV(this, String.format("Download image: %s", mUrl));
-			mDownloader = new DownloadTask(this);
+			AppUtils.logI(this, String.format("Download image: %s", mUrl));
+			mDownloader = new DownloadTask(this, mChapter.getUrl());
 			mDownloader.execute(mUrl);
 		}
 
@@ -208,11 +233,14 @@ public final class ActivityChapter extends Activity {
 			if (mBitmap != null) {
 				return mBitmap;
 			}
+			// TODO Debug
+			printDebug(mUrl, "Loading cache");
 			return AppCache.readCacheForImage(mUrl, TYPE);
 		}
 	}
 
 	private static final String BUNDLE_KEY_IS_PROCESSED = "BUNDLE_KEY_IS_PROCESSED";
+	private static final HashSet<String> DUMMY_PIC_CRC32 = new HashSet<String>();
 
 	private SourceDownloader mSourceDownloader;
 
@@ -221,16 +249,16 @@ public final class ActivityChapter extends Activity {
 
 	private String[] mPageUrls;
 	private HashMap<Integer, Page> mPages;
-	private int mPageMax;
 	private int mPageCurrent;
 
 	private ImageView mPage;
+	private TextView mtvDebug;
+	private ScrollView msvScroller;
 
 	private boolean mProcessed;
 
 	public ActivityChapter() {
 		mProcessed = false;
-		mPageMax = 0;
 		mPageCurrent = 0;
 	}
 
@@ -258,6 +286,8 @@ public final class ActivityChapter extends Activity {
 		setTitle(getCustomTitle());
 
 		mPage = (ImageView) findViewById(R.id.mivPage);
+		mtvDebug = (TextView) findViewById(R.id.mtvDebug);
+		msvScroller = (ScrollView) findViewById(R.id.msvScroller);
 
 		if (!mProcessed) {
 			loadChapter();
@@ -338,39 +368,40 @@ public final class ActivityChapter extends Activity {
 	}
 
 	private void loadChapter() {
+		// TODO Debug
+		printDebug(mChapter.getUrl(), "Downloading");
 		mSourceDownloader = new SourceDownloader(SourceDownloader.MODE_CHAPTER);
 		mSourceDownloader.download(mChapter.getUrl());
 	}
 
 	private void processChapterSource(String source) {
-		// ((TextView) findViewById(R.id.mtvDebug)).append("\n" + source);
-
 		mPageUrls = mChapter.getPageUrls(source);
 
-		if (mPageUrls != null) {
-			mPageMax = mPageUrls.length;
-		} else {
+		if (mPageUrls == null) {
 			setMessage(String.format(getString(R.string.ui_error_on_process), getSiteName()));
 			return;
 		}
 
-		for (String url : mPageUrls) {
-			((TextView) findViewById(R.id.mtvDebug)).append("\n" + url);
-		}
-
 		String urlImgServers = mChapter.getDynamicImgServersUrl();
 		if (TextUtils.isEmpty(urlImgServers)) {
+			// TODO Warning message
 		} else {
-			((TextView) findViewById(R.id.mtvDebug)).append("\n" + urlImgServers);
-			mSourceDownloader.cancelDownload();
-			mSourceDownloader = new SourceDownloader(SourceDownloader.MODE_IMG_SERVERS);
-			mSourceDownloader.download(urlImgServers);
+			if (AppCache.checkCacheForData(urlImgServers, 3600)) {
+				// TODO Debug
+				printDebug(urlImgServers, "Loading cache");
+				source = AppCache.readCacheForData(urlImgServers);
+				processImgServersSource(source);
+			} else {
+				// TODO Debug
+				printDebug(urlImgServers, "Downloading");
+				mSourceDownloader.cancelDownload();
+				mSourceDownloader = new SourceDownloader(SourceDownloader.MODE_IMG_SERVERS);
+				mSourceDownloader.download(urlImgServers);
+			}
 		}
 	}
 
 	private void processImgServersSource(String source) {
-		// ((TextView) findViewById(R.id.mtvDebug)).append("\n" + source);
-
 		if (mChapter.setDynamicImgServers(source)) {
 			return;
 		}
@@ -382,13 +413,13 @@ public final class ActivityChapter extends Activity {
 
 		mPages = new HashMap<Integer, Page>();
 		String imgServer = mChapter.getDynamicImgServer();
-		((TextView) findViewById(R.id.mtvDebug)).append("\n" + imgServer);
+		// TODO Debug
+		printDebug(imgServer, "Get Img Server");
 
 		for (int i = 0; i < mPageUrls.length; i++) {
 			String url = (imgServer + mPageUrls[i]).replaceAll("(?<!http:)//", "/");
 			Page page = new Page(i + 1, url);
 			mPages.put(i + 1, page);
-			((TextView) findViewById(R.id.mtvDebug)).append("\n" + url);
 		}
 
 		chagePage(1);
@@ -402,20 +433,16 @@ public final class ActivityChapter extends Activity {
 	}
 
 	private void preloadPage(int pageIndex) {
-		for (int i = 1; i <= AppConst.IMG_PRELOAD_MAX; i++) {
-			if (pageIndex + i > mPageMax) {
-				break;
-			}
-			mPages.get(pageIndex + i).download();
+		if (pageIndex - mPageCurrent <= AppConst.IMG_PRELOAD_MAX && pageIndex < mPages.size()) {
+			mPages.get(pageIndex).download();
 		}
 	}
 
 	private void notifyPageDownloaded(Page page) {
-		AppUtils.logI(this, "Notify that Page downloaded.");
+		AppUtils.logI(this, String.format("Notify that Page %d downloaded.", page.mPageIndex));
+
+		// current page
 		if (page.mPageIndex == mPageCurrent) {
-			// preload next page
-			preloadPage(mPageCurrent);
-			// current page
 			Bitmap bitmap = page.getBitmap();
 			if (bitmap != null) {
 				mPage.setImageBitmap(bitmap);
@@ -423,5 +450,44 @@ public final class ActivityChapter extends Activity {
 				AppUtils.logE(this, "Invalid bitmap.");
 			}
 		}
+
+		// preload page
+		preloadPage(page.mPageIndex + 1);
 	}
+
+	private boolean checkDummyPic(byte[] data) {
+		if (DUMMY_PIC_CRC32.size() == 0) {
+			String[] array = getResources().getStringArray(R.array.dummy_pic_crc32);
+			for (int i = 0; i < array.length; i++) {
+				DUMMY_PIC_CRC32.add(array[i]);
+			}
+		}
+		CRC32 crc = new CRC32();
+		crc.update(data);
+		String hash = Integer.toHexString((int) crc.getValue()).toUpperCase();
+		return DUMMY_PIC_CRC32.contains(hash);
+	}
+
+	private void printDebug(String msg, String tag) {
+		mtvDebug.append("\n");
+		SpannableString text;
+		if (TextUtils.isEmpty(tag)) {
+			text = new SpannableString(msg);
+		} else {
+			text = new SpannableString(tag + ": " + msg);
+			text.setSpan(new StyleSpan(Typeface.BOLD), 0, tag.length() + 1, 0);
+		}
+		mtvDebug.append(text);
+		mtvDebug.post(new Runnable() {
+			@Override
+			public void run() {
+				msvScroller.smoothScrollBy(0, 100);
+				// msvScroller.fullScroll(ScrollView.FOCUS_DOWN);
+			}
+		});
+	}
+
+	// private void printDebug(String msg) {
+	// printDebug(msg, null);
+	// }
 }

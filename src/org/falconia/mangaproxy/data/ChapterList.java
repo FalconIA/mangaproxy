@@ -13,7 +13,6 @@ public final class ChapterList implements Serializable, ISiteId, Iterable<Chapte
 	private final Manga mManga;
 
 	private int sizeVolume = 0, sizeChapter = 0, sizeUnknow = 0;
-	private String[] dynamicImgServers;
 
 	public ChapterList(Manga manga) {
 		mChapterList = new ArrayList<Chapter>();
@@ -29,10 +28,6 @@ public final class ChapterList implements Serializable, ISiteId, Iterable<Chapte
 		return getAt(position).displayname;
 	}
 
-	public boolean hasDynamicImgServers() {
-		return dynamicImgServers != null && dynamicImgServers.length > 0;
-	}
-
 	@Override
 	public Iterator<Chapter> iterator() {
 		return mChapterList.iterator();
@@ -40,7 +35,6 @@ public final class ChapterList implements Serializable, ISiteId, Iterable<Chapte
 
 	public void add(Chapter chapter) {
 		countType(chapter);
-		setDynamicImgServers(chapter);
 		mChapterList.add(chapter);
 	}
 
@@ -56,7 +50,6 @@ public final class ChapterList implements Serializable, ISiteId, Iterable<Chapte
 
 	public void insert(int position, Chapter chapter) {
 		countType(chapter);
-		setDynamicImgServers(chapter);
 		mChapterList.add(position, chapter);
 	}
 
@@ -65,9 +58,7 @@ public final class ChapterList implements Serializable, ISiteId, Iterable<Chapte
 	}
 
 	public Chapter getAt(int position) {
-		Chapter chapter = mChapterList.get(position);
-		setDynamicImgServers(chapter);
-		return chapter;
+		return mChapterList.get(position);
 	}
 
 	public int size() {
@@ -92,18 +83,11 @@ public final class ChapterList implements Serializable, ISiteId, Iterable<Chapte
 		}
 	}
 
-	private void setDynamicImgServers(Chapter chapter) {
-		if (!chapter.hasDynamicImgServers() && hasDynamicImgServers()) {
-			chapter.setDynamicImgServers(dynamicImgServers);
-		}
-	}
-
 	@Override
 	public String toString() {
-		return String
-				.format("{ SiteId:%d, MangaId:'%s', Size:%d, Volume:%d, Chapter:%d, Unknow:%d, HasDynamicImgServers:%b }",
-						mManga.siteId, mManga.mangaId, size(), sizeVolume, sizeChapter, sizeUnknow,
-						hasDynamicImgServers());
+		return String.format(
+				"{ SiteId:%d, MangaId:'%s', Size:%d, Volume:%d, Chapter:%d, Unknow:%d }",
+				mManga.siteId, mManga.mangaId, size(), sizeVolume, sizeChapter, sizeUnknow);
 	}
 
 }

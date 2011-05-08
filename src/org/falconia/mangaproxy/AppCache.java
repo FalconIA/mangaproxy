@@ -1,12 +1,13 @@
 package org.falconia.mangaproxy;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -66,9 +67,9 @@ public final class AppCache {
 			return false;
 		}
 		try {
-			FileWriter writer = new FileWriter(file);
-			AppUtils.logD(TAG, String.format("Writing file using %s.", writer.getEncoding()));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 			writer.write(data);
+			writer.flush();
 			writer.close();
 			AppUtils.logD(TAG, String.format("Wrote file: %s", file.getPath()));
 			return true;
@@ -92,12 +93,10 @@ public final class AppCache {
 			return false;
 		}
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-			for (byte b : data) {
-				writer.write(b);
-			}
-			writer.flush();
-			writer.close();
+			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+			out.write(data);
+			out.flush();
+			out.close();
 			AppUtils.logD(TAG, String.format("Wrote file: %s", file.getPath()));
 			return true;
 		} catch (IOException e) {
@@ -122,15 +121,12 @@ public final class AppCache {
 				return null;
 			}
 			StringBuilder data = new StringBuilder();
-			FileReader fileReader = new FileReader(file);
-			BufferedReader reader = new BufferedReader(fileReader);
-			AppUtils.logD(TAG, String.format("Reading file using %s.", fileReader.getEncoding()));
+			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				data.append(line + NEW_LINE);
 			}
 			reader.close();
-			fileReader.close();
 			AppUtils.logD(TAG, String.format("Read file: %s", file.getPath()));
 			return data.toString();
 		} catch (IOException e) {
@@ -154,18 +150,7 @@ public final class AppCache {
 				AppUtils.logE(TAG, String.format("File not exists: %s", file.getPath()));
 				return null;
 			}
-			// Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
-			BufferedReader reader = new BufferedReader(new FileReader(file));
-			ArrayList<Byte> data = new ArrayList<Byte>();
-			int b;
-			while ((b = reader.read()) != -1) {
-				data.add((byte) b);
-			}
-			byte[] bytes = new byte[data.size()];
-			for (int i = 0; i < bytes.length; i++) {
-				bytes[i] = data.get(i);
-			}
-			Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+			Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
 			AppUtils.logD(TAG, String.format("Read file: %s", file.getPath()));
 			return bitmap;
 		} catch (Exception e) {

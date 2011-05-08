@@ -1,5 +1,10 @@
 package org.falconia.mangaproxy;
 
+import org.falconia.mangaproxy.data.Chapter;
+import org.falconia.mangaproxy.data.Manga;
+import org.falconia.mangaproxy.data.Site;
+import org.falconia.mangaproxy.plugin.Plugins;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,8 +30,28 @@ public final class ActivityInit extends Activity {
 		setContentView(R.layout.main);
 		setTitle(String.format("%s (Alpha, Test only)", AppConst.APP_NAME));
 
-		// startActivity(new Intent(this, ActivityFavoriteList.class));
-		startActivity(new Intent(this, DebugActivity.class));
+		final int debug = 2;
+		switch (debug) {
+		// normal
+		case 0:
+			startActivity(new Intent(this, ActivityFavoriteList.class));
+			break;
+		// start DebugActivity
+		case 1:
+			startActivity(new Intent(this, DebugActivity.class));
+			break;
+		// start ActivityChapter
+		case 2:
+			Site site = new Site(Plugins.getPlugin(1000));
+			Manga manga = new Manga("174", "魔法先生", null, site.getSiteId());
+			manga.isCompleted = false;
+			manga.chapterCount = 323;
+			Chapter chapter = new Chapter("73996", "魔法先生323集", manga);
+			chapter.typeId = Chapter.TYPE_ID_CHAPTER;
+			chapter.setDynamicImgServerId(3);
+			ActivityChapter.IntentHandler.startActivityChapter(this, manga, chapter);
+			break;
+		}
 	}
 
 	@Override

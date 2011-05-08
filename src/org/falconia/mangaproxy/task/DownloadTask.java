@@ -22,11 +22,17 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	private int mFileSize;
 	private int mDownloaded;
 	private OnDownloadListener mListener;
+	private String mReferer;
 
 	public DownloadTask(OnDownloadListener listener) {
 		mFileSize = 0;
 		mDownloaded = 0;
 		mListener = listener;
+	}
+
+	public DownloadTask(OnDownloadListener listener, String referer) {
+		this(listener);
+		mReferer = referer;
 	}
 
 	@Override
@@ -63,6 +69,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 			connection = (HttpURLConnection) (new URL(url)).openConnection();
 			connection.setConnectTimeout(TIME_OUT_CONNECT);
 			connection.setReadTimeout(TIME_OUT_READ);
+			connection.setRequestProperty("Referer", mReferer);
 
 			int statusCode = connection.getResponseCode();
 			if (statusCode >= 400) {
