@@ -9,7 +9,6 @@ import org.falconia.mangaproxy.task.SourceProcessTask;
 import org.falconia.mangaproxy.ui.BaseListAdapter;
 import org.falconia.mangaproxy.ui.PinnedHeaderListView;
 import org.falconia.mangaproxy.utils.FormatUtils;
-import org.falconia.mangaproxy.utils.FormatUtils.FileSizeUnit;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -78,8 +77,8 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 
 		@Override
 		public void onDownloadProgressUpdate(int value, int total) {
-			mDownloadDialog.setMessage(String.format(mMessage,
-					FormatUtils.getFileSize(value, FileSizeUnit.B)));
+			mDownloadDialog
+					.setMessage(String.format(mMessage, FormatUtils.getFileSizeBtoKB(value)));
 		}
 
 		@Override
@@ -99,7 +98,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 			} else {
 				title = getString(R.string.dialog_download_title);
 				message = String.format(getString(R.string.dialog_download_message_format), what,
-						"0.000B");
+						"0.000KB");
 			}
 			mMessage = String
 					.format(getString(R.string.dialog_download_message_format), what, "%s");

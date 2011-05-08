@@ -50,6 +50,10 @@ public final class FormatUtils {
 		return getFileSize(size, FileSizeUnit.B);
 	}
 
+	public static String getFileSizeBtoKB(double size) {
+		return String.format("%.3fKB", size / 1024d);
+	}
+
 	public static int year2to4(int year) {
 		if (year > 100) {
 			throw new InvalidParameterException("Invalid year digits.");

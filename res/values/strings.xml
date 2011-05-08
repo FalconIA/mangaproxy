@@ -19,6 +19,8 @@
 	<string name="dialog_process_title">@string/ui_process_data</string>
 	<string name="dialog_process_message">Processing, please wait...</string>
 	<string name="dialog_process_message_format">Processing %s...</string>
+	<string name="dialog_loading_chapter_message_format">Loading chapter...              \nDownload: %s</string>
+	<string name="dialog_loading_imgsvrs_message_format">Loading dynamic image servers...\nDownload: %s</string>
 	<string name="source_of_genre_list">the list of Genre</string>
 	<string name="source_of_manga_list">the list of Manga</string>
 	<string name="source_of_chapter_list">the list of Chapter</string>
@@ -45,6 +47,7 @@
 	<string name="ui_pages">Page - / -</string>
 	<string name="ui_pages_format">Page %1$d / %2$d</string>
 	<string name="ui_page">Page %d</string>
+	<string name="ui_downloading_page">Downloading Page %d ...</string>
 	<string name="popup_loaded_page">Loaded Page %d of current Genre.</string>
 	<string name="popup_cache_save_allmanga">Cached the source of all manga.</string>
 	<string name="popup_cache_load_allmanga">Loaded the source of all manga from cache.</string>

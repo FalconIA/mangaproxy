@@ -96,23 +96,19 @@ public final class ActivityFavoriteList extends ActivityBase {
 
 	private Dialog createExitConfirmDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(getString(R.string.dialog_confirm_to_exit))
-				.setCancelable(false)
-				.setPositiveButton(getString(R.string.dialog_ok),
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int id) {
-								ActivityFavoriteList.this.finish();
-								System.exit(0);
-							}
-						})
-				.setNegativeButton(getString(R.string.dialog_cancel),
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
+		builder.setMessage(R.string.dialog_confirm_to_exit).setCancelable(false)
+				.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						ActivityFavoriteList.this.finish();
+						System.exit(0);
+					}
+				}).setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
 		return builder.create();
 	}
 
