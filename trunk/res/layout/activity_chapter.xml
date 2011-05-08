@@ -15,7 +15,7 @@
 		</LinearLayout>
 	</ScrollView>
 	<ScrollView android:layout_width="match_parent" android:id="@+id/msvScroller"
-		android:clickable="false" android:layout_height="55.0dip"
+		android:clickable="false" android:layout_height="110.0dip"
 		android:background="@drawable/safe_mode_background"
 		android:layout_below="@+id/mvgTitleBar">
 		<TextView android:layout_height="wrap_content"
