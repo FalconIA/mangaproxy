@@ -22,8 +22,9 @@ public final class AppEnv {
 	}
 
 	public static File getExternalFilesDir() throws IOException {
-		if (TextUtils.isEmpty(AppConst.APP_PACKAGE))
+		if (TextUtils.isEmpty(AppConst.APP_PACKAGE)) {
 			throw new IOException("Invalid package name.");
+		}
 		return new File(Environment.getExternalStorageDirectory(), String.format("Android/data/%s",
 				AppConst.APP_PACKAGE));
 	}

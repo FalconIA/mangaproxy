@@ -4,6 +4,8 @@ import java.io.File;
 
 public final class AppConst {
 
+	public static int DEBUG;
+
 	public static String APP_NAME;
 	public static String APP_PACKAGE;
 	public static File APP_FILES_DIR;

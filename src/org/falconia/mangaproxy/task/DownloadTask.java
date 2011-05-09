@@ -23,7 +23,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	private int mDownloaded;
 	private OnDownloadListener mListener;
 	private String mReferer;
-	
+
 	private boolean mCancelled = false;
 
 	public DownloadTask(OnDownloadListener listener) {

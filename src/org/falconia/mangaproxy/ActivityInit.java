@@ -30,8 +30,8 @@ public final class ActivityInit extends Activity {
 		setContentView(R.layout.main);
 		setTitle(String.format("%s (Alpha, Test only)", AppConst.APP_NAME));
 
-		final int debug = 1;
-		switch (debug) {
+		AppConst.DEBUG = 0;
+		switch (AppConst.DEBUG) {
 		// normal
 		case 0:
 			startActivity(new Intent(this, ActivityFavoriteList.class));
