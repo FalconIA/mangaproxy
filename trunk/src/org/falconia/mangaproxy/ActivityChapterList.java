@@ -193,6 +193,7 @@ public final class ActivityChapterList extends ActivityBase {
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		mManga.chapterList = mChapterList;
 		ActivityChapter.IntentHandler.startActivityChapter(this, mManga,
 				mChapterList.getAt(position));
 	}

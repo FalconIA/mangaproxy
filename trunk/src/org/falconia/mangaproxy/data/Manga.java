@@ -27,6 +27,9 @@ public final class Manga implements Serializable {
 
 	private String mDetailsTemplate;
 
+	// for Intent
+	public ChapterList chapterList = null;
+
 	// for Favorite
 	public boolean isFavorite = false;
 	public boolean hasNewChapter = false;
@@ -34,7 +37,7 @@ public final class Manga implements Serializable {
 	private Chapter mLastReadChapter = null;
 	private Chapter mLatestChapter = null;
 
-	// for extra info
+	// for Extra Info
 	public transient Bitmap extraInfoCoverBitmap = null;
 	public transient String extraInfoArtist = null;
 	public transient String extraInfoAuthor = null;
