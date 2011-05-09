@@ -457,24 +457,26 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		mpbDownload = (ProgressBar) findViewById(R.id.mpbDownload);
 		mpbDownload.setProgress(0);
 
-		// Listener
-		mtvDebug.setClickable(true);
-		mtvDebug.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				msvScroller.setVisibility(View.GONE);
-			}
-		});
-		mtvTitle.setClickable(true);
-		mtvTitle.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// mtvTitle.setOnClickListener(null);
-				// mtvTitle.setClickable(false);
-				msvScroller.setVisibility(View.VISIBLE);
-				msvScroller.fullScroll(ScrollView.FOCUS_DOWN);
-			}
-		});
+		if (AppConst.DEBUG > 0) {
+			// Listener
+			mtvDebug.setClickable(true);
+			mtvDebug.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					msvScroller.setVisibility(View.GONE);
+				}
+			});
+			mtvTitle.setClickable(true);
+			mtvTitle.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					// mtvTitle.setOnClickListener(null);
+					// mtvTitle.setClickable(false);
+					msvScroller.setVisibility(View.VISIBLE);
+					msvScroller.fullScroll(View.FOCUS_DOWN);
+				}
+			});
+		}
 
 		if (!mProcessed) {
 			loadChapter();
@@ -485,14 +487,17 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				mPages.put(key, new Page(key, conf.mPages.get(key).mUrl));
 			}
 
-			mtvDebug.setText(conf.mtvDebugText);
-			msvScroller.post(new Runnable() {
-				@Override
-				public void run() {
-					msvScroller.fullScroll(ScrollView.FOCUS_DOWN);
-				}
-			});
-			msvScroller.setVisibility(conf.msvScrollerVisibility);
+			if (AppConst.DEBUG > 0) {
+				mtvDebug.setText(conf.mtvDebugText);
+				msvScroller.post(new Runnable() {
+					@Override
+					public void run() {
+						msvScroller.fullScroll(View.FOCUS_DOWN);
+					}
+				});
+				msvScroller.setVisibility(conf.msvScrollerVisibility);
+			}
+
 			mPageView.setImageDrawable(conf.mPageViewDrawable);
 
 			mvgTitleBar.setVisibility(conf.mvgTitleBarVisibility);
@@ -584,6 +589,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		conf.mtvDebugText = mtvDebug.getText();
 		conf.msvScrollerVisibility = msvScroller.getVisibility();
+
 		conf.mPageViewDrawable = mPageView.getDrawable();
 
 		conf.mvgTitleBarVisibility = mvgTitleBar.getVisibility();
@@ -787,7 +793,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			Bitmap bitmap = page.getBitmap();
 			if (bitmap != null) {
 				mPageIndexCurrent = mPageIndexLoading;
-				msvPageScroller.fullScroll(ScrollView.FOCUS_UP);
+				msvPageScroller.fullScroll(View.FOCUS_UP);
 				mPageView.setImageBitmap(bitmap);
 				mtvTitle.setText(getCustomTitle());
 				mvgTitleBar = (LinearLayout) findViewById(R.id.mvgTitleBar);
@@ -802,8 +808,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		if (mPreloadPageIndexQueue.isEmpty()) {
 			hideScroller();
 		} else {
-			mHideScrollerHandler.removeCallbacks(mHideScrollerRunnable);
-			msvScroller.setVisibility(View.VISIBLE);
+			if (AppConst.DEBUG > 0) {
+				mHideScrollerHandler.removeCallbacks(mHideScrollerRunnable);
+				msvScroller.setVisibility(View.VISIBLE);
+			}
 			int pageIndexPreload = mPreloadPageIndexQueue.poll();
 			preloadPage(pageIndexPreload);
 		}
@@ -823,6 +831,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void printDebug(String msg, String tag) {
+		if (AppConst.DEBUG == 0) {
+			return;
+		}
+
 		mtvDebug.append("\n");
 		SpannableString text;
 		if (TextUtils.isEmpty(tag)) {
