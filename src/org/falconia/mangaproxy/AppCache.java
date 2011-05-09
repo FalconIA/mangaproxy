@@ -54,6 +54,28 @@ public final class AppCache {
 		return checkCacheForImage(url, type, 0);
 	}
 
+	public static int wipeCacheForImage(String type) {
+		File file;
+		try {
+			file = getExternalCacheImageFile(type, null);
+		} catch (IOException e) {
+			return -1;
+		}
+		int count = 0;
+		if (file.exists() && file.isDirectory()) {
+			File[] files = file.listFiles();
+			if (files.length > 30) {
+				for (File child : files) {
+					if (child.delete()) {
+						count++;
+					}
+				}
+				AppUtils.logD(TAG, String.format("Wipe %d files of image cache.", count));
+			}
+		}
+		return count;
+	}
+
 	public static boolean writeCacheForData(String data, String url) {
 		AppUtils.logD(TAG, String.format("Write cache for: %s", url));
 		String key = hashKey(url);
@@ -179,10 +201,14 @@ public final class AppCache {
 
 	private static File getExternalCacheImageFile(String filename, String type) throws IOException {
 		File dir = getExternalCacheFile("images");
-		if (TextUtils.isEmpty(filename) || TextUtils.isEmpty(type)) {
+		if (TextUtils.isEmpty(filename)) {
 			return null;
 		}
-		dir = new File(dir, String.format("%s/%s", type, filename));
+		if (TextUtils.isEmpty(type)) {
+			dir = new File(dir, filename);
+		} else {
+			dir = new File(dir, String.format("%s/%s", type, filename));
+		}
 		return dir;
 	}
 
