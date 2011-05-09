@@ -1,6 +1,3 @@
 This is a ALPHA version for TEST only.
 TODO: Zoom Page Viewer.
 TODO: Favorite Management.
-
-
-Press MENU to choose Manga Source.

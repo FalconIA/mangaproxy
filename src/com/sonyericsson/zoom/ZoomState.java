@@ -62,6 +62,11 @@ public class ZoomState extends Observable {
 	private AlignY mAlignY = AlignY.Center;
 
 	/**
+	 * Default value of Zoom level.
+	 */
+	private float mZoomDefault;
+
+	/**
 	 * Zoom level A value of 1.0 means the content fits the view.
 	 */
 	private float mZoom;
@@ -123,6 +128,15 @@ public class ZoomState extends Observable {
 	 */
 	public float getZoom() {
 		return mZoom;
+	}
+
+	/**
+	 * Get default zoom value
+	 * 
+	 * @return Default zoom value
+	 */
+	public float getDefaultZoom() {
+		return Math.max(mZoom, mZoomDefault);
 	}
 
 	/**
@@ -207,6 +221,20 @@ public class ZoomState extends Observable {
 	 */
 	public void setZoom(float zoom) {
 		if (zoom != mZoom) {
+			mZoom = zoom;
+			setChanged();
+		}
+	}
+
+	/**
+	 * Set default zoom
+	 * 
+	 * @param zoom
+	 *            Default zoom value to set
+	 */
+	public void setDefaultZoom(float zoom) {
+		if (zoom != mZoomDefault || zoom != mZoom) {
+			mZoomDefault = zoom;
 			mZoom = zoom;
 			setChanged();
 		}

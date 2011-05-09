@@ -7,6 +7,11 @@
 	<string name="menu_item_source">Source</string>
 	<string name="menu_item_refresh">Refresh</string>
 	<string name="menu_item_preferences">Preferences</string>
+	<string name="menu_item_zoom">Zoom</string>
+	<string name="menu_item_zoom_fit_width_auto_split">Fit Wifth (Auto Split)</string>
+	<string name="menu_item_zoom_fit_width">Fit Width</string>
+	<string name="menu_item_zoom_fit_height">Fit Height</string>
+	<string name="menu_item_zoom_fit_screen">Fit Screen</string>
 	<string name="dialog_confirm_to_exit">Confirm to exit?</string>
 	<string name="dialog_ok">Ok</string>
 	<string name="dialog_cancel">Cancel</string>

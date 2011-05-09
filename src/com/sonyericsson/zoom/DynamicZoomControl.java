@@ -260,10 +260,10 @@ public class DynamicZoomControl implements Observer {
 	 * Force zoom to stay within limits
 	 */
 	private void limitZoom() {
-		if (mState.getZoom() < MIN_ZOOM) {
-			mState.setZoom(MIN_ZOOM);
-		} else if (mState.getZoom() > MAX_ZOOM) {
-			mState.setZoom(MAX_ZOOM);
+		if (mState.getZoom() < MIN_ZOOM * mState.getDefaultZoom()) {
+			mState.setZoom(MIN_ZOOM * mState.getDefaultZoom());
+		} else if (mState.getZoom() > MAX_ZOOM * mState.getDefaultZoom()) {
+			mState.setZoom(MAX_ZOOM * mState.getDefaultZoom());
 		}
 	}
 

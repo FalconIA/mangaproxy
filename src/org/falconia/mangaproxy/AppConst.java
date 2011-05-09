@@ -4,6 +4,10 @@ import java.io.File;
 
 public final class AppConst {
 
+	public enum ZoomMode {
+		FIT_SCREEN, FIT_HEIGHT, FIT_WIDTH, FIT_WIDTH_AUTO_SPLIT
+	}
+
 	public static int DEBUG;
 
 	public static String APP_NAME;
