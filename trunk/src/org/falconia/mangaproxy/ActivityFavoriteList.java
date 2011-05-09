@@ -1,9 +1,5 @@
 package org.falconia.mangaproxy;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import org.falconia.mangaproxy.data.Site;
 import org.falconia.mangaproxy.plugin.Plugins;
 import org.falconia.mangaproxy.ui.MangaListAdapter;
@@ -12,7 +8,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -41,23 +36,6 @@ public final class ActivityFavoriteList extends ActivityBase {
 
 		setContentView(R.layout.activity_favorite_list);
 		setNoItemsMessage(R.string.ui_no_favorite_items);
-
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(
-					"alpha.txt")));
-			StringBuilder builder = new StringBuilder();
-			String text;
-			while ((text = reader.readLine()) != null) {
-				builder.append(text + AppCache.NEW_LINE);
-			}
-			reader.close();
-			text = builder.toString().trim();
-			if (!TextUtils.isEmpty(text)) {
-				setNoItemsMessage(text);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
 		setupListView(new MangaListAdapter(this));
 	}

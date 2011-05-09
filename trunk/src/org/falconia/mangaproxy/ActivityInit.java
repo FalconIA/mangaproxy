@@ -1,5 +1,9 @@
 package org.falconia.mangaproxy;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.data.Site;
@@ -8,8 +12,13 @@ import org.falconia.mangaproxy.plugin.Plugins;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.TextView;
 
-public final class ActivityInit extends Activity {
+public final class ActivityInit extends Activity implements OnClickListener {
 
 	/** Called when the activity is first created. */
 	@Override
@@ -30,8 +39,56 @@ public final class ActivityInit extends Activity {
 		setContentView(R.layout.main);
 		setTitle(String.format("%s (Alpha, Test only)", AppConst.APP_NAME));
 
-		AppConst.DEBUG = 0;
-		switch (AppConst.DEBUG) {
+
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(
+					"alpha.txt")));
+			StringBuilder builder = new StringBuilder();
+			String text;
+			while ((text = reader.readLine()) != null) {
+				builder.append(text + AppCache.NEW_LINE);
+			}
+			reader.close();
+			text = builder.toString().trim();
+			if (!TextUtils.isEmpty(text)) {
+				((TextView) findViewById(R.id.mtvMain)).setText(text);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		Button mbtn1 = (Button) findViewById(R.id.mbtn1);
+		Button mbtn2 = (Button) findViewById(R.id.mbtn2);
+		Button mbtn3 = (Button) findViewById(R.id.mbtn3);
+		mbtn1.setText("Normal Mode");
+		mbtn2.setText("Direct to PageView");
+		mbtn3.setText("Zoom PageView Debug");
+		mbtn1.setOnClickListener(this);
+		mbtn2.setOnClickListener(this);
+		mbtn3.setOnClickListener(this);
+
+
+		AppConst.DEBUG = -1;
+		sitchMode(AppConst.DEBUG);
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.mbtn1:
+			sitchMode(0);
+			break;
+		case R.id.mbtn2:
+			sitchMode(1);
+			break;
+		case R.id.mbtn3:
+			sitchMode(2);
+			break;
+		}
+	}
+
+	private void sitchMode(int mode) {
+		switch (mode) {
 		// normal
 		case 0:
 			startActivity(new Intent(this, ActivityFavoriteList.class));
