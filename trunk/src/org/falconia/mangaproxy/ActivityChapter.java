@@ -66,6 +66,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		public static void startActivityChapter(Context context, Manga manga, Chapter chapter) {
 			context.startActivity(getIntent(context, manga, chapter));
+			AppCache.wipeCacheForImage(TYPE);
 		}
 
 	}
@@ -166,8 +167,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private final class Page implements OnDownloadListener {
-
-		private static final String TYPE = "page";
 
 		private DownloadTask mDownloader;
 
@@ -345,6 +344,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	private static final HashSet<String> DUMMY_PIC_CRC32 = new HashSet<String>();
 
+	private static final String TYPE = "page";
+
 	private SourceDownloader mSourceDownloader;
 
 	private Manga mManga;
@@ -437,6 +438,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		// Debug controls
 		mtvDebug = (TextView) findViewById(R.id.mtvDebug);
 		msvScroller = (ScrollView) findViewById(R.id.msvScroller);
+		msvScroller.setVisibility(View.GONE);
 		// Page image
 		mPageView = (ImageView) findViewById(R.id.mivPage);
 		msvPageScroller = (ScrollView) findViewById(R.id.msvPageScroller);
@@ -458,6 +460,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		mpbDownload.setProgress(0);
 
 		if (AppConst.DEBUG > 0) {
+			msvScroller.setVisibility(View.VISIBLE);
+
 			// Listener
 			mtvDebug.setClickable(true);
 			mtvDebug.setOnClickListener(new OnClickListener() {
