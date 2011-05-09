@@ -49,24 +49,28 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 		@Override
 		public void onPreDownload() {
 			AppUtils.logV(this, "onPreDownload()");
+
 			setProgressBarIndeterminateVisibility(true);
+
 			showDialog(DIALOG_DOWNLOAD_ID);
 		}
 
 		@Override
 		public void onPostDownload(byte[] result) {
 			AppUtils.logV(this, "onPostDownload()");
+
+			try {
+				dismissDialog(DIALOG_DOWNLOAD_ID);
+			} catch (Exception e) {
+				AppUtils.logE(this, "dismissDialog(DIALOG_DOWNLOAD_ID)");
+			}
 			setProgressBarIndeterminateVisibility(false);
+
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
 				setNoItemsMessage(String.format(getString(R.string.ui_error_on_download),
 						getSiteName()));
 				return;
-			}
-			try {
-				dismissDialog(DIALOG_DOWNLOAD_ID);
-			} catch (Exception e) {
-				AppUtils.logE(this, "dismissDialog(DIALOG_DOWNLOAD_ID)");
 			}
 
 			String source = EncodingUtils.getString(result, 0, result.length, mCharset);
@@ -268,11 +272,14 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 	@Override
 	public void onPreSourceProcess() {
 		AppUtils.logV(this, "onPreSourceProcess()");
+
 		if (mSourceProcessTask == null) {
 			AppUtils.logE(this, "ProcessDataTask is not initialized.");
 			return;
 		}
+
 		mProcessed = false;
+
 		if (mShowProcessDialog) {
 			showDialog(DIALOG_PROCESS_ID);
 		}
@@ -282,18 +289,18 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 	@Override
 	public void onPostSourceProcess(int size) {
 		AppUtils.logV(this, "onPostSourceProcess()");
-		if (mSourceProcessTask == null) {
-			AppUtils.logE(this, "ProcessDataTask is not initialized.");
-			return;
-		}
-		mProcessed = true;
-		if (size <= 0) {
-			setNoItemsMessage(String.format(getString(R.string.ui_error_on_process), getSiteName()));
-		}
+
 		if (mShowProcessDialog) {
 			dismissDialog(DIALOG_PROCESS_ID);
 		}
 		setProgressBarIndeterminateVisibility(false);
+
+		if (size <= 0) {
+			setNoItemsMessage(String.format(getString(R.string.ui_error_on_process), getSiteName()));
+			return;
+		}
+
+		mProcessed = true;
 	}
 
 	protected void startProcessSource(String source) {
