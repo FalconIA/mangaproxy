@@ -23,6 +23,8 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	private int mDownloaded;
 	private OnDownloadListener mListener;
 	private String mReferer;
+	
+	private boolean mCancelled = false;
 
 	public DownloadTask(OnDownloadListener listener) {
 		mFileSize = 0;
@@ -37,6 +39,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 
 	@Override
 	protected byte[] doInBackground(String... params) {
+		mCancelled = false;
 		return download(params[0]);
 	}
 
@@ -55,6 +58,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	@Override
 	protected void onCancelled() {
 		logD("Download cancelled.");
+		mCancelled = true;
 	}
 
 	@Override
@@ -63,7 +67,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	}
 
 	protected byte[] download(String url) {
-		logD("Download: " + url);
+		logD("Downloading: " + url);
 		HttpURLConnection connection;
 		try {
 			connection = (HttpURLConnection) (new URL(url)).openConnection();
@@ -105,6 +109,13 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 		try {
 			int readed = 0;
 			while (readed != -1 || mFileSize > mDownloaded) {
+				if (mCancelled) {
+					output.close();
+					input.close();
+					connection.disconnect();
+					logD("Connection cancelled.");
+					return null;
+				}
 				byte[] buffer = new byte[MAX_BUFFER_SIZE];
 				readed = input.read(buffer);
 				if (readed == -1) {
@@ -116,10 +127,11 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 				publishProgress(mDownloaded);
 			}
 			byte[] result = output.toByteArray();
-			logD("Download length: " + result.length);
+			logD("Downloaded length: " + result.length);
 			output.flush();
 			output.close();
 			input.close();
+			connection.disconnect();
 			return result;
 		} catch (IOException e) {
 			e.printStackTrace();
