@@ -10,6 +10,7 @@ import java.net.URL;
 import org.falconia.mangaproxy.AppConst;
 
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
 
 public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
@@ -73,7 +74,9 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 			connection = (HttpURLConnection) (new URL(url)).openConnection();
 			connection.setConnectTimeout(TIME_OUT_CONNECT);
 			connection.setReadTimeout(TIME_OUT_READ);
-			connection.setRequestProperty("Referer", mReferer);
+			if (!TextUtils.isEmpty(mReferer)) {
+				connection.setRequestProperty("Referer", mReferer);
+			}
 
 			int statusCode = connection.getResponseCode();
 			if (statusCode >= 400) {

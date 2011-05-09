@@ -95,18 +95,25 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 			switch (mMode) {
 			case MODE_CHAPTER:
-				showDialog(DIALOG_LOADING_ID);
 				break;
 			case MODE_IMG_SERVERS:
 				mLoadingDialog.setMessage(String.format(
 						getString(R.string.dialog_loading_imgsvrs_message_format), "0.000KB"));
 				break;
 			}
+
+			showDialog(DIALOG_LOADING_ID);
 		}
 
 		@Override
 		public void onPostDownload(byte[] result) {
 			AppUtils.logV(this, "onPostDownload()");
+
+			try {
+				dismissDialog(DIALOG_LOADING_ID);
+			} catch (Exception e) {
+				AppUtils.logE(this, "dismissDialog(DIALOG_LOADING_ID)");
+			}
 
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
@@ -750,12 +757,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			String url = (imgServer + mPageUrls[i]).replaceAll("(?<!http:)//", "/");
 			Page page = new Page(i + 1, url);
 			mPages.put(i + 1, page);
-		}
-
-		try {
-			dismissDialog(DIALOG_LOADING_ID);
-		} catch (Exception e) {
-			AppUtils.logE(this, "dismissDialog(DIALOG_LOADING_ID)");
 		}
 
 		mProcessed = true;
