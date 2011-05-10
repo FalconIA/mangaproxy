@@ -136,7 +136,7 @@ public class ZoomState extends Observable {
 	 * @return Default zoom value
 	 */
 	public float getDefaultZoom() {
-		return Math.max(mZoom, mZoomDefault);
+		return Math.max(1, mZoomDefault);
 	}
 
 	/**

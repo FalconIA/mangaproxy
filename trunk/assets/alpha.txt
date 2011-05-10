@@ -1,3 +1,18 @@
 This is a ALPHA version for TEST only.
-TODO: Zoom Page Viewer.
-TODO: Favorite Management.
+
+
+操作方式：
+下一页：　图片处在左边缘时向右滑动
+　　　　　或右下按钮
+上一页：　图片处在右边缘时向左滑动
+　　　　　或左下按钮
+缩放：　　两点触控
+缩放复位：双击屏幕
+缩放方式：菜单中选择
+显示信息：单击屏幕
+
+
+模式选择：
+Normal Mode						正常模式
+Direct to PageView				章节页面浏览测试
+Zoom PageView Degug		图片浏览控件测试
