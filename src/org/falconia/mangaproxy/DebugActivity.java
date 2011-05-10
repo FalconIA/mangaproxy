@@ -1,7 +1,7 @@
 package org.falconia.mangaproxy;
 
 import org.falconia.mangaproxy.AppConst.ZoomMode;
-import org.falconia.mangaproxy.ui.ImageZoomOnTouchListener;
+import org.falconia.mangaproxy.ui.ZoomViewOnTouchListener;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -10,6 +10,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import com.sonyericsson.zoom.DynamicZoomControl;
@@ -17,7 +20,7 @@ import com.sonyericsson.zoom.ImageZoomView;
 import com.sonyericsson.zoom.ZoomState.AlignX;
 import com.sonyericsson.zoom.ZoomState.AlignY;
 
-public final class DebugActivity extends Activity {
+public final class DebugActivity extends Activity implements OnTouchListener {
 
 	private final class Configuration {
 		private ZoomMode mZoomMode;
@@ -34,7 +37,10 @@ public final class DebugActivity extends Activity {
 	private MenuItem mmiZoomFitHeight;
 	private MenuItem mmiZoomFitScreen;
 
-	private ImageZoomOnTouchListener mZoomListener;
+	private ZoomViewOnTouchListener mZoomListener;
+
+	// private GestureDetector mGestureDetector;
+	// private ZoomViewOnGestureListener mGestureListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +58,21 @@ public final class DebugActivity extends Activity {
 
 		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.download);
 
-		mZoomListener = new ImageZoomOnTouchListener(getApplicationContext());
+		mZoomListener = new ZoomViewOnTouchListener(getApplicationContext());
 		mZoomListener.setZoomControl(mZoomControl);
 
 		mZoomView = (ImageZoomView) findViewById(R.id.mvDebug);
 		mZoomView.setZoomState(mZoomControl.getZoomState());
 		mZoomView.setImage(mBitmap);
 		mZoomView.setOnTouchListener(mZoomListener);
+		// mZoomView.setLongClickable(true);
+		// mZoomView.setOnTouchListener(this);
+
+		// mGestureListener = new
+		// ZoomViewOnGestureListener(getApplicationContext());
+		// mGestureListener.setZoomView(mZoomView);
+		// mGestureListener.setZoomControl(mZoomControl);
+		// mGestureDetector = new GestureDetector(mGestureListener);
 
 		mZoomControl.setAspectQuotient(mZoomView.getAspectQuotient());
 
@@ -77,6 +91,11 @@ public final class DebugActivity extends Activity {
 	public void onBackPressed() {
 		finish();
 		System.exit(0);
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		return false;
 	}
 
 	@Override
@@ -115,8 +134,10 @@ public final class DebugActivity extends Activity {
 			mmiZoomFitWidth.setChecked(mZoomMode == ZoomMode.FIT_WIDTH);
 			mmiZoomFitHeight.setChecked(mZoomMode == ZoomMode.FIT_HEIGHT);
 			mmiZoomFitScreen.setChecked(mZoomMode == ZoomMode.FIT_SCREEN);
-			mZoomControl.getZoomState().setDefaultZoom(calcuZoom(mZoomMode, mZoomView, mBitmap));
+			mZoomControl.getZoomState().setDefaultZoom(
+					computeDefaultZoom(mZoomMode, mZoomView, mBitmap));
 			mZoomControl.getZoomState().notifyObservers();
+			mZoomControl.startFling(0, 0);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -139,20 +160,25 @@ public final class DebugActivity extends Activity {
 		mZoomControl.getZoomState().setPanX(0.0f);
 		mZoomControl.getZoomState().setPanY(0.0f);
 		// mZoomControl.getZoomState().setZoom(2f);
-		mZoomControl.getZoomState().setDefaultZoom(calcuZoom(mZoomMode, mZoomView, mBitmap));
+		mZoomControl.getZoomState().setDefaultZoom(
+				computeDefaultZoom(mZoomMode, mZoomView, mBitmap));
 		mZoomControl.getZoomState().notifyObservers();
 	}
 
-	private float calcuZoom(ZoomMode mode, ImageZoomView view, Bitmap bitmap) {
-		if (view.getAspectQuotient() == null || view.getAspectQuotient().get() == Float.NaN)
+	private float computeDefaultZoom(ZoomMode mode, ImageZoomView view, Bitmap bitmap) {
+		if (view.getAspectQuotient() == null || view.getAspectQuotient().get() == Float.NaN) {
 			return 1f;
-		if (view == null || view.getWidth() == 0 || view.getHeight() == 0)
+		}
+		if (view == null || view.getWidth() == 0 || view.getHeight() == 0) {
 			return 1f;
-		if (bitmap == null || bitmap.getWidth() == 0 || bitmap.getHeight() == 0)
+		}
+		if (bitmap == null || bitmap.getWidth() == 0 || bitmap.getHeight() == 0) {
 			return 1f;
+		}
 
-		if (mode == ZoomMode.FIT_SCREEN)
+		if (mode == ZoomMode.FIT_SCREEN) {
 			return 1f;
+		}
 
 		// aq = (bW / bH) / (vW / vH)
 		float aq = view.getAspectQuotient().get();
@@ -169,7 +195,8 @@ public final class DebugActivity extends Activity {
 			if (mode == ZoomMode.FIT_WIDTH_AUTO_SPLIT) {
 				if (1f * bitmap.getWidth() / view.getWidth() > 1.5f
 						&& bitmap.getWidth() > bitmap.getHeight()) {
-					zoom *= 2f;
+					zoom *= (2f + AppConst.WIDTH_AUTO_SPLIT_MARGIN)
+							/ (1f + AppConst.WIDTH_AUTO_SPLIT_MARGIN);
 				}
 			}
 		} else if (mode == ZoomMode.FIT_HEIGHT) {

@@ -25,6 +25,7 @@ public final class ActivityInit extends Activity implements OnClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 
 		// initialize static members
+		AppConst.APP_CONTEXT = getApplicationContext();
 		AppConst.APP_NAME = getString(R.string.app_name);
 		AppConst.APP_PACKAGE = getClass().getPackage().getName();
 		AppConst.APP_FILES_DIR = getFilesDir();

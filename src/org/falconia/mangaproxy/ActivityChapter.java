@@ -6,11 +6,13 @@ import java.util.LinkedList;
 import java.util.zip.CRC32;
 
 import org.apache.http.util.EncodingUtils;
+import org.falconia.mangaproxy.AppConst.ZoomMode;
 import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.plugin.Plugins;
 import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
+import org.falconia.mangaproxy.ui.ZoomViewOnTouchListener;
 import org.falconia.mangaproxy.utils.FormatUtils;
 
 import android.app.Activity;
@@ -23,21 +25,28 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.sonyericsson.zoom.DynamicZoomControl;
+import com.sonyericsson.zoom.ImageZoomView;
+import com.sonyericsson.zoom.ZoomState.AlignX;
+import com.sonyericsson.zoom.ZoomState.AlignY;
 
 public final class ActivityChapter extends Activity implements OnClickListener, OnCancelListener {
 
@@ -69,6 +78,27 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			AppCache.wipeCacheForImage(TYPE);
 		}
 
+	}
+
+	private final class PageViewOnTouchListener extends ZoomViewOnTouchListener {
+
+		public PageViewOnTouchListener() {
+			super(getApplicationContext());
+		}
+
+		@Override
+		public boolean onSingleTap() {
+			showTitleBar();
+			return true;
+		}
+
+		@Override
+		public void onNextPage() {
+		}
+
+		@Override
+		public void onPrevPage() {
+		}
 	}
 
 	private final class SourceDownloader implements OnDownloadListener {
@@ -342,7 +372,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		private CharSequence mtvDebugText;
 		private int msvScrollerVisibility;
 
-		private Drawable mPageViewDrawable;
+		private ZoomMode mZoomMode;
+		private Bitmap mPageViewImage;
 
 		private int mvgTitleBarVisibility;
 	}
@@ -371,8 +402,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	private ProgressDialog mLoadingDialog;
 
-	private ImageView mPageView;
-	private ScrollView msvPageScroller;
+	private ZoomMode mZoomMode;
+	private ImageZoomView mPageView;
+	private DynamicZoomControl mZoomControl;
+	private PageViewOnTouchListener mZoomListener;
 
 	private LinearLayout mvgTitleBar;
 	private TextView mtvTitle;
@@ -380,6 +413,11 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private TextView mtvDownloading;
 	private TextView mtvDownloaded;
 	private ProgressBar mpbDownload;
+
+	private MenuItem mmiZoomFitWidthAutoSplit;
+	private MenuItem mmiZoomFitWidth;
+	private MenuItem mmiZoomFitHeight;
+	private MenuItem mmiZoomFitScreen;
 
 	private final Handler mHideScrollerHandler;
 	private final Handler mHideTitleBarHandler;
@@ -390,6 +428,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		mProcessed = false;
 		mPageIndexCurrent = 0;
 		mPageIndexLoading = 0;
+		mZoomMode = ZoomMode.FIT_WIDTH_AUTO_SPLIT;
 		mPreloadPageIndexQueue = new LinkedList<Integer>();
 		mHideScrollerHandler = new Handler();
 		mHideTitleBarHandler = new Handler();
@@ -435,20 +474,18 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		setContentView(R.layout.activity_chapter);
 		// setTitle(getCustomTitle());
 
-		Configuration conf = (Configuration) getLastNonConfigurationInstance();
+		final Configuration conf = (Configuration) getLastNonConfigurationInstance();
 		if (conf != null) {
 			mProcessed = conf.mProcessed;
 			mPageIndexCurrent = conf.mPageIndexCurrent;
 			mPageIndexLoading = conf.mPageIndexLoading;
+			mZoomMode = conf.mZoomMode;
 		}
 
 		// Debug controls
 		mtvDebug = (TextView) findViewById(R.id.mtvDebug);
 		msvScroller = (ScrollView) findViewById(R.id.msvScroller);
 		msvScroller.setVisibility(View.GONE);
-		// Page image
-		mPageView = (ImageView) findViewById(R.id.mivPage);
-		msvPageScroller = (ScrollView) findViewById(R.id.msvPageScroller);
 		// Buttons
 		((Button) findViewById(R.id.mbtnNext)).setOnClickListener(this);
 		((Button) findViewById(R.id.mbtnPrev)).setOnClickListener(this);
@@ -465,6 +502,15 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		mtvDownloaded = (TextView) findViewById(R.id.mtvDownloaded);
 		mpbDownload = (ProgressBar) findViewById(R.id.mpbDownload);
 		mpbDownload.setProgress(0);
+		// Page image
+		mZoomControl = new DynamicZoomControl();
+		mZoomListener = new PageViewOnTouchListener();
+		mZoomListener.setZoomControl(mZoomControl);
+		mPageView = (ImageZoomView) findViewById(R.id.mivPage);
+		mPageView.setZoomState(mZoomControl.getZoomState());
+		mPageView.setOnTouchListener(mZoomListener);
+		mZoomControl.setAspectQuotient(mPageView.getAspectQuotient());
+		setupZoomState();
 
 		if (AppConst.DEBUG > 0) {
 			msvScroller.setVisibility(View.VISIBLE);
@@ -509,9 +555,16 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				msvScroller.setVisibility(conf.msvScrollerVisibility);
 			}
 
-			mPageView.setImageDrawable(conf.mPageViewDrawable);
-
 			mvgTitleBar.setVisibility(conf.mvgTitleBarVisibility);
+
+			// Set image
+			mPageView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+				@Override
+				public void onGlobalLayout() {
+					AppUtils.logV(this, "onGlobalLayout()");
+					setImage(conf.mPageViewImage);
+				}
+			});
 
 			mHideScrollerHandler.postAtTime(mHideScrollerRunnable, 2000);
 			mHideTitleBarHandler.postAtTime(mHideTitleBarRunnable, 2000);
@@ -601,7 +654,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		conf.mtvDebugText = mtvDebug.getText();
 		conf.msvScrollerVisibility = msvScroller.getVisibility();
 
-		conf.mPageViewDrawable = mPageView.getDrawable();
+		conf.mZoomMode = mZoomMode;
+		conf.mPageViewImage = mPageView.getImage();
 
 		conf.mvgTitleBarVisibility = mvgTitleBar.getVisibility();
 
@@ -622,6 +676,50 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_chapter, menu);
+		mmiZoomFitWidthAutoSplit = menu.findItem(R.id.mmiZoomFitWidthAutoSplit);
+		mmiZoomFitWidthAutoSplit.setChecked(mZoomMode == ZoomMode.FIT_WIDTH_AUTO_SPLIT);
+		mmiZoomFitWidth = menu.findItem(R.id.mmiZoomFitWidth);
+		mmiZoomFitWidth.setChecked(mZoomMode == ZoomMode.FIT_WIDTH);
+		mmiZoomFitHeight = menu.findItem(R.id.mmiZoomFitHeight);
+		mmiZoomFitHeight.setChecked(mZoomMode == ZoomMode.FIT_HEIGHT);
+		mmiZoomFitScreen = menu.findItem(R.id.mmiZoomFitScreen);
+		mmiZoomFitScreen.setChecked(mZoomMode == ZoomMode.FIT_SCREEN);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getGroupId() == R.id.mmgZoomGroup) {
+			switch (item.getItemId()) {
+			case R.id.mmiZoomFitWidthAutoSplit:
+				mZoomMode = ZoomMode.FIT_WIDTH_AUTO_SPLIT;
+				break;
+			case R.id.mmiZoomFitWidth:
+				mZoomMode = ZoomMode.FIT_WIDTH;
+				break;
+			case R.id.mmiZoomFitHeight:
+				mZoomMode = ZoomMode.FIT_HEIGHT;
+				break;
+			case R.id.mmiZoomFitScreen:
+				mZoomMode = ZoomMode.FIT_SCREEN;
+				break;
+			}
+			mmiZoomFitWidthAutoSplit.setChecked(mZoomMode == ZoomMode.FIT_WIDTH_AUTO_SPLIT);
+			mmiZoomFitWidth.setChecked(mZoomMode == ZoomMode.FIT_WIDTH);
+			mmiZoomFitHeight.setChecked(mZoomMode == ZoomMode.FIT_HEIGHT);
+			mmiZoomFitScreen.setChecked(mZoomMode == ZoomMode.FIT_SCREEN);
+			mZoomControl.getZoomState().setDefaultZoom(computeDefaultZoom(mZoomMode, mPageView));
+			mZoomControl.getZoomState().notifyObservers();
+			mZoomControl.startFling(0, 0);
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
 	public void onCancel(DialogInterface dialog) {
 		if (mSourceDownloader != null) {
 			mSourceDownloader.cancelDownload();
@@ -631,31 +729,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	@Override
 	public void onClick(View v) {
-		// Loading
-		if (mPageIndexLoading != mPageIndexCurrent) {
-			return;
-		}
-
-		int mPageIndexGoto = mPageIndexCurrent;
-
 		switch (v.getId()) {
 		case R.id.mbtnNext:
-			mPageIndexGoto++;
+			changePage(true);
 			break;
 		case R.id.mbtnPrev:
-			mPageIndexGoto--;
+			changePage(false);
 			break;
-		}
-
-		// Prev chapter
-		if (mPageIndexGoto < 1) {
-			AppUtils.popupMessage(this, "First Page");
-		}
-		// Next chapter
-		else if (mPageIndexGoto > mPages.size()) {
-			AppUtils.popupMessage(this, "Last Page");
-		} else {
-			changePage(mPageIndexGoto);
 		}
 	}
 
@@ -678,8 +758,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private String getCustomTitle() {
-		String title = String.format("%s - %s - %s", mManga.getSiteDisplayname(),
-				mManga.displayname, mChapter.displayname);
+		String title = String.format("%s - %s", mManga.displayname, mChapter.displayname);
 		if (mPageIndexCurrent > 0) {
 			title = String.format("%s - " + getString(R.string.ui_page), title, mPageIndexCurrent);
 		}
@@ -781,6 +860,26 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		page.download();
 	}
 
+	private void changePage(boolean nextpage) {
+		// Loading
+		if (mPageIndexLoading != mPageIndexCurrent) {
+			return;
+		}
+
+		int mPageIndexGoto = mPageIndexCurrent + (nextpage ? 1 : -1);
+
+		// Prev chapter
+		if (mPageIndexGoto < 1) {
+			AppUtils.popupMessage(this, "First Page");
+		}
+		// Next chapter
+		else if (mPageIndexGoto > mPages.size()) {
+			AppUtils.popupMessage(this, "Last Page");
+		} else {
+			changePage(mPageIndexGoto);
+		}
+	}
+
 	private void preloadPage(int pageIndex) {
 		if (pageIndex - mPageIndexLoading <= AppConst.IMG_PRELOAD_MAX && pageIndex <= mPages.size()) {
 			AppUtils.logI(this, String.format("preloadPage(%d)", pageIndex));
@@ -798,12 +897,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			Bitmap bitmap = page.getBitmap();
 			if (bitmap != null) {
 				mPageIndexCurrent = mPageIndexLoading;
-				msvPageScroller.fullScroll(View.FOCUS_UP);
-				mPageView.setImageBitmap(bitmap);
+				setImage(bitmap);
 				mtvTitle.setText(getCustomTitle());
-				mvgTitleBar = (LinearLayout) findViewById(R.id.mvgTitleBar);
-				mvgTitleBar.setVisibility(View.VISIBLE);
-				hideTitleBar();
+				showTitleBar();
 			} else {
 				AppUtils.logE(this, "Invalid bitmap.");
 			}
@@ -835,6 +931,74 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		return DUMMY_PIC_CRC32.contains(hash);
 	}
 
+	private void setupZoomState() {
+		mZoomControl.getZoomState().setAlignX(AlignX.Right);
+		mZoomControl.getZoomState().setAlignY(AlignY.Top);
+		mZoomControl.getZoomState().setPanX(0.0f);
+		mZoomControl.getZoomState().setPanY(0.0f);
+	}
+
+	private void setImage(Bitmap bitmap) {
+		AppUtils.logD(this, "ZoomView Width: " + mPageView.getWidth());
+		AppUtils.logD(this, "ZoomView Height: " + mPageView.getHeight());
+		AppUtils.logD(this, "AspectQuotient: " + mPageView.getAspectQuotient().get());
+
+		mZoomControl.stopFling();
+		mZoomControl.getZoomState().setPanX(0.0f);
+		mZoomControl.getZoomState().setPanY(0.0f);
+		mPageView.setImage(bitmap);
+		mZoomControl.getZoomState().setDefaultZoom(computeDefaultZoom(mZoomMode, mPageView));
+		mZoomControl.getZoomState().notifyObservers();
+	}
+
+	private float computeDefaultZoom(ZoomMode mode, ImageZoomView view) {
+		final Bitmap bitmap = view.getImage();
+
+		if (view.getAspectQuotient() == null || view.getAspectQuotient().get() == Float.NaN) {
+			return 1f;
+		}
+		if (view == null || view.getWidth() == 0 || view.getHeight() == 0) {
+			return 1f;
+		}
+		if (bitmap == null || bitmap.getWidth() == 0 || bitmap.getHeight() == 0) {
+			return 1f;
+		}
+
+		if (mode == ZoomMode.FIT_SCREEN) {
+			return 1f;
+		}
+
+		// aq = (bW / bH) / (vW / vH)
+		final float aq = view.getAspectQuotient().get();
+		float zoom = 1f;
+
+		if (mode == ZoomMode.FIT_WIDTH || mode == ZoomMode.FIT_WIDTH_AUTO_SPLIT) {
+			// Over height
+			if (aq < 1f) {
+				zoom = 1f / aq;
+			} else {
+				zoom = 1f;
+			}
+
+			if (mode == ZoomMode.FIT_WIDTH_AUTO_SPLIT) {
+				if (1f * bitmap.getWidth() / view.getWidth() > 1.5f
+						&& bitmap.getWidth() > bitmap.getHeight()) {
+					zoom *= (2f + AppConst.WIDTH_AUTO_SPLIT_MARGIN)
+							/ (1f + AppConst.WIDTH_AUTO_SPLIT_MARGIN);
+				}
+			}
+		} else if (mode == ZoomMode.FIT_HEIGHT) {
+			// Over width
+			if (aq > 1f) {
+				zoom = aq;
+			} else {
+				zoom = 1f;
+			}
+		}
+
+		return zoom;
+	}
+
 	private void printDebug(String msg, String tag) {
 		if (AppConst.DEBUG == 0) {
 			return;
@@ -864,9 +1028,15 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		mHideScrollerHandler.postDelayed(mHideScrollerRunnable, 2000);
 	}
 
+	private void showTitleBar() {
+		mvgTitleBar.setVisibility(View.VISIBLE);
+		mtvTitle.requestFocus();
+		hideTitleBar();
+	}
+
 	private void hideTitleBar() {
 		mHideTitleBarHandler.removeCallbacks(mHideTitleBarRunnable);
-		mHideTitleBarHandler.postDelayed(mHideTitleBarRunnable, 2000);
+		mHideTitleBarHandler.postDelayed(mHideTitleBarRunnable, 5000);
 	}
 
 	// private void printDebug(String msg) {

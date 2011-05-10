@@ -112,6 +112,15 @@ public class ImageZoomView extends View implements Observer {
 		return mAspectQuotient;
 	}
 
+	/**
+	 * Gets reference to object holding bitmap
+	 * 
+	 * @return Object holding bitmap
+	 */
+	public Bitmap getImage() {
+		return mBitmap;
+	}
+
 	// Superclass overrides
 
 	@Override

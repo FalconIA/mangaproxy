@@ -131,6 +131,42 @@ public class DynamicZoomControl implements Observer {
 	}
 
 	/**
+	 * Get minimum x-pan
+	 * 
+	 * @return minimum x-pan
+	 */
+	public float getPanMinX() {
+		return mPanMinX;
+	}
+
+	/**
+	 * Get maximum x-pan
+	 * 
+	 * @return maximum x-pan
+	 */
+	public float getPanMaxX() {
+		return mPanMaxX;
+	}
+
+	/**
+	 * Get minimum y-pan
+	 * 
+	 * @return minimum y-pan
+	 */
+	public float getPanMinY() {
+		return mPanMinY;
+	}
+
+	/**
+	 * Get maximum y-pan
+	 * 
+	 * @return maximum y-pan
+	 */
+	public float getPanMaxY() {
+		return mPanMaxY;
+	}
+
+	/**
 	 * Zoom
 	 * 
 	 * @param f

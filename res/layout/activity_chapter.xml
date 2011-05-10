@@ -4,16 +4,9 @@
 	<TextView android:layout_height="wrap_content"
 		android:layout_width="wrap_content" android:id="@+id/mtvMessage"
 		android:layout_centerInParent="true" />
-	<ScrollView android:id="@+id/msvPageScroller"
-		android:layout_height="match_parent" android:layout_width="match_parent">
-		<LinearLayout android:orientation="horizontal"
-			android:layout_height="wrap_content" android:layout_width="match_parent"
-			android:gravity="right">
-			<ImageView android:id="@+id/mivPage" android:layout_height="wrap_content"
-				android:layout_width="match_parent" android:adjustViewBounds="true"
-				android:scaleType="fitEnd" android:src="@drawable/screen_background_dark" />
-		</LinearLayout>
-	</ScrollView>
+	<com.sonyericsson.zoom.ImageZoomView
+		android:id="@+id/mivPage" android:layout_height="match_parent"
+		android:layout_width="match_parent" />
 	<ScrollView android:id="@+id/msvScroller"
 		android:layout_height="110.0dip" android:layout_width="match_parent"
 		android:clickable="false" android:background="@drawable/safe_mode_background"
@@ -37,10 +30,12 @@
 		android:paddingLeft="2.0dip" android:paddingRight="4.0dip"
 		android:background="@drawable/bar_background">
 		<TextView android:id="@+id/mtvTitle" android:layout_height="wrap_content"
-			android:layout_width="match_parent" android:layout_alignParentBottom="true"
-			android:text="Title" android:layout_weight="1.0" android:paddingLeft="2.0dip"
-			android:textColor="@color/bright_foreground_dark" android:ellipsize="marquee"
-			android:maxLines="1" />
+			android:layout_width="match_parent" android:text="Title"
+			android:layout_weight="1.0" android:paddingLeft="2.0dip"
+			android:textColor="@color/bright_foreground_dark" android:maxLines="1"
+			android:ellipsize="marquee" android:marqueeRepeatLimit="marquee_forever"
+			android:scrollHorizontally="true" android:focusable="true"
+			android:focusableInTouchMode="true" />
 		<org.falconia.mangaproxy.ui.SystemInfo
 			android:text="DigitalClock" android:layout_height="match_parent"
 			android:layout_width="wrap_content" android:gravity="center_vertical"
