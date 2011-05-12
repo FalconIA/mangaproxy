@@ -15,7 +15,7 @@ public final class AppUtils {
 	}
 
 	public static void log(int priority, String tag, String msg) {
-		Log.println(priority, AppConst.APP_NAME, String.format("[%s] %s", tag, msg));
+		Log.println(priority, App.NAME, String.format("[%s] %s", tag, msg));
 	}
 
 	public static void log(int priority, Object src, String msg) {

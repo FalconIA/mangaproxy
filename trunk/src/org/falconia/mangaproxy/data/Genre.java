@@ -2,7 +2,7 @@ package org.falconia.mangaproxy.data;
 
 import java.io.Serializable;
 
-import org.falconia.mangaproxy.AppConst;
+import org.falconia.mangaproxy.App;
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugins;
 
@@ -14,7 +14,7 @@ public final class Genre implements Serializable {
 	public static final String GENRE_ALL_ID = "GENRE_UNKNOWN";
 
 	public static Genre getGenreAll(int siteId) {
-		return new Genre(GENRE_ALL_ID, AppConst.GENRE_ALL_TEXT, siteId);
+		return new Genre(GENRE_ALL_ID, App.UI_GENRE_ALL_TEXT, siteId);
 	}
 
 	public final int siteId;

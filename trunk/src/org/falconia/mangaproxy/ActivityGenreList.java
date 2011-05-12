@@ -3,7 +3,7 @@ package org.falconia.mangaproxy;
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.GenreList;
 import org.falconia.mangaproxy.data.Site;
-import org.falconia.mangaproxy.ui.BaseListAdapter;
+import org.falconia.mangaproxy.ui.BaseHeadersAdapter;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -40,7 +40,7 @@ public final class ActivityGenreList extends ActivityBase {
 
 	}
 
-	private final class GenreListAdapter extends BaseListAdapter {
+	private final class GenreListAdapter extends BaseHeadersAdapter {
 
 		final class ViewHolder {
 			public TextView tvDisplayname;
@@ -79,15 +79,12 @@ public final class ActivityGenreList extends ActivityBase {
 				holder = new ViewHolder();
 				convertView = mInflater.inflate(R.layout.list_item_genre, null);
 				holder.tvDisplayname = (TextView) convertView.findViewById(R.id.mtvDisplayname);
+				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
 			}
 
 			holder.tvDisplayname.setText(mGenreList.getDisplayname(position));
-
-			if (convertView.getTag() == null) {
-				convertView.setTag(holder);
-			}
 
 			return convertView;
 		}

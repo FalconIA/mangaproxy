@@ -3,7 +3,7 @@ package org.falconia.mangaproxy.utils;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidParameterException;
 
-import org.falconia.mangaproxy.AppConst;
+import org.falconia.mangaproxy.App;
 
 import android.util.Log;
 
@@ -45,7 +45,7 @@ public final class FormatUtils {
 			size = file.getBytes(charset).length;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-			Log.e(AppConst.APP_NAME, e.toString() + ": " + e.getMessage());
+			Log.e(App.NAME, e.toString() + ": " + e.getMessage());
 		}
 		return getFileSize(size, FileSizeUnit.B);
 	}

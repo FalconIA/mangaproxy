@@ -7,7 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.falconia.mangaproxy.AppConst;
+import org.falconia.mangaproxy.App;
 
 import android.os.AsyncTask;
 import android.text.TextUtils;
@@ -149,7 +149,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	}
 
 	private void log(int priority, String msg) {
-		Log.println(priority, AppConst.APP_NAME, String.format("[%s] %s", getTag(), msg));
+		Log.println(priority, App.NAME, String.format("[%s] %s", getTag(), msg));
 	}
 
 	private void logD(String msg) {

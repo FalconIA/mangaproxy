@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.zip.CRC32;
 
 import org.apache.http.util.EncodingUtils;
-import org.falconia.mangaproxy.AppConst.ZoomMode;
+import org.falconia.mangaproxy.App.ZoomMode;
 import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.plugin.Plugins;
@@ -88,7 +88,11 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		@Override
 		public boolean onSingleTap() {
-			showTitleBar();
+			if (mvgTitleBar.isShown()) {
+				hideTitleBar();
+			} else {
+				showTitleBar();
+			}
 			return true;
 		}
 
@@ -158,7 +162,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				processChapterSource(source);
 				break;
 			case MODE_IMG_SERVERS:
-				// TODO Debug
+				// Debug
 				printDebug(mUrl, "Caching");
 
 				AppCache.writeCacheForData(source, mUrl);
@@ -230,7 +234,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 			mIsDownloading = true;
 
-			// TODO Debug
+			// Debug
 			printDebug(mUrl, "Downloading");
 
 			if (mPageIndex == mPageIndexLoading) {
@@ -269,7 +273,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				mvgStatusBar.setVisibility(View.GONE);
 			}
 
-			// TODO Debug
+			// Debug
 			printDebug(mUrl, "Downloaded");
 
 			notifyPageDownloaded(this);
@@ -314,7 +318,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				return;
 			}
 			if (isDownloaded()) {
-				// TODO Debug
+				// Debug
 				printDebug(mUrl, "Cached");
 
 				notifyPageDownloaded(this);
@@ -347,7 +351,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				return mBitmap;
 			}
 
-			// TODO Debug
+			// Debug
 			printDebug(mUrl, "Loading");
 
 			return AppCache.readCacheForImage(mUrl, TYPE);
@@ -512,7 +516,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		mZoomControl.setAspectQuotient(mPageView.getAspectQuotient());
 		setupZoomState();
 
-		if (AppConst.DEBUG > 0) {
+		if (App.DEBUG > 0) {
 			msvScroller.setVisibility(View.VISIBLE);
 
 			// Listener
@@ -544,7 +548,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				mPages.put(key, new Page(key, conf.mPages.get(key).mUrl));
 			}
 
-			if (AppConst.DEBUG > 0) {
+			if (App.DEBUG > 0) {
 				mtvDebug.setText(conf.mtvDebugText);
 				msvScroller.post(new Runnable() {
 					@Override
@@ -780,7 +784,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void loadChapter() {
-		// TODO Debug
+		// Debug
 		printDebug(mChapter.getUrl(), "Downloading");
 
 		mSourceDownloader = new SourceDownloader(SourceDownloader.MODE_CHAPTER);
@@ -800,13 +804,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			// TODO Warning message
 		} else {
 			if (AppCache.checkCacheForData(urlImgServers, 3600)) {
-				// TODO Debug
+				// Debug
 				printDebug(urlImgServers, "Loading");
 
 				source = AppCache.readCacheForData(urlImgServers);
 				processImgServersSource(source);
 			} else {
-				// TODO Debug
+				// Debug
 				printDebug(urlImgServers, "Downloading");
 
 				mSourceDownloader.cancelDownload();
@@ -829,7 +833,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		mPages = new HashMap<Integer, Page>();
 		String imgServer = mChapter.getDynamicImgServer();
 
-		// TODO Debug
+		// Debug
 		printDebug(imgServer, "Get DynamicImgServer");
 
 		for (int i = 0; i < mPageUrls.length; i++) {
@@ -840,6 +844,11 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		mProcessed = true;
 
+		initalPage();
+	}
+
+	private void initalPage() {
+		// TODO Update database
 		changePage(1);
 	}
 
@@ -848,11 +857,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			return;
 		}
 
-		AppUtils.logI(this, String.format("chagePage(%d)", pageIndex));
+		AppUtils.logI(this, String.format("Change to Page %d.", pageIndex));
+
+		// TODO Update database
 
 		mPageIndexLoading = pageIndex;
 		mPreloadPageIndexQueue.clear();
-		for (int i = 1; i <= AppConst.IMG_PRELOAD_MAX; i++) {
+		for (int i = 1; i <= App.IMG_PRELOAD_MAX; i++) {
 			mPreloadPageIndexQueue.add(mPageIndexLoading + i);
 		}
 
@@ -881,8 +892,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void preloadPage(int pageIndex) {
-		if (pageIndex - mPageIndexLoading <= AppConst.IMG_PRELOAD_MAX && pageIndex <= mPages.size()) {
-			AppUtils.logI(this, String.format("preloadPage(%d)", pageIndex));
+		if (pageIndex - mPageIndexLoading <= App.IMG_PRELOAD_MAX && pageIndex <= mPages.size()) {
+			AppUtils.logI(this, String.format("Preload Page %d.", pageIndex));
 			mPages.get(pageIndex).download();
 		} else {
 			hideScroller();
@@ -909,7 +920,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		if (mPreloadPageIndexQueue.isEmpty()) {
 			hideScroller();
 		} else {
-			if (AppConst.DEBUG > 0) {
+			if (App.DEBUG > 0) {
 				mHideScrollerHandler.removeCallbacks(mHideScrollerRunnable);
 				msvScroller.setVisibility(View.VISIBLE);
 			}
@@ -932,10 +943,12 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void setupZoomState() {
+		mPageView.setImage(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
 		mZoomControl.getZoomState().setAlignX(AlignX.Right);
 		mZoomControl.getZoomState().setAlignY(AlignY.Top);
 		mZoomControl.getZoomState().setPanX(0.0f);
 		mZoomControl.getZoomState().setPanY(0.0f);
+		mZoomControl.getZoomState().notifyObservers();
 	}
 
 	private void setImage(Bitmap bitmap) {
@@ -949,6 +962,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		mPageView.setImage(bitmap);
 		mZoomControl.getZoomState().setDefaultZoom(computeDefaultZoom(mZoomMode, mPageView));
 		mZoomControl.getZoomState().notifyObservers();
+		mZoomControl.startFling(0, 0);
 	}
 
 	private float computeDefaultZoom(ZoomMode mode, ImageZoomView view) {
@@ -983,8 +997,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			if (mode == ZoomMode.FIT_WIDTH_AUTO_SPLIT) {
 				if (1f * bitmap.getWidth() / view.getWidth() > 1.5f
 						&& bitmap.getWidth() > bitmap.getHeight()) {
-					zoom *= (2f + AppConst.WIDTH_AUTO_SPLIT_MARGIN)
-							/ (1f + AppConst.WIDTH_AUTO_SPLIT_MARGIN);
+					zoom *= (2f + App.WIDTH_AUTO_SPLIT_MARGIN) / (1f + App.WIDTH_AUTO_SPLIT_MARGIN);
 				}
 			}
 		} else if (mode == ZoomMode.FIT_HEIGHT) {
@@ -1000,7 +1013,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void printDebug(String msg, String tag) {
-		if (AppConst.DEBUG == 0) {
+		if (App.DEBUG == 0) {
 			return;
 		}
 
@@ -1025,18 +1038,19 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	private void hideScroller() {
 		mHideScrollerHandler.removeCallbacks(mHideScrollerRunnable);
-		mHideScrollerHandler.postDelayed(mHideScrollerRunnable, 2000);
+		mHideScrollerHandler.postDelayed(mHideScrollerRunnable, 3000);
 	}
 
 	private void showTitleBar() {
+		mHideTitleBarHandler.removeCallbacks(mHideTitleBarRunnable);
+		mHideTitleBarHandler.postDelayed(mHideTitleBarRunnable, 3000);
 		mvgTitleBar.setVisibility(View.VISIBLE);
 		mtvTitle.requestFocus();
-		hideTitleBar();
 	}
 
 	private void hideTitleBar() {
 		mHideTitleBarHandler.removeCallbacks(mHideTitleBarRunnable);
-		mHideTitleBarHandler.postDelayed(mHideTitleBarRunnable, 5000);
+		mvgTitleBar.setVisibility(View.GONE);
 	}
 
 	// private void printDebug(String msg) {
