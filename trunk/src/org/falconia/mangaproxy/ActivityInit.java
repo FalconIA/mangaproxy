@@ -74,9 +74,9 @@ public final class ActivityInit extends Activity implements OnClickListener {
 		Button mbtn3 = (Button) findViewById(R.id.mbtn3);
 		Button mbtn4 = (Button) findViewById(R.id.mbtn4);
 		mbtn1.setText("Normal Mode");
-		mbtn2.setText("Direct to MangaList");
-		mbtn3.setText("Direct to PageView");
-		mbtn4.setText("Zoom PageView Debug");
+		mbtn2.setText("MangaList");
+		mbtn3.setText("PageView");
+		mbtn4.setText("ZoomView");
 		mbtn1.setOnClickListener(this);
 		mbtn2.setOnClickListener(this);
 		mbtn3.setOnClickListener(this);

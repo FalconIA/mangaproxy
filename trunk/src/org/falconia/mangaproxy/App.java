@@ -31,6 +31,9 @@ public final class App extends Application {
 	public static String UI_CHAPTER_COUNT = "Chapters: %s";
 	public static String UI_LAST_UPDATE = "Update: %tF";
 
+	// Chapter
+	public static int TIME_AUTO_HIDE = 5000;
+
 	// Settings
 	public static int IMG_PRELOAD_MAX = 2;
 	public static float WIDTH_AUTO_SPLIT_MARGIN = .2f;

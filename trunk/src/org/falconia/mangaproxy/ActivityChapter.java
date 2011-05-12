@@ -1038,12 +1038,12 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	private void hideScroller() {
 		mHideScrollerHandler.removeCallbacks(mHideScrollerRunnable);
-		mHideScrollerHandler.postDelayed(mHideScrollerRunnable, 3000);
+		mHideScrollerHandler.postDelayed(mHideScrollerRunnable, App.TIME_AUTO_HIDE);
 	}
 
 	private void showTitleBar() {
 		mHideTitleBarHandler.removeCallbacks(mHideTitleBarRunnable);
-		mHideTitleBarHandler.postDelayed(mHideTitleBarRunnable, 3000);
+		mHideTitleBarHandler.postDelayed(mHideTitleBarRunnable, App.TIME_AUTO_HIDE);
 		mvgTitleBar.setVisibility(View.VISIBLE);
 		mtvTitle.requestFocus();
 	}

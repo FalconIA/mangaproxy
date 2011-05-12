@@ -15,6 +15,7 @@ This is a ALPHA version for TEST only.
 显示信息：单击屏幕
 
 模式选择：
-Normal Mode						正常模式
-Direct to PageView				章节页面浏览测试
-Zoom PageView Degug		图片浏览控件测试
+Normal Mode			正常模式
+MangaList					分类列表浏览测试
+PageView					章节页面浏览测试
+ZoomView					图片浏览控件测试
