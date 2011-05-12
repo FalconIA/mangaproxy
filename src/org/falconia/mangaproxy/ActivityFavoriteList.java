@@ -81,6 +81,13 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			holder.cbFavorite.setTag(manga);
 		}
 
+		@Override
+		public void notifyDataSetInvalidated() {
+			Cursor cursor = mDB.getAllMangasCursor(null, null);
+			changeCursor(cursor);
+			super.notifyDataSetInvalidated();
+		}
+
 	}
 
 	private AppSQLite mDB;
@@ -117,7 +124,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	protected void onResume() {
 		super.onResume();
 
-		refreshFavorite();
+		mListAdapter.notifyDataSetInvalidated();
 	}
 
 	@Override
@@ -268,14 +275,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 				AppUtils.logW(this, "Remove " + deleted + " mangas.");
 			}
 		}
-		refreshFavorite();
-	}
-
-	private void refreshFavorite() {
-		Cursor cursor = mDB.getAllMangaRows(null, null);
-		((FavoriteListAdapter) mListAdapter).changeCursor(cursor);
-		mListAdapter.notifyDataSetChanged();
-		// mListAdapter.notifyDataSetInvalidated();
+		mListAdapter.notifyDataSetInvalidated();
 	}
 
 }

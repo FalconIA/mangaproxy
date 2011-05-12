@@ -96,9 +96,9 @@ public final class AppSQLite {
 
 	// For manga
 
-	public Cursor getAllMangaRows(String selection, String orderBy) throws SQLException {
-		// String[] columns = new String[] { KEY_ROW_ID };
-		Cursor cursor = db.query(true, DATABASE_TABLE_MANGA, null, selection, null, null, null,
+	public Cursor getAllMangasCursor(String selection, String orderBy) throws SQLException {
+		String[] columns = new String[] { KEY_ROW_ID };
+		Cursor cursor = db.query(true, DATABASE_TABLE_MANGA, columns, selection, null, null, null,
 				orderBy, null);
 
 		if (cursor != null) {
@@ -108,7 +108,7 @@ public final class AppSQLite {
 	}
 
 	public ArrayList<Manga> getAllMangas(String orderBy) throws SQLException {
-		Cursor cursor = getAllMangaRows(null, orderBy);
+		Cursor cursor = getAllMangasCursor(null, orderBy);
 
 		if (cursor == null || cursor.getCount() == 0) {
 			return null;
@@ -131,7 +131,7 @@ public final class AppSQLite {
 
 	public HashMap<String, Manga> getAllMangasBySite(int siteId) throws SQLException {
 		String selection = String.format("%s=%d", KEY_SITE_ID, siteId);
-		Cursor cursor = getAllMangaRows(selection, null);
+		Cursor cursor = getAllMangasCursor(selection, null);
 
 		if (cursor == null || cursor.getCount() == 0) {
 			return null;
@@ -149,6 +149,27 @@ public final class AppSQLite {
 	}
 
 	public Manga getManga(Cursor cursor) throws SQLException {
+		long id = cursor.getLong(0);
+
+		return getManga(id);
+	}
+
+	public Manga getManga(long id) throws SQLException {
+		String selection = String.format("%s=%d", KEY_ROW_ID, id);
+		Cursor cursor = db.query(true, DATABASE_TABLE_MANGA, null, selection, null, null, null,
+				null, null);
+
+		if (cursor != null) {
+			cursor.moveToFirst();
+		}
+
+		Manga manga = getMangaFromRow(cursor);
+		cursor.close();
+
+		return manga;
+	}
+
+	public Manga getMangaFromRow(Cursor cursor) throws SQLException {
 		if (cursor == null || cursor.getCount() == 0) {
 			return null;
 		}
@@ -157,15 +178,6 @@ public final class AppSQLite {
 				.getFavoriteManga(cursor.getInt(1), cursor.getString(2), cursor.getString(3),
 						cursor.getInt(4) != 0, cursor.getInt(7), cursor.getInt(8) != 0);
 		return manga;
-	}
-
-	public Manga getManga(long id) throws SQLException {
-		String selection = String.format("%s=%d", KEY_ROW_ID, id);
-		Cursor cursor = db.query(true, DATABASE_TABLE_MANGA, null, selection, null, null, null,
-				null, null);
-		cursor.close();
-
-		return getManga(cursor);
 	}
 
 	public long containsManga(Manga manga) throws SQLException {
