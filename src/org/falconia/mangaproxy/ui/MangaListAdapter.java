@@ -11,9 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.CheckBox;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 
-public final class MangaListAdapter extends BaseListAdapter {
+@Deprecated
+public final class MangaListAdapter extends BaseHeadersAdapter {
 
 	final class ViewHolder {
 		public TextView tvDisplayname;
@@ -24,6 +26,7 @@ public final class MangaListAdapter extends BaseListAdapter {
 
 	private MangaList mMangaList;
 	private LayoutInflater mInflater;
+	private OnCheckedChangeListener mListener;
 
 	public MangaListAdapter(Context context) {
 		mInflater = LayoutInflater.from(context);
@@ -87,6 +90,7 @@ public final class MangaListAdapter extends BaseListAdapter {
 			holder.tvDetails = (TextView) convertView.findViewById(R.id.mtvDetails);
 			holder.tvCompleted = (TextView) convertView.findViewById(R.id.mtvCompleted);
 			holder.cbFavorite = (CheckBox) convertView.findViewById(R.id.mcbFavorite);
+			holder.cbFavorite.setOnCheckedChangeListener(mListener);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
@@ -106,6 +110,10 @@ public final class MangaListAdapter extends BaseListAdapter {
 	public void setMangaList(MangaList mangaList) {
 		mMangaList = mangaList;
 		notifyDataSetChanged();
+	}
+
+	public void setOnCheckedChangeListener(OnCheckedChangeListener listener) {
+		mListener = listener;
 	}
 
 }

@@ -4,7 +4,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 
-import org.falconia.mangaproxy.AppConst;
+import org.falconia.mangaproxy.App;
 import org.falconia.mangaproxy.ITag;
 import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.Genre;
@@ -206,8 +206,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 	}
 
 	private void log(int priority, String msg) {
-		Log.println(priority, AppConst.APP_NAME + " Plugin",
-				String.format("[%s] %s", getTag(), msg));
+		Log.println(priority, App.NAME + " Plugin", String.format("[%s] %s", getTag(), msg));
 	}
 
 	protected void logV(String format, Object... args) {

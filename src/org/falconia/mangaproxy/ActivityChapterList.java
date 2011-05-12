@@ -3,7 +3,7 @@ package org.falconia.mangaproxy;
 import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.ChapterList;
 import org.falconia.mangaproxy.data.Manga;
-import org.falconia.mangaproxy.ui.BaseListAdapter;
+import org.falconia.mangaproxy.ui.BaseHeadersAdapter;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -40,7 +40,7 @@ public final class ActivityChapterList extends ActivityBase {
 
 	}
 
-	private final class ChapterListAdapter extends BaseListAdapter {
+	private final class ChapterListAdapter extends BaseHeadersAdapter {
 
 		final class ViewHolder {
 			public TextView tvDisplayname;
@@ -79,6 +79,7 @@ public final class ActivityChapterList extends ActivityBase {
 				holder = new ViewHolder();
 				convertView = mInflater.inflate(R.layout.list_item_genre, null);
 				holder.tvDisplayname = (TextView) convertView.findViewById(R.id.mtvDisplayname);
+				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
 			}
@@ -90,10 +91,6 @@ public final class ActivityChapterList extends ActivityBase {
 			} else {
 				holder.tvDisplayname.setTextColor(getResources().getColor(
 						android.R.color.primary_text_dark));
-			}
-
-			if (convertView.getTag() == null) {
-				convertView.setTag(holder);
 			}
 
 			return convertView;
@@ -193,7 +190,6 @@ public final class ActivityChapterList extends ActivityBase {
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		mManga.chapterList = mChapterList;
 		ActivityChapter.IntentHandler.startActivityChapter(this, mManga,
 				mChapterList.getAt(position));
 	}
@@ -201,6 +197,7 @@ public final class ActivityChapterList extends ActivityBase {
 	@Override
 	public int onSourceProcess(String source) {
 		mChapterList = mManga.getChapterList(source);
+		mManga.chapterList = mChapterList;
 		return mChapterList.size();
 	}
 

@@ -114,18 +114,14 @@ public final class MangaList implements Serializable, ISiteId, Collection<Manga>
 	}
 
 	public ArrayList<Manga> updateAll(Collection<? extends Manga> mangas) {
-		ArrayList<Manga> previous = new ArrayList<Manga>();
+		ArrayList<Manga> previousList = new ArrayList<Manga>();
 		for (Manga manga : mangas) {
-			previous.add(update(manga));
+			Manga previous = update(manga);
+			if (previous != null) {
+				previousList.add(previous);
+			}
 		}
-		return previous;
-	}
-
-	@Override
-	public void clear() {
-		pageIndexMax = DEFAULT_PAGE_MAX;
-		mMangaKeyList.clear();
-		mMangaList.clear();
+		return previousList;
 	}
 
 	@Override
@@ -151,8 +147,91 @@ public final class MangaList implements Serializable, ISiteId, Collection<Manga>
 	}
 
 	@Override
+	public boolean remove(Object object) {
+		String key = ((Manga) object).mangaId;
+		return remove(key);
+	}
+
+	public boolean remove(String mangaId) {
+		if (!contains(mangaId)) {
+			return false;
+		}
+		mMangaList.remove(mangaId);
+		mMangaKeyList.remove(mangaId);
+		return true;
+	}
+
+	public boolean removeAt(int position) {
+		if (position < 0 || position >= size()) {
+			return false;
+		}
+		String key = getMangaId(position);
+		mMangaList.remove(key);
+		mMangaKeyList.remove(position);
+		return true;
+	}
+
+	@Override
+	public boolean removeAll(Collection<?> collection) {
+		boolean modified = false;
+		for (Object object : collection) {
+			if (remove(object) && !modified) {
+				modified = true;
+			}
+		}
+		return modified;
+	}
+
+	@Override
+	public boolean retainAll(Collection<?> collection) {
+		boolean modified = false;
+		ArrayList<String> mangaIds = new ArrayList<String>();
+		for (Object object : collection) {
+			mangaIds.add(((Manga) object).mangaId);
+		}
+		for (String mangaId : mMangaKeyList) {
+			if (mangaIds.contains(mangaId)) {
+				if (remove(mangaId) && !modified) {
+					modified = true;
+				}
+			}
+		}
+		return modified;
+	}
+
+	@Override
+	public void clear() {
+		pageIndexMax = DEFAULT_PAGE_MAX;
+		mMangaKeyList.clear();
+		mMangaList.clear();
+	}
+
+	@Override
+	public int size() {
+		return mMangaKeyList.size();
+	}
+
+	@Override
 	public boolean isEmpty() {
 		return mMangaKeyList.isEmpty();
+	}
+
+	@Override
+	public Object[] toArray() {
+		return toArrayList().toArray();
+	}
+
+	@Override
+	public <T> T[] toArray(T[] array) {
+		return toArrayList().toArray(array);
+	}
+
+	public ArrayList<Manga> toArrayList() {
+		ArrayList<Manga> mangas = new ArrayList<Manga>();
+		for (String mangaId : mMangaKeyList) {
+			mangas.add(mMangaList.get(mangaId));
+		}
+		return mangas;
 	}
 
 	@Override
@@ -177,73 +256,6 @@ public final class MangaList implements Serializable, ISiteId, Collection<Manga>
 			}
 
 		};
-	}
-
-	@Override
-	public boolean remove(Object object) {
-		String key = ((Manga) object).mangaId;
-		return remove(key);
-	}
-
-	public boolean remove(int mangaId) {
-		if (!contains(mangaId)) {
-			return false;
-		}
-		mMangaList.remove(mangaId);
-		mMangaKeyList.remove((Object) mangaId);
-		return true;
-	}
-
-	public void removeAt(int position) {
-		remove(getAt(position));
-	}
-
-	@Override
-	public boolean removeAll(Collection<?> collection) {
-		boolean modified = false;
-		for (Object object : collection) {
-			if (remove(object) && !modified) {
-				modified = true;
-			}
-		}
-		return modified;
-	}
-
-	@Override
-	public boolean retainAll(Collection<?> collection) {
-		ArrayList<String> mangaIds = new ArrayList<String>();
-		for (Object object : collection) {
-			mangaIds.add(((Manga) object).mangaId);
-		}
-		for (String mangaId : mMangaKeyList) {
-			if (mangaIds.contains(mangaId)) {
-				remove(mangaId);
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public int size() {
-		return mMangaKeyList.size();
-	}
-
-	@Override
-	public Object[] toArray() {
-		return toArrayList().toArray();
-	}
-
-	@Override
-	public <T> T[] toArray(T[] array) {
-		return toArrayList().toArray(array);
-	}
-
-	public ArrayList<Manga> toArrayList() {
-		ArrayList<Manga> mangas = new ArrayList<Manga>();
-		for (String mangaId : mMangaKeyList) {
-			mangas.add(mMangaList.get(mangaId));
-		}
-		return mangas;
 	}
 
 	@Override

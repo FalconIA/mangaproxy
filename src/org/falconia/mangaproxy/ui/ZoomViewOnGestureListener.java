@@ -1,6 +1,6 @@
 package org.falconia.mangaproxy.ui;
 
-import org.falconia.mangaproxy.AppConst;
+import org.falconia.mangaproxy.App;
 import org.falconia.mangaproxy.AppUtils;
 
 import android.content.Context;
@@ -82,7 +82,7 @@ public final class ZoomViewOnGestureListener extends SimpleOnGestureListener {
 
 		if (getZoomState().getZoom() != getZoomState().getDefaultZoom()) {
 			Log.i(GESTURE_TAG, "Double Tap");
-			AppUtils.popupMessage(AppConst.APP_CONTEXT, "Double Tap");
+			AppUtils.popupMessage(App.CONTEXT, "Double Tap");
 			return true;
 		}
 
@@ -140,10 +140,10 @@ public final class ZoomViewOnGestureListener extends SimpleOnGestureListener {
 						0.5f * mZoomView.getHeight())) {
 			if (dx > 0) {
 				Log.i(GESTURE_TAG, "Next Page");
-				AppUtils.popupMessage(AppConst.APP_CONTEXT, "Next Page");
+				AppUtils.popupMessage(App.CONTEXT, "Next Page");
 			} else {
 				Log.i(GESTURE_TAG, "Prev Page");
-				AppUtils.popupMessage(AppConst.APP_CONTEXT, "Prev Page");
+				AppUtils.popupMessage(App.CONTEXT, "Prev Page");
 			}
 		} else {
 			mZoomControl.startFling(-vx / mZoomView.getWidth(), -vy / mZoomView.getHeight());

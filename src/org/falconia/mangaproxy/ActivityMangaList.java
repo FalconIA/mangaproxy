@@ -1,26 +1,37 @@
 package org.falconia.mangaproxy;
 
+import java.util.HashMap;
+
 import org.apache.http.util.EncodingUtils;
 import org.falconia.mangaproxy.data.Genre;
+import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.data.MangaList;
 import org.falconia.mangaproxy.plugin.Plugins;
 import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
 import org.falconia.mangaproxy.task.OnSourceProcessListener;
 import org.falconia.mangaproxy.task.SourceProcessTask;
-import org.falconia.mangaproxy.ui.MangaListAdapter;
+import org.falconia.mangaproxy.ui.BaseHeadersAdapter;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.SQLException;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public final class ActivityMangaList extends ActivityBase {
+public final class ActivityMangaList extends ActivityBase implements OnClickListener {
 
 	public final static class IntentHandler {
 
@@ -125,7 +136,8 @@ public final class ActivityMangaList extends ActivityBase {
 		public void onPostSourceProcess(int size) {
 			AppUtils.logV(this, "onPostSourceProcess()");
 			if (size > 0) {
-				((MangaListAdapter) ActivityMangaList.this.mListAdapter).setMangaList(mMangaList);
+				// ((MangaListAdapter) mListAdapter).setMangaList(mMangaList);
+				mListAdapter.notifyDataSetChanged();
 				mPageLoaded++;
 				AppUtils.popupMessage(ActivityMangaList.this,
 						String.format(getString(R.string.popup_loaded_page), mPageLoaded));
@@ -217,12 +229,104 @@ public final class ActivityMangaList extends ActivityBase {
 		}
 	}
 
+	private final class MangaListAdapter extends BaseHeadersAdapter {
+
+		final class ViewHolder {
+			public TextView tvDisplayname;
+			public TextView tvDetails;
+			public TextView tvCompleted;
+			public CheckBox cbFavorite;
+		}
+
+		private LayoutInflater mInflater;
+
+		public MangaListAdapter(Context context) {
+			mInflater = LayoutInflater.from(context);
+		}
+
+		@Override
+		public int getCount() {
+			if (mMangaList == null) {
+				return 0;
+			}
+			return mMangaList.size();
+		}
+
+		@Override
+		public Manga getItem(int position) {
+			return mMangaList.getAt(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return getItem(position).mangaId.hashCode();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			Manga manga = getItem(position);
+			ViewHolder holder;
+
+			if (convertView == null) {
+				holder = new ViewHolder();
+				convertView = mInflater.inflate(R.layout.list_item_manga, null);
+				holder.tvDisplayname = (TextView) convertView.findViewById(R.id.mtvDisplayname);
+				holder.tvDetails = (TextView) convertView.findViewById(R.id.mtvDetails);
+				holder.tvCompleted = (TextView) convertView.findViewById(R.id.mtvCompleted);
+				holder.cbFavorite = (CheckBox) convertView.findViewById(R.id.mcbFavorite);
+				holder.cbFavorite.setOnClickListener(ActivityMangaList.this);
+				convertView.setTag(holder);
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+			}
+
+			if (mFavoriteMangaList != null) {
+				manga.isFavorite = mFavoriteMangaList.containsKey(manga.mangaId);
+			}
+
+			holder.tvDisplayname.setText(manga.displayname);
+			holder.tvDetails.setText(manga.getDetails());
+			holder.tvCompleted.setVisibility(manga.isCompleted ? View.VISIBLE : View.GONE);
+			holder.cbFavorite.setChecked(manga.isFavorite);
+			holder.cbFavorite.setTag(manga);
+
+			return convertView;
+		}
+
+		@Override
+		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+				int totalItemCount) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onScrollStateChanged(AbsListView view, int scrollState) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void notifyDataSetChanged() {
+			final AppSQLite db = App.DATABASE.open();
+			try {
+				mFavoriteMangaList = db.getAllMangasBySite(getSiteId());
+			} catch (SQLException e) {
+				AppUtils.logE(this, e.getMessage());
+			}
+			db.close();
+			super.notifyDataSetChanged();
+		}
+
+	}
+
 	private static final String BUNDLE_KEY_PAGE_MAX = "BUNDLE_KEY_PAGE_MAX";
 	private static final String BUNDLE_KEY_PAGE_LOADED = "BUNDLE_KEY_PAGE_LOADED";
 	private static final String BUNDLE_KEY_MANGA_LIST = "BUNDLE_KEY_MANGA_LIST";
 
 	private Genre mGenre;
 	private MangaList mMangaList;
+	private HashMap<String, Manga> mFavoriteMangaList;
 	private String mUrl;
 	private int mPageMax;
 	private int mPageLoaded;
@@ -295,7 +399,8 @@ public final class ActivityMangaList extends ActivityBase {
 		if (mPageLoaded < mPageMax) {
 			showFooter();
 		}
-		((MangaListAdapter) mListAdapter).setMangaList(mMangaList);
+		// ((MangaListAdapter) mListAdapter).setMangaList(mMangaList);
+		mListAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -326,6 +431,33 @@ public final class ActivityMangaList extends ActivityBase {
 	}
 
 	@Override
+	public void onClick(View view) {
+		// For favorite CheckBox in Manga item
+		if (view instanceof CheckBox) {
+			final CheckBox button = (CheckBox) view;
+			final Manga manga = (Manga) button.getTag();
+			if (button.isChecked()) {
+				modifiedFavorite(manga, button.isChecked());
+			} else {
+				button.toggle();
+				DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == DialogInterface.BUTTON_POSITIVE) {
+							button.toggle();
+							modifiedFavorite(manga, button.isChecked());
+						}
+					}
+				};
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setMessage(R.string.dialog_confirm_to_remove_favorite).setCancelable(true)
+						.setPositiveButton(R.string.dialog_ok, listener)
+						.setNegativeButton(R.string.dialog_cancel, listener).show();
+			}
+		}
+	}
+
+	@Override
 	public int onSourceProcess(String source) {
 		super.onSourceProcess(source);
 		mMangaList = mGenre.getMangaList(source);
@@ -343,7 +475,8 @@ public final class ActivityMangaList extends ActivityBase {
 		if (mPageLoaded < mPageMax) {
 			showFooter();
 		}
-		((MangaListAdapter) mListAdapter).setMangaList(mMangaList);
+		// ((MangaListAdapter) mListAdapter).setMangaList(mMangaList);
+		mListAdapter.notifyDataSetChanged();
 		getListView().requestFocus();
 
 		super.onPostSourceProcess(size);
@@ -387,6 +520,28 @@ public final class ActivityMangaList extends ActivityBase {
 		mNextPageDownloader = new NextPageDownloader();
 		getListView().addFooterView(mNextPageDownloader.getFooter(), null, true);
 		setListAdapter(mListAdapter);
+	}
+
+	private void modifiedFavorite(Manga manga, boolean add) {
+		final AppSQLite db = App.DATABASE.open();
+		if (add) {
+			AppUtils.logI(this, "Add to Favorite.");
+			try {
+				long id = db.insertManga(manga);
+				AppUtils.logW(this, "Add as ID " + id + ".");
+			} catch (SQLException e) {
+				AppUtils.logE(this, e.getMessage());
+			}
+		} else {
+			AppUtils.logI(this, "Remove from Favorite.");
+			int deleted;
+			if ((deleted = db.deleteManga(manga)) == 0) {
+				AppUtils.logE(this, "Remove none.");
+			} else {
+				AppUtils.logW(this, "Remove " + deleted + " mangas.");
+			}
+		}
+		db.close();
 	}
 
 }

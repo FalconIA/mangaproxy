@@ -1,6 +1,6 @@
 package org.falconia.mangaproxy;
 
-import org.falconia.mangaproxy.AppConst.ZoomMode;
+import org.falconia.mangaproxy.App.ZoomMode;
 import org.falconia.mangaproxy.ui.ZoomViewOnTouchListener;
 
 import android.app.Activity;
@@ -195,8 +195,7 @@ public final class DebugActivity extends Activity implements OnTouchListener {
 			if (mode == ZoomMode.FIT_WIDTH_AUTO_SPLIT) {
 				if (1f * bitmap.getWidth() / view.getWidth() > 1.5f
 						&& bitmap.getWidth() > bitmap.getHeight()) {
-					zoom *= (2f + AppConst.WIDTH_AUTO_SPLIT_MARGIN)
-							/ (1f + AppConst.WIDTH_AUTO_SPLIT_MARGIN);
+					zoom *= (2f + App.WIDTH_AUTO_SPLIT_MARGIN) / (1f + App.WIDTH_AUTO_SPLIT_MARGIN);
 				}
 			}
 		} else if (mode == ZoomMode.FIT_HEIGHT) {

@@ -13,6 +13,7 @@
 	<string name="menu_item_zoom_fit_height">Fit Height</string>
 	<string name="menu_item_zoom_fit_screen">Fit Screen</string>
 	<string name="dialog_confirm_to_exit">Confirm to exit?</string>
+	<string name="dialog_confirm_to_remove_favorite">Confirm to remove?</string>
 	<string name="dialog_ok">Ok</string>
 	<string name="dialog_cancel">Cancel</string>
 	<string name="dialog_loading_title">Loading</string>
@@ -26,6 +27,10 @@
 	<string name="dialog_process_message_format">Processing %s...</string>
 	<string name="dialog_loading_chapter_message_format">Loading chapter...              \nDownload: %s</string>
 	<string name="dialog_loading_imgsvrs_message_format">Loading dynamic image servers...\nDownload: %s</string>
+	<string name="dialog_unmounted_title">SD Card Unmounted</string>
+	<string name="dialog_unmounted_message">We are unable to access your SD card.\nPlease ensure that you have mounted your Android\'s SD card.</string>
+	<string name="dialog_unmounted_try_again">Try Again</string>
+	<string name="dialog_unmounted_exit">Exit</string>
 	<string name="source_of_genre_list">the list of Genre</string>
 	<string name="source_of_manga_list">the list of Manga</string>
 	<string name="source_of_chapter_list">the list of Chapter</string>

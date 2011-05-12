@@ -5,7 +5,7 @@
 
 package org.falconia.mangaproxy.ui;
 
-import org.falconia.mangaproxy.AppConst;
+import org.falconia.mangaproxy.App;
 import org.falconia.mangaproxy.AppUtils;
 
 import android.content.Context;
@@ -210,16 +210,16 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 	}
 
 	public boolean onSingleTap() {
-		AppUtils.popupMessage(AppConst.APP_CONTEXT, "Single Tap");
+		AppUtils.popupMessage(App.CONTEXT, "Single Tap");
 		return false;
 	}
 
 	public void onNextPage() {
-		AppUtils.popupMessage(AppConst.APP_CONTEXT, "Next Page");
+		AppUtils.popupMessage(App.CONTEXT, "Next Page");
 	}
 
 	public void onPrevPage() {
-		AppUtils.popupMessage(AppConst.APP_CONTEXT, "Prev Page");
+		AppUtils.popupMessage(App.CONTEXT, "Prev Page");
 	}
 
 	private final class ScaleListener extends SimpleOnScaleGestureListener {

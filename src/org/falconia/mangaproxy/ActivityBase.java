@@ -6,7 +6,7 @@ import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
 import org.falconia.mangaproxy.task.OnSourceProcessListener;
 import org.falconia.mangaproxy.task.SourceProcessTask;
-import org.falconia.mangaproxy.ui.BaseListAdapter;
+import org.falconia.mangaproxy.ui.BaseHeadersAdapter;
 import org.falconia.mangaproxy.ui.PinnedHeaderListView;
 import org.falconia.mangaproxy.utils.FormatUtils;
 
@@ -28,6 +28,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -130,7 +131,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 
 	protected static final String BUNDLE_KEY_IS_PROCESSED = "BUNDLE_KEY_IS_PROCESSED";
 
-	protected static final int DIALOG_CLOSE_ID = -1;
+	protected static final int DIALOG_CLOSE_ID = -2;
 	protected static final int DIALOG_LOADING_ID = 0;
 	protected static final int DIALOG_DOWNLOAD_ID = 1;
 	protected static final int DIALOG_PROCESS_ID = 2;
@@ -140,7 +141,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 	protected boolean mShowProcessDialog = true;
 	protected boolean mProcessed = false;
 
-	protected BaseListAdapter mListAdapter;
+	protected BaseAdapter mListAdapter;
 
 	abstract int getSiteId();
 
@@ -290,6 +291,8 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 	public void onPostSourceProcess(int size) {
 		AppUtils.logV(this, "onPostSourceProcess()");
 
+		mSourceProcessTask = null;
+
 		if (mShowProcessDialog) {
 			dismissDialog(DIALOG_PROCESS_ID);
 		}
@@ -335,7 +338,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 		setNoItemsMessage(getString(resId));
 	}
 
-	protected void setupListView(BaseListAdapter adapter) {
+	protected void setupListView(BaseAdapter adapter) {
 		mListAdapter = adapter;
 
 		setListAdapter(mListAdapter);
@@ -354,15 +357,19 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 
 		list.setEmptyView(findViewById(R.id.mvgEmpty));
 
-		if (list instanceof PinnedHeaderListView && mListAdapter.getDisplaySectionHeadersEnabled()) {
-			// mPinnedHeaderBackgroundColor =
-			// getResources().getColor(R.color.pinned_header_background);
-			PinnedHeaderListView pinnedHeaderList = (PinnedHeaderListView) list;
-			View pinnedHeader = inflater.inflate(R.layout.list_section, list, false);
-			pinnedHeaderList.setPinnedHeaderView(pinnedHeader);
+		if (mListAdapter instanceof BaseHeadersAdapter) {
+			if (list instanceof PinnedHeaderListView
+					&& ((BaseHeadersAdapter) mListAdapter).getDisplaySectionHeadersEnabled()) {
+				// mPinnedHeaderBackgroundColor =
+				// getResources().getColor(R.color.pinned_header_background);
+				PinnedHeaderListView pinnedHeaderList = (PinnedHeaderListView) list;
+				View pinnedHeader = inflater.inflate(R.layout.list_section, list, false);
+				pinnedHeaderList.setPinnedHeaderView(pinnedHeader);
+			}
+
+			list.setOnScrollListener((BaseHeadersAdapter) mListAdapter);
 		}
 
-		list.setOnScrollListener(mListAdapter);
 		list.setOnFocusChangeListener(this);
 		list.setOnTouchListener(this);
 		list.setOnItemClickListener(this);

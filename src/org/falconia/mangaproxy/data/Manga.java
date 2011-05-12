@@ -3,7 +3,7 @@ package org.falconia.mangaproxy.data;
 import java.io.Serializable;
 import java.util.GregorianCalendar;
 
-import org.falconia.mangaproxy.AppConst;
+import org.falconia.mangaproxy.App;
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugins;
 
@@ -11,6 +11,16 @@ import android.graphics.Bitmap;
 import android.text.TextUtils;
 
 public final class Manga implements Serializable {
+
+	public static Manga getFavoriteManga(int siteId, String mangaId, String displayname,
+			boolean isCompleted, int chapterCount, boolean hasNewChapter) {
+		Manga manga = new Manga(mangaId, displayname, null, siteId);
+		manga.isCompleted = isCompleted;
+		manga.chapterCount = chapterCount;
+		manga.hasNewChapter = hasNewChapter;
+		manga.isFavorite = true;
+		return manga;
+	}
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,8 +44,8 @@ public final class Manga implements Serializable {
 	public boolean isFavorite = false;
 	public boolean hasNewChapter = false;
 
-	private Chapter mLastReadChapter = null;
-	private Chapter mLatestChapter = null;
+	private Chapter lastReadChapter = null;
+	private Chapter latestChapter = null;
 
 	// for Extra Info
 	public transient Bitmap extraInfoCoverBitmap = null;
@@ -49,6 +59,10 @@ public final class Manga implements Serializable {
 		this.displayname = displayname;
 		this.section = section;
 		this.siteId = siteId;
+	}
+
+	public int getId() {
+		return String.format("%s - %s", getSiteName(), mangaId).hashCode();
 	}
 
 	private IPlugin getPlugin() {
@@ -79,10 +93,9 @@ public final class Manga implements Serializable {
 		if (!TextUtils.isEmpty(mDetailsTemplate)) {
 			String result = mDetailsTemplate;
 			result = result.replaceAll("%chapterDisplayname%", chapterDisplayname);
-			result = result.replaceAll("%chapterCount%", String.format(AppConst.UI_CHAPTER_COUNT,
-					chapterCount == 0 ? "??" : chapterCount));
-			result = result.replaceAll("%updatedAt%",
-					String.format(AppConst.UI_LAST_UPDATE, updatedAt));
+			result = result.replaceAll("%chapterCount%",
+					String.format(App.UI_CHAPTER_COUNT, chapterCount == 0 ? "??" : chapterCount));
+			result = result.replaceAll("%updatedAt%", String.format(App.UI_LAST_UPDATE, updatedAt));
 			result = result.replaceAll("%details%", details);
 			return result;
 		}
@@ -92,35 +105,49 @@ public final class Manga implements Serializable {
 	// for Favorite
 
 	public void setLastReadChapter(Chapter chapter) {
-		mLastReadChapter = chapter;
+		// TODO Update database
+		lastReadChapter = chapter;
 	}
 
 	public Chapter getLastReadChapter() {
-		return mLastReadChapter;
+		return lastReadChapter;
+	}
+
+	public String getLastReadChapterId() {
+		if (lastReadChapter == null) {
+			return null;
+		}
+		return lastReadChapter.chapterId;
 	}
 
 	public String getLastReadChapterDisplayname() {
-		if (mLastReadChapter != null) {
-			return mLastReadChapter.displayname;
-		} else {
+		if (lastReadChapter == null) {
 			return null;
 		}
+		return lastReadChapter.displayname;
 	}
 
 	public void setLatestChapter(Chapter chapter) {
-		mLatestChapter = chapter;
+		// TODO Update database
+		latestChapter = chapter;
 	}
 
 	public Chapter getLatestChapter() {
-		return mLatestChapter;
+		return latestChapter;
+	}
+
+	public String getLatestChapterId() {
+		if (latestChapter == null) {
+			return null;
+		}
+		return latestChapter.chapterId;
 	}
 
 	public String getLatestChapterDisplayname() {
-		if (mLatestChapter != null) {
-			return mLatestChapter.displayname;
-		} else {
+		if (latestChapter == null) {
 			return null;
 		}
+		return latestChapter.displayname;
 	}
 
 	// for extra info
