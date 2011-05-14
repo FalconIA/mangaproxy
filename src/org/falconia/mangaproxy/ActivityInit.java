@@ -261,6 +261,9 @@ public final class ActivityInit extends Activity implements OnClickListener {
 		case R.id.mbtn3:
 			sitchMode(App.DEBUG = 2);
 			break;
+		case R.id.mbtn4:
+			sitchMode(App.DEBUG = 3);
+			break;
 		}
 	}
 }
