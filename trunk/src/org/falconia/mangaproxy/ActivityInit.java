@@ -49,6 +49,13 @@ public final class ActivityInit extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		AppUtils.logV(this, "onCreate()");
 
+
+		if (App.DEBUG >= 0) {
+			sitchMode(App.DEBUG);
+			return;
+		}
+
+
 		setContentView(R.layout.main);
 		setTitle(String.format("%s (Alpha, Test only)", App.NAME));
 
@@ -83,11 +90,7 @@ public final class ActivityInit extends Activity implements OnClickListener {
 		mbtn4.setOnClickListener(this);
 
 
-		if (App.DEBUG >= 0) {
-			sitchMode(App.DEBUG);
-		} else {
-			checkExternalStorageMounted();
-		}
+		checkExternalStorageMounted();
 	}
 
 	private void checkExternalStorageMounted() {
