@@ -264,8 +264,8 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			Manga manga = getItem(position);
-			ViewHolder holder;
+			final Manga manga = getItem(position);
+			final ViewHolder holder;
 
 			if (convertView == null) {
 				holder = new ViewHolder();
@@ -310,7 +310,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		public void notifyDataSetChanged() {
 			final AppSQLite db = App.DATABASE.open();
 			try {
-				mFavoriteMangaList = db.getAllMangasBySite(getSiteId());
+				mFavoriteMangaList = db.getMangasBySite(getSiteId());
 			} catch (SQLException e) {
 				AppUtils.logE(this, e.getMessage());
 			}
@@ -320,9 +320,11 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 
 	}
 
-	private static final String BUNDLE_KEY_PAGE_MAX = "BUNDLE_KEY_PAGE_MAX";
-	private static final String BUNDLE_KEY_PAGE_LOADED = "BUNDLE_KEY_PAGE_LOADED";
-	private static final String BUNDLE_KEY_MANGA_LIST = "BUNDLE_KEY_MANGA_LIST";
+	private final class Configuration {
+		private MangaList mMangaList;
+		private int mPageMax;
+		private int mPageLoaded;
+	}
 
 	private Genre mGenre;
 	private MangaList mMangaList;
@@ -377,30 +379,40 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 
 		if (!mProcessed) {
 			loadMangaList();
+		} else {
+			final Configuration conf = (Configuration) getLastNonConfigurationInstance();
+			mMangaList = conf.mMangaList;
+			mPageMax = conf.mPageMax;
+			mPageLoaded = conf.mPageLoaded;
+			if (mPageLoaded < mPageMax) {
+				showFooter();
+			}
 		}
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-
-		outState.putSerializable(BUNDLE_KEY_PAGE_MAX, mPageMax);
-		outState.putSerializable(BUNDLE_KEY_PAGE_LOADED, mPageLoaded);
-		outState.putSerializable(BUNDLE_KEY_MANGA_LIST, mMangaList);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 
-		mPageMax = savedInstanceState.getInt(BUNDLE_KEY_PAGE_MAX);
-		mPageLoaded = savedInstanceState.getInt(BUNDLE_KEY_PAGE_LOADED);
-		mMangaList = (MangaList) savedInstanceState.getSerializable(BUNDLE_KEY_MANGA_LIST);
-		if (mPageLoaded < mPageMax) {
-			showFooter();
-		}
-		// ((MangaListAdapter) mListAdapter).setMangaList(mMangaList);
 		mListAdapter.notifyDataSetChanged();
+	}
+
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		AppUtils.logV(this, "onRetainNonConfigurationInstance()");
+
+		Configuration conf = new Configuration();
+
+		conf.mMangaList = mMangaList;
+		conf.mPageMax = mPageMax;
+		conf.mPageLoaded = mPageLoaded;
+
+		return conf;
 	}
 
 	@Override
@@ -437,7 +449,9 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 			final CheckBox button = (CheckBox) view;
 			final Manga manga = (Manga) button.getTag();
 			if (button.isChecked()) {
-				modifiedFavorite(manga, button.isChecked());
+				if (!modifiedFavorite(manga, button.isChecked())) {
+					button.toggle();
+				}
 			} else {
 				button.toggle();
 				DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -445,7 +459,9 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == DialogInterface.BUTTON_POSITIVE) {
 							button.toggle();
-							modifiedFavorite(manga, button.isChecked());
+							if (!modifiedFavorite(manga, button.isChecked())) {
+								button.toggle();
+							}
 						}
 					}
 				};
@@ -522,26 +538,33 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		setListAdapter(mListAdapter);
 	}
 
-	private void modifiedFavorite(Manga manga, boolean add) {
+	private boolean modifiedFavorite(Manga manga, boolean add) {
+		boolean modified = false;
 		final AppSQLite db = App.DATABASE.open();
 		if (add) {
 			AppUtils.logI(this, "Add to Favorite.");
 			try {
 				long id = db.insertManga(manga);
-				AppUtils.logW(this, "Add as ID " + id + ".");
+				manga._id = id;
+				manga.isFavorite = true;
+				modified = true;
+				AppUtils.logD(this, "Add as ID " + id + ".");
 			} catch (SQLException e) {
 				AppUtils.logE(this, e.getMessage());
 			}
 		} else {
 			AppUtils.logI(this, "Remove from Favorite.");
 			int deleted;
-			if ((deleted = db.deleteManga(manga)) == 0) {
-				AppUtils.logE(this, "Remove none.");
+			if ((deleted = db.deleteManga(manga)) != 0) {
+				manga.isFavorite = false;
+				modified = true;
+				AppUtils.logD(this, "Remove " + deleted + " mangas.");
 			} else {
-				AppUtils.logW(this, "Remove " + deleted + " mangas.");
+				AppUtils.logE(this, "Remove none.");
 			}
 		}
 		db.close();
+		return modified;
 	}
 
 }

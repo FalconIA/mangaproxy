@@ -41,6 +41,9 @@
 	<string name="ui_error_no_network">No available wireless or network.\nPlease check your settings,\nand try again later.</string>
 	<string name="ui_error_on_download">Cannot download data from %s.\nPlease try again later.</string>
 	<string name="ui_error_on_process">Cannot process data of %s.\nPlease try again later,\nor update the app if necessary.</string>
+	<string name="ui_error_on_imgsvr_url">Cannot get URL for Image Servers.\nPlease try again later,\nor update the app if necessary.</string>
+	<string name="ui_error_on_imgsvr_download">Cannot download Image Servers.\nPlease try again later.</string>
+	<string name="ui_error_on_imgsvr_process">Cannot process Image Servers.\nPlease try again later,\nor update the app if necessary.</string>
 	<string name="ui_chapter_count">Chapters: %s</string>
 	<string name="ui_last_update">Update: %tF</string>
 	<string name="ui_search_hint">Search</string>
