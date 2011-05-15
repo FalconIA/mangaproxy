@@ -130,6 +130,13 @@ public class Plugin99770 extends PluginBase {
 		return calendar;
 	}
 
+	protected GregorianCalendar parseDateTime(String string) {
+		GregorianCalendar calendar = null;
+		calendar = parseDateTime(string,
+				"(\\d+)/(\\d+)/(\\d+) (\\d+)\\:(\\d+)\\:(\\d+){'YY','M','D','h','m','s'}");
+		return calendar;
+	}
+
 	@Override
 	protected String parseGenreName(String string) {
 		string = super.parseName(string);
@@ -373,7 +380,7 @@ public class Plugin99770 extends PluginBase {
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)集数：(?:\\s*<[^<>]+>)?(\\d*?)(?:<[^<>]+>\\s*)?集\\(卷\\).+?状态：〖(?:\\s*<[^<>]+>)?(.+?)(?:<[^<>]+>\\s*)?〗.+?<div [^<>]*?class=\"cVol\"[^<>]*?>\\s*<ul>(.+?)</ul>";
+			pattern = "(?is)集数：(?:\\s*<[^<>]+>)?(\\d*?)(?:<[^<>]+>\\s*)?集\\(卷\\).+?状态：〖(?:\\s*<[^<>]+>)?(.+?)(?:<[^<>]+>\\s*)?〗.+?>本页更新时间：([ \\d/:]+)<.+?<div [^<>]*?class=\"cVol\"[^<>]*?>\\s*<ul>(.+?)</ul>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
@@ -385,10 +392,14 @@ public class Plugin99770 extends PluginBase {
 			manga.isCompleted = parseIsCompleted(groups.get(2));
 			logV(Catched_in_section, groups.get(2), 2, section, manga.isCompleted);
 
+			section = "UpdatedAt";
+			manga.updatedAt = parseDateTime(groups.get(3));
+			logV(Catched_in_section, groups.get(3), 3, section, manga.updatedAt.getTime());
+
 			section = "ul";
 			// logV(groups.get(3));
 			pattern = "(?is)(?:<li>|<div.*?>)<a href=\"?/\\w+/\\d+/(\\d+)/\\?s=(\\d+)\"? .*?>(?:<.*?>)?(.*?)</a>";
-			matches = Regex.matchAll(pattern, groups.get(3));
+			matches = Regex.matchAll(pattern, groups.get(4));
 			logD(Catched_count_in_section, matches.size(), section);
 
 			for (ArrayList<String> groups2 : matches) {
@@ -494,6 +505,8 @@ public class Plugin99770 extends PluginBase {
 
 			time = System.currentTimeMillis() - time;
 			logD(Process_Time_ChapterList, time);
+
+			return true;
 
 		} catch (Exception e) {
 			e.printStackTrace();

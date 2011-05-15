@@ -13,6 +13,16 @@ public final class Chapter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static Chapter getFavoriteChapter(int _id, Manga manga, String chapterId,
+			String displayname, int pageIndexMax, int pageIndexLastRead) {
+		Chapter chapter = new Chapter(chapterId, displayname, manga);
+		chapter._id = _id;
+		chapter.pageIndexMax = pageIndexMax;
+		chapter.pageIndexLastRead = pageIndexLastRead;
+		chapter.isFavorite = true;
+		return chapter;
+	}
+
 	public static final int TYPE_ID_VOLUME = 0;
 	public static final int TYPE_ID_CHAPTER = 1;
 	public static final int TYPE_ID_UNKNOW = 2;
@@ -24,6 +34,16 @@ public final class Chapter implements Serializable {
 	public final String chapterId;
 	public final String displayname;
 
+	public int pageIndexMax;
+	public int pageIndexLastRead;
+
+	// for Favorite
+	public boolean isFavorite = false;
+
+	// for Database
+	public long _id = -1;
+
+	// for Other
 	public int typeId = TYPE_ID_UNKNOW;
 
 	private String dynamicImgServersUrl;
@@ -35,6 +55,8 @@ public final class Chapter implements Serializable {
 		this.displayname = displayname;
 		this.manga = manga;
 		siteId = manga.siteId;
+		pageIndexMax = 0;
+		pageIndexLastRead = 0;
 	}
 
 	private IPlugin getPlugin() {

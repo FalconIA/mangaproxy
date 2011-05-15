@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
@@ -98,10 +99,12 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		@Override
 		public void onNextPage() {
+			changePage(true);
 		}
 
 		@Override
 		public void onPrevPage() {
+			changePage(false);
 		}
 	}
 
@@ -370,6 +373,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		private String[] mPageUrls;
 		private HashMap<Integer, Page> mPages;
+		private int mPageIndexMax;
 		private int mPageIndexCurrent;
 		private int mPageIndexLoading;
 
@@ -397,7 +401,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	private String[] mPageUrls;
 	private HashMap<Integer, Page> mPages;
-	private int mPageIndexCurrent;
+	// private int mPageIndexCurrent;
 	private int mPageIndexLoading;
 	private LinkedList<Integer> mPreloadPageIndexQueue;
 
@@ -430,7 +434,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	public ActivityChapter() {
 		mProcessed = false;
-		mPageIndexCurrent = 0;
+		// mPageIndexCurrent = 0;
 		mPageIndexLoading = 0;
 		mZoomMode = ZoomMode.FIT_WIDTH_AUTO_SPLIT;
 		mPreloadPageIndexQueue = new LinkedList<Integer>();
@@ -470,7 +474,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		AppUtils.logV(this, "onCreate()");
 
 		mManga = IntentHandler.getManga(this);
+		long time = System.currentTimeMillis();
 		mChapter = IntentHandler.getChapter(this);
+		time = System.currentTimeMillis() - time;
+		AppUtils.logW(this, "Cost Time: " + time);
 		if (mManga == null || mChapter == null) {
 			finish();
 		}
@@ -481,7 +488,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		final Configuration conf = (Configuration) getLastNonConfigurationInstance();
 		if (conf != null) {
 			mProcessed = conf.mProcessed;
-			mPageIndexCurrent = conf.mPageIndexCurrent;
+			mChapter.pageIndexMax = conf.mPageIndexMax;
+			mChapter.pageIndexLastRead = conf.mPageIndexCurrent;
 			mPageIndexLoading = conf.mPageIndexLoading;
 			mZoomMode = conf.mZoomMode;
 		}
@@ -565,7 +573,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mPageView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 				@Override
 				public void onGlobalLayout() {
-					AppUtils.logV(this, "onGlobalLayout()");
+					AppUtils.logV(ActivityChapter.this, "onGlobalLayout()");
+					mPageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 					setImage(conf.mPageViewImage);
 				}
 			});
@@ -573,12 +582,12 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mHideScrollerHandler.postAtTime(mHideScrollerRunnable, 2000);
 			mHideTitleBarHandler.postAtTime(mHideTitleBarRunnable, 2000);
 
-			if (mPageIndexCurrent != mPageIndexLoading) {
+			if (mChapter.pageIndexLastRead != mPageIndexLoading) {
 				AppUtils.logW(this, "mPageIndexCurrent != mPageIndexLoading");
-				changePage(mPageIndexLoading);
+				// changePage(mPageIndexLoading);
 			} else {
 				AppUtils.logW(this, "mPageIndexCurrent == mPageIndexLoading");
-				changePage(mPageIndexLoading);
+				// changePage(mPageIndexLoading);
 			}
 		}
 	}
@@ -652,7 +661,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		conf.mPageUrls = mPageUrls;
 		conf.mPages = mPages;
-		conf.mPageIndexCurrent = mPageIndexCurrent;
+		conf.mPageIndexMax = mChapter.pageIndexMax;
+		conf.mPageIndexCurrent = mChapter.pageIndexLastRead;
 		conf.mPageIndexLoading = mPageIndexLoading;
 
 		conf.mtvDebugText = mtvDebug.getText();
@@ -763,8 +773,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	private String getCustomTitle() {
 		String title = String.format("%s - %s", mManga.displayname, mChapter.displayname);
-		if (mPageIndexCurrent > 0) {
-			title = String.format("%s - " + getString(R.string.ui_page), title, mPageIndexCurrent);
+		if (mChapter.pageIndexLastRead > 0) {
+			title = String.format("%s - " + getString(R.string.ui_page), title,
+					mChapter.pageIndexLastRead);
 		}
 		return title;
 	}
@@ -796,12 +807,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		if (mPageUrls == null) {
 			setMessage(String.format(getString(R.string.ui_error_on_process), getSiteName()));
+			mChapter.pageIndexMax = 0;
 			return;
 		}
 
 		String urlImgServers = mChapter.getDynamicImgServersUrl();
 		if (TextUtils.isEmpty(urlImgServers)) {
-			// TODO Warning message
+			setMessage(String.format(getString(R.string.ui_error_on_imgsvr_url), getSiteName()));
 		} else {
 			if (AppCache.checkCacheForData(urlImgServers, 3600)) {
 				// Debug
@@ -821,7 +833,14 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void processImgServersSource(String source) {
-		if (mChapter.setDynamicImgServers(source)) {
+		if (TextUtils.isEmpty(source)) {
+			setMessage(String
+					.format(getString(R.string.ui_error_on_imgsvr_download), getSiteName()));
+			return;
+		}
+
+		if (!mChapter.setDynamicImgServers(source)) {
+			setMessage(String.format(getString(R.string.ui_error_on_imgsvr_process), getSiteName()));
 			return;
 		}
 
@@ -842,6 +861,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mPages.put(i + 1, page);
 		}
 
+		mChapter.pageIndexMax = mPages.size();
 		mProcessed = true;
 
 		initalPage();
@@ -849,11 +869,21 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	private void initalPage() {
 		// TODO Update database
+		final AppSQLite db = App.DATABASE.open();
+		AppUtils.logI(this, "Add to Favorite(Chapter).");
+		try {
+			long id = db.insertChapter(mChapter);
+			AppUtils.logD(this, "Add as ID " + id + ".");
+		} catch (SQLException e) {
+			AppUtils.logE(this, e.getMessage());
+		}
+		db.close();
+
 		changePage(1);
 	}
 
 	private void changePage(int pageIndex) {
-		if (pageIndex <= 0 || pageIndex > mPages.size()) {
+		if (pageIndex <= 0 || pageIndex > mChapter.pageIndexMax) {
 			return;
 		}
 
@@ -872,19 +902,23 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void changePage(boolean nextpage) {
+		// Empty
+		if (mChapter.pageIndexMax == 0) {
+			return;
+		}
 		// Loading
-		if (mPageIndexLoading != mPageIndexCurrent) {
+		if (mPageIndexLoading != mChapter.pageIndexLastRead) {
 			return;
 		}
 
-		int mPageIndexGoto = mPageIndexCurrent + (nextpage ? 1 : -1);
+		int mPageIndexGoto = mChapter.pageIndexLastRead + (nextpage ? 1 : -1);
 
 		// Prev chapter
 		if (mPageIndexGoto < 1) {
 			AppUtils.popupMessage(this, "First Page");
 		}
 		// Next chapter
-		else if (mPageIndexGoto > mPages.size()) {
+		else if (mPageIndexGoto > mChapter.pageIndexMax) {
 			AppUtils.popupMessage(this, "Last Page");
 		} else {
 			changePage(mPageIndexGoto);
@@ -892,7 +926,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void preloadPage(int pageIndex) {
-		if (pageIndex - mPageIndexLoading <= App.IMG_PRELOAD_MAX && pageIndex <= mPages.size()) {
+		if (pageIndex - mPageIndexLoading <= App.IMG_PRELOAD_MAX
+				&& pageIndex <= mChapter.pageIndexMax) {
 			AppUtils.logI(this, String.format("Preload Page %d.", pageIndex));
 			mPages.get(pageIndex).download();
 		} else {
@@ -907,7 +942,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		if (page.mPageIndex == mPageIndexLoading) {
 			Bitmap bitmap = page.getBitmap();
 			if (bitmap != null) {
-				mPageIndexCurrent = mPageIndexLoading;
+				mChapter.pageIndexLastRead = mPageIndexLoading;
 				setImage(bitmap);
 				mtvTitle.setText(getCustomTitle());
 				showTitleBar();
@@ -943,7 +978,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void setupZoomState() {
-		mPageView.setImage(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
+		mPageView.setImage(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_4444));
 		mZoomControl.getZoomState().setAlignX(AlignX.Right);
 		mZoomControl.getZoomState().setAlignY(AlignY.Top);
 		mZoomControl.getZoomState().setPanX(0.0f);
@@ -1030,7 +1065,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			@Override
 			public void run() {
 				if (msvScroller != null) {
-					msvScroller.smoothScrollBy(0, 100);
+					msvScroller.smoothScrollBy(0, 1000);
 				}
 			}
 		});

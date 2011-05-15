@@ -1,5 +1,7 @@
 package org.falconia.mangaproxy;
 
+import java.util.HashMap;
+
 import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.ChapterList;
 import org.falconia.mangaproxy.data.Manga;
@@ -8,12 +10,14 @@ import org.falconia.mangaproxy.ui.BaseHeadersAdapter;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.SQLException;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public final class ActivityChapterList extends ActivityBase {
@@ -44,9 +48,12 @@ public final class ActivityChapterList extends ActivityBase {
 
 		final class ViewHolder {
 			public TextView tvDisplayname;
+
+			public TextView tvDetails;
+			public TextView tvIsVolume;
+			public ImageView imIsRead;
 		}
 
-		private ChapterList mChapterList;
 		private LayoutInflater mInflater;
 
 		public ChapterListAdapter() {
@@ -73,24 +80,56 @@ public final class ActivityChapterList extends ActivityBase {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			ViewHolder holder;
+			final Chapter chapter = getItem(position);
+			final ViewHolder holder;
+
+			if (mFavoriteChapterList != null && mFavoriteChapterList.containsKey(chapter.chapterId)) {
+				final Chapter chapterFav = mFavoriteChapterList.get(chapter.chapterId);
+				chapter._id = chapterFav._id;
+				chapter.pageIndexMax = chapterFav.pageIndexMax;
+				chapter.pageIndexLastRead = chapterFav.pageIndexLastRead;
+				chapter.isFavorite = true;
+			}
 
 			if (convertView == null) {
 				holder = new ViewHolder();
-				convertView = mInflater.inflate(R.layout.list_item_genre, null);
-				holder.tvDisplayname = (TextView) convertView.findViewById(R.id.mtvDisplayname);
+				if (mManga.isFavorite) {
+					convertView = mInflater.inflate(R.layout.list_item_chapter_favorite, null);
+					holder.tvDisplayname = (TextView) convertView.findViewById(R.id.mtvDisplayname);
+					holder.tvDetails = (TextView) convertView.findViewById(R.id.mtvDetails);
+					holder.tvIsVolume = (TextView) convertView.findViewById(R.id.mtvIsVolume);
+					holder.imIsRead = (ImageView) convertView.findViewById(R.id.mimIsRead);
+				} else {
+					convertView = mInflater.inflate(R.layout.list_item_chapter, null);
+					holder.tvDisplayname = (TextView) convertView.findViewById(R.id.mtvDisplayname);
+				}
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
 			}
 
-			Chapter chapter = mChapterList.getAt(position);
 			holder.tvDisplayname.setText(chapter.displayname);
-			if (chapter.typeId == Chapter.TYPE_ID_VOLUME) {
-				holder.tvDisplayname.setTextColor(getResources().getColor(R.color.highlight));
+			if (mManga.isFavorite) {
+				if (chapter.typeId == Chapter.TYPE_ID_VOLUME) {
+					holder.tvIsVolume.setVisibility(View.VISIBLE);
+				} else {
+					holder.tvIsVolume.setVisibility(View.GONE);
+				}
+				if (chapter.isFavorite) {
+					holder.tvDetails.setText(String.format(getString(R.string.ui_pages_format),
+							chapter.pageIndexLastRead, chapter.pageIndexMax));
+					holder.imIsRead.setVisibility(View.VISIBLE);
+				} else {
+					holder.tvDetails.setText(R.string.ui_pages);
+					holder.imIsRead.setVisibility(View.GONE);
+				}
 			} else {
-				holder.tvDisplayname.setTextColor(getResources().getColor(
-						android.R.color.primary_text_dark));
+				if (chapter.typeId == Chapter.TYPE_ID_VOLUME) {
+					holder.tvDisplayname.setTextColor(getResources().getColor(R.color.highlight));
+				} else {
+					holder.tvDisplayname.setTextColor(getResources().getColor(
+							android.R.color.primary_text_dark));
+				}
 			}
 
 			return convertView;
@@ -109,9 +148,18 @@ public final class ActivityChapterList extends ActivityBase {
 
 		}
 
-		public void setChapterList(ChapterList chapterList) {
-			mChapterList = chapterList;
-			notifyDataSetChanged();
+		@Override
+		public void notifyDataSetChanged() {
+			if (mManga.isFavorite) {
+				final AppSQLite db = App.DATABASE.open();
+				try {
+					mFavoriteChapterList = db.getChaptersByManga(mManga);
+				} catch (SQLException e) {
+					AppUtils.logE(this, e.getMessage());
+				}
+				db.close();
+			}
+			super.notifyDataSetChanged();
 		}
 
 	}
@@ -120,6 +168,7 @@ public final class ActivityChapterList extends ActivityBase {
 
 	private Manga mManga;
 	private ChapterList mChapterList;
+	private HashMap<String, Chapter> mFavoriteChapterList;
 
 	@Override
 	public int getSiteId() {
@@ -169,7 +218,7 @@ public final class ActivityChapterList extends ActivityBase {
 		super.onRestoreInstanceState(savedInstanceState);
 
 		mChapterList = (ChapterList) savedInstanceState.getSerializable(BUNDLE_KEY_CHAPTER_LIST);
-		((ChapterListAdapter) mListAdapter).setChapterList(mChapterList);
+		mListAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -198,12 +247,27 @@ public final class ActivityChapterList extends ActivityBase {
 	public int onSourceProcess(String source) {
 		mChapterList = mManga.getChapterList(source);
 		mManga.chapterList = mChapterList;
+		mManga.latestChapterDisplayname = mChapterList.getDisplayname(0);
 		return mChapterList.size();
 	}
 
 	@Override
 	public void onPostSourceProcess(int result) {
-		((ChapterListAdapter) mListAdapter).setChapterList(mChapterList);
+		// Update manga in database
+		if (mManga.isFavorite && result > 0) {
+			final AppSQLite db = App.DATABASE.open();
+			try {
+				AppUtils.logI(this, "Update manga in favorite.");
+				if (db.updateManga(mManga) == 0) {
+					AppUtils.logE(this, "Fail to update manga in favorite.");
+				}
+			} catch (SQLException e) {
+				AppUtils.logE(this, e.getMessage());
+			}
+			db.close();
+		}
+
+		mListAdapter.notifyDataSetChanged();
 		getListView().requestFocus();
 
 		super.onPostSourceProcess(result);

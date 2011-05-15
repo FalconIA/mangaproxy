@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,7 +62,17 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			view.setTag(holder);
 
 			holder.tvDisplayname.setText(manga.displayname);
-			holder.tvDetails.setText(manga.getDetails());
+			if (TextUtils.isEmpty(manga.latestChapterDisplayname)) {
+				holder.tvDetails.setText("-");
+			} else {
+				holder.tvDetails.setText(manga.latestChapterDisplayname);
+			}
+			if (manga.hasNewChapter) {
+				holder.tvDetails.setTextColor(getResources().getColor(R.color.highlight));
+			} else {
+				holder.tvDetails.setTextColor(getResources().getColor(
+						android.R.color.primary_text_dark));
+			}
 			holder.tvCompleted.setVisibility(manga.isCompleted ? View.VISIBLE : View.GONE);
 			holder.cbFavorite.setChecked(manga.isFavorite);
 			holder.cbFavorite.setTag(manga);
@@ -75,7 +86,17 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			ViewHolder holder = (ViewHolder) view.getTag();
 
 			holder.tvDisplayname.setText(manga.displayname);
-			holder.tvDetails.setText(manga.getDetails());
+			if (TextUtils.isEmpty(manga.latestChapterDisplayname)) {
+				holder.tvDetails.setText("-");
+			} else {
+				holder.tvDetails.setText(manga.latestChapterDisplayname);
+			}
+			if (manga.hasNewChapter) {
+				holder.tvDetails.setTextColor(getResources().getColor(R.color.highlight));
+			} else {
+				holder.tvDetails.setTextColor(getResources().getColor(
+						android.R.color.primary_text_dark));
+			}
 			holder.tvCompleted.setVisibility(manga.isCompleted ? View.VISIBLE : View.GONE);
 			holder.cbFavorite.setChecked(manga.isFavorite);
 			holder.cbFavorite.setTag(manga);
@@ -83,7 +104,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 
 		@Override
 		public void notifyDataSetInvalidated() {
-			Cursor cursor = mDB.getAllMangasCursor(null, null);
+			Cursor cursor = mDB.getMangasCursor(null, null);
 			changeCursor(cursor);
 			super.notifyDataSetInvalidated();
 		}

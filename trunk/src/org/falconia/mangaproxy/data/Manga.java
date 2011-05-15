@@ -12,17 +12,20 @@ import android.text.TextUtils;
 
 public final class Manga implements Serializable {
 
-	public static Manga getFavoriteManga(int siteId, String mangaId, String displayname,
-			boolean isCompleted, int chapterCount, boolean hasNewChapter) {
+	private static final long serialVersionUID = 1L;
+
+	public static Manga getFavoriteManga(int _id, int siteId, String mangaId, String displayname,
+			boolean isCompleted, int chapterCount, boolean hasNewChapter,
+			String latestChapterDisplayname) {
 		Manga manga = new Manga(mangaId, displayname, null, siteId);
+		manga._id = _id;
 		manga.isCompleted = isCompleted;
 		manga.chapterCount = chapterCount;
 		manga.hasNewChapter = hasNewChapter;
+		manga.latestChapterDisplayname = latestChapterDisplayname;
 		manga.isFavorite = true;
 		return manga;
 	}
-
-	private static final long serialVersionUID = 1L;
 
 	public final int siteId;
 	public final String mangaId;
@@ -43,9 +46,12 @@ public final class Manga implements Serializable {
 	// for Favorite
 	public boolean isFavorite = false;
 	public boolean hasNewChapter = false;
+	public String latestChapterDisplayname = null;
 
 	private Chapter lastReadChapter = null;
-	private Chapter latestChapter = null;
+
+	// for Database
+	public long _id = -1;
 
 	// for Extra Info
 	public transient Bitmap extraInfoCoverBitmap = null;
@@ -125,29 +131,6 @@ public final class Manga implements Serializable {
 			return null;
 		}
 		return lastReadChapter.displayname;
-	}
-
-	public void setLatestChapter(Chapter chapter) {
-		// TODO Update database
-		latestChapter = chapter;
-	}
-
-	public Chapter getLatestChapter() {
-		return latestChapter;
-	}
-
-	public String getLatestChapterId() {
-		if (latestChapter == null) {
-			return null;
-		}
-		return latestChapter.chapterId;
-	}
-
-	public String getLatestChapterDisplayname() {
-		if (latestChapter == null) {
-			return null;
-		}
-		return latestChapter.displayname;
 	}
 
 	// for extra info
