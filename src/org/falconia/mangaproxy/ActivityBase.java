@@ -125,7 +125,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 		public void cancelDownload() {
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
-				mDownloader.cancel(true);
+				mDownloader.cancelDownload();
 			}
 		}
 	}

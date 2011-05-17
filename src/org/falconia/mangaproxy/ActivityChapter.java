@@ -210,7 +210,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		public void cancelDownload() {
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
-				mDownloader.cancel(true);
+				mDownloader.cancelDownload();
 			}
 		}
 	}
@@ -399,7 +399,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
 
-				// mDownloader.cancel(true);
 				mDownloader.cancelDownload();
 				mUrlRedirected = null;
 				mIsDownloaded = false;
