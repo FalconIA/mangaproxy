@@ -156,7 +156,9 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 		case MotionEvent.ACTION_UP: {
 			Log.d(GESTURE_TAG, action == MotionEvent.ACTION_UP ? "ACTION_UP" : "ACTION_CANCEL");
 
-			if (mMode == Mode.PAN_ZOOM) {
+			if (mMode == Mode.NONE) {
+
+			} else if (mMode == Mode.PAN_ZOOM) {
 				mVelocityTracker.computeCurrentVelocity(1000, mScaledMaximumFlingVelocity);
 				mZoomControl.startFling(-mVelocityTracker.getXVelocity() / v.getWidth(),
 						-mVelocityTracker.getYVelocity() / v.getHeight());
@@ -305,9 +307,10 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 					Log.i(GESTURE_TAG, "Prev Page");
 					onPrevPage();
 				}
-			}
 
-			mZoomControl.stopFling();
+				mMode = Mode.NONE;
+				// mZoomControl.stopFling();
+			}
 
 			return true;
 		}

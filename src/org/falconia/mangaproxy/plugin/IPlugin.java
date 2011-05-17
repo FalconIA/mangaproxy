@@ -27,7 +27,9 @@ public interface IPlugin {
 
 	boolean hasGenreList();
 
-	boolean isDynamicImgServer();
+	boolean usingImgRedirect();
+
+	boolean usingDynamicImgServer();
 
 	String getGenreListUrl();
 
@@ -47,6 +49,8 @@ public interface IPlugin {
 
 	String getChapterUrl(Chapter chapter, Manga manga);
 
+	Genre getGenreAll();
+
 	GenreList getGenreList(String source);
 
 	MangaList getMangaList(String source, Genre genre);
@@ -56,6 +60,8 @@ public interface IPlugin {
 	ChapterList getChapterList(String source, Manga manga);
 
 	String[] getChapterPages(String source, Chapter chapter);
+
+	String getPageRedirectUrl(String source);
 
 	boolean setDynamicImgServers(String source, Chapter chapter);
 

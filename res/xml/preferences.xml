@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+	android:title="Preferences">
+	<PreferenceCategory android:title="General">
+		<CheckBoxPreference android:title="Favorite Auto-update"
+			android:summary="Automagically updates favorites when open."
+			android:key="bFavoriteAutoUpdate" android:defaultValue="false" />
+		<CheckBoxPreference android:key="bRightToLeftReading"
+			android:title="Right-to-Left Reading" android:summary="Read peags using Right-to-Left direction."
+			android:defaultValue="true" android:enabled="false" />
+		<ListPreference android:key="iPageOrientation"
+			android:title="Screen Orientation" android:summary="Sets the screen orientation while reading pages."
+			android:entries="@array/orientations" android:entryValues="@array/orientations_values"
+			android:defaultValue="4" />
+		<ListPreference android:key="iPageZoomMode"
+			android:title="Pages Zoom Mode" android:entries="@array/zoom_mode"
+			android:entryValues="@array/zoom_mode_values" android:summary="Sets the default method while reading pages."
+			android:defaultValue="0" />
+		<ListPreference android:key="iPreloadPages"
+			android:title="Preload Pages" android:summary="Sets the pages to preload while reading."
+			android:entries="@array/preload" android:entryValues="@array/preload_values"
+			android:defaultValue="2" />
+	</PreferenceCategory>
+</PreferenceScreen>

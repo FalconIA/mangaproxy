@@ -12,6 +12,7 @@ import com.sonyericsson.zoom.DynamicZoomControl;
 import com.sonyericsson.zoom.ImageZoomView;
 import com.sonyericsson.zoom.ZoomState;
 
+@Deprecated
 public final class ZoomViewOnGestureListener extends SimpleOnGestureListener {
 
 	private static final String GESTURE_TAG = "Gesture";

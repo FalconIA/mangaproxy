@@ -1,0 +1,39 @@
+更新：
+增加新站点
+增加用户收藏功能
+增加收藏更新
+
+浏览页操作方式：
+下一页：　图片处在左边缘时向右滑动
+　　　　　或右下角按钮
+上一页：　图片处在右边缘时向左滑动
+　　　　　或左下角按钮
+缩放：　　两点触控
+缩放复位：双击屏幕
+初始缩放：菜单中选择
+显示信息：单击屏幕
+
+
+Version 1.0 (Beta)
+==================
+- New plugin for site DM5(www.dm5.com).
+- New Favorite Management for bookmarking and checking update.
+- New option menu.
+- Fix page change issue in ActivityChapter.
+- Update databse structure.
+
+Version 0.5 (Preview)
+=====================
+- New Favorite Bookmark (ony for Manga).
+
+Version 0.4 (Preview)
+=====================
+- New Chapter Page Viewer.
+
+Version 0.3 (Preview)
+=====================
+- Fix the error of HttpURLConnection when Referer is null in old SDK.
+
+Version 0.2 (Preview)
+=====================
+- Test only.

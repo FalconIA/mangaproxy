@@ -30,7 +30,7 @@ public final class Chapter implements Serializable {
 	public static final int IMG_SERVER_ID_NONE = -1;
 
 	public final int siteId;
-	public final Manga manga;
+	public transient Manga manga;
 	public final String chapterId;
 	public final String displayname;
 
@@ -46,8 +46,8 @@ public final class Chapter implements Serializable {
 	// for Other
 	public int typeId = TYPE_ID_UNKNOW;
 
-	private String dynamicImgServersUrl;
-	private String[] dynamicImgServers;
+	private transient String dynamicImgServersUrl;
+	private transient String[] dynamicImgServers;
 	private int dynamicImgServerId = IMG_SERVER_ID_NONE;
 
 	public Chapter(String chapterId, String displayname, Manga manga) {
@@ -61,6 +61,10 @@ public final class Chapter implements Serializable {
 
 	private IPlugin getPlugin() {
 		return Plugins.getPlugin(siteId);
+	}
+
+	public String getSiteCharset() {
+		return getPlugin().getCharset();
 	}
 
 	public String getUrl() {
@@ -116,6 +120,10 @@ public final class Chapter implements Serializable {
 
 	public String[] getPageUrls(String source) {
 		return getPlugin().getChapterPages(source, this);
+	}
+
+	public String getPageRedirectUrl(String source) {
+		return getPlugin().getPageRedirectUrl(source);
 	}
 
 	public boolean setDynamicImgServers(String source) {

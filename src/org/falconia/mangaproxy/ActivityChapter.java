@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -38,6 +40,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.Window;
+import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -49,7 +53,8 @@ import com.sonyericsson.zoom.ImageZoomView;
 import com.sonyericsson.zoom.ZoomState.AlignX;
 import com.sonyericsson.zoom.ZoomState.AlignY;
 
-public final class ActivityChapter extends Activity implements OnClickListener, OnCancelListener {
+public final class ActivityChapter extends Activity implements OnClickListener, OnCancelListener,
+		OnSharedPreferenceChangeListener {
 
 	public final static class IntentHandler {
 
@@ -212,23 +217,39 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	private final class Page implements OnDownloadListener {
 
+		private final String mCharset;
+
 		private DownloadTask mDownloader;
 
 		private final int mPageIndex;
 		private final String mUrl;
+		private final boolean mIsRedirect;
+		private String mUrlRedirected;
 
 		private boolean mIsDownloaded;
 		private boolean mIsDownloading;
 
 		private transient Bitmap mBitmap;
 
-		public Page(int pageIndex, String url) {
+		public Page(int pageIndex, String url, boolean isRedirect) {
+			mCharset = mChapter.getSiteCharset();
+
 			mPageIndex = pageIndex;
 			mUrl = url;
+			mIsRedirect = isRedirect;
+
 			mIsDownloaded = false;
 			mIsDownloading = false;
 
 			checkCache();
+		}
+
+		public Page(int pageIndex, String url) {
+			this(pageIndex, url, false);
+		}
+
+		public Page(Page page) {
+			this(page.mPageIndex, page.mUrl, page.mIsRedirect);
 		}
 
 		@Override
@@ -252,6 +273,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
 				setMessage(String.format(getString(R.string.ui_error_on_download), getSiteName()));
+				hideStatusBar();
 
 				// TODO Retry to downlaod
 
@@ -313,25 +335,64 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			return checkCache();
 		}
 
-		public void download() {
-			if (mIsDownloading) {
-				if (mPageIndex == mPageIndexLoading) {
-					showStatusBar();
+		public void download(boolean refresh) {
+			if (!refresh) {
+				if (mIsDownloading) {
+					if (mPageIndex == mPageIndexLoading) {
+						showStatusBar();
+					}
+					return;
 				}
-				return;
+				if (isDownloaded()) {
+					// Debug
+					printDebug(mUrl, "Cached");
+
+					notifyPageDownloaded(this);
+					return;
+				}
+			} else {
+				AppUtils.logI(this, String.format("Force refresh image: %s", mUrl));
+				cancelDownload();
 			}
-			if (isDownloaded()) {
-				// Debug
-				printDebug(mUrl, "Cached");
 
-				notifyPageDownloaded(this);
-				return;
+			if (mIsRedirect) {
+				if (!mIsDownloaded || TextUtils.isEmpty(mUrlRedirected)) {
+					AppUtils.logI(this, String.format("Download redirect URL: %s", mUrl));
+
+					mDownloader = new DownloadTask(null, mChapter.getUrl());
+					mDownloader.execute(mUrl);
+
+					byte[] result = new byte[0];
+					try {
+						result = mDownloader.get();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					String source = EncodingUtils.getString(result, 0, result.length, mCharset);
+					String url = mChapter.getPageRedirectUrl(source);
+					if (TextUtils.isEmpty(url)) {
+						onPostDownload(result);
+						return;
+					} else {
+						mUrlRedirected = url;
+					}
+				}
+
+				AppUtils.logI(this, String.format("Download image: %s", mUrlRedirected));
+
+				mDownloader = new DownloadTask(this, mChapter.getUrl());
+				mDownloader.execute(mUrlRedirected);
+			} else {
+				AppUtils.logI(this, String.format("Download image: %s", mUrl));
+
+				mDownloader = new DownloadTask(this, mChapter.getUrl());
+				mDownloader.execute(mUrl);
 			}
+		}
 
-			AppUtils.logI(this, String.format("Download image: %s", mUrl));
-
-			mDownloader = new DownloadTask(this, mChapter.getUrl());
-			mDownloader.execute(mUrl);
+		public void download() {
+			download(false);
 		}
 
 		public void cancelDownload() {
@@ -339,6 +400,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				AppUtils.logD(this, "Cancel DownloadTask.");
 
 				mDownloader.cancel(true);
+				mUrlRedirected = null;
+				mIsDownloaded = false;
 				mIsDownloading = false;
 			}
 		}
@@ -366,6 +429,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					mPageIndexLoading));
 			mvgStatusBar.setVisibility(View.VISIBLE);
 		}
+
+		private void hideStatusBar() {
+			mvgStatusBar.setVisibility(View.GONE);
+		}
 	}
 
 	private final class Configuration {
@@ -380,10 +447,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		private CharSequence mtvDebugText;
 		private int msvScrollerVisibility;
 
-		private ZoomMode mZoomMode;
 		private Bitmap mPageViewImage;
 
 		private int mvgTitleBarVisibility;
+	}
+
+	public enum ChangePageMode {
+		NONE, NEXT, PREV
 	}
 
 	private static final int DIALOG_LOADING_ID = 0;
@@ -399,10 +469,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	private boolean mProcessed;
 
+	private ChangePageMode mChangePageMode;
+
 	private String[] mPageUrls;
 	private HashMap<Integer, Page> mPages;
 	// private int mPageIndexCurrent;
 	private int mPageIndexLoading;
+	private int mPreloadMaxPages;
 	private LinkedList<Integer> mPreloadPageIndexQueue;
 
 	private TextView mtvDebug;
@@ -422,6 +495,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private TextView mtvDownloaded;
 	private ProgressBar mpbDownload;
 
+	private MenuItem mmiZoomFitWidthOrHeight;
 	private MenuItem mmiZoomFitWidthAutoSplit;
 	private MenuItem mmiZoomFitWidth;
 	private MenuItem mmiZoomFitHeight;
@@ -434,9 +508,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	public ActivityChapter() {
 		mProcessed = false;
+		mChangePageMode = ChangePageMode.NONE;
 		// mPageIndexCurrent = 0;
 		mPageIndexLoading = 0;
-		mZoomMode = ZoomMode.FIT_WIDTH_AUTO_SPLIT;
+		mZoomMode = ZoomMode.FIT_WIDTH_OR_HEIGHT;
 		mPreloadPageIndexQueue = new LinkedList<Integer>();
 		mHideScrollerHandler = new Handler();
 		mHideTitleBarHandler = new Handler();
@@ -473,15 +548,18 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		super.onCreate(savedInstanceState);
 		AppUtils.logV(this, "onCreate()");
 
-		mManga = IntentHandler.getManga(this);
-		long time = System.currentTimeMillis();
 		mChapter = IntentHandler.getChapter(this);
-		time = System.currentTimeMillis() - time;
-		AppUtils.logW(this, "Cost Time: " + time);
-		if (mManga == null || mChapter == null) {
+		mManga = IntentHandler.getManga(this);
+		if (mChapter == null || mManga == null) {
 			finish();
 		}
+		mManga.lastReadChapterId = mChapter.chapterId;
+		mChapter.manga = mManga;
 
+		getWindow().addFlags(LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+		getWindow().addFlags(LayoutParams.FLAG_FULLSCREEN);
+		setRequestedOrientation(App.getPageOrientation());
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_chapter);
 		// setTitle(getCustomTitle());
 
@@ -491,8 +569,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mChapter.pageIndexMax = conf.mPageIndexMax;
 			mChapter.pageIndexLastRead = conf.mPageIndexCurrent;
 			mPageIndexLoading = conf.mPageIndexLoading;
-			mZoomMode = conf.mZoomMode;
 		}
+		mZoomMode = App.getPageZoomMode();
+		mPreloadMaxPages = App.getPreloadPages();
+		App.getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
 		// Debug controls
 		mtvDebug = (TextView) findViewById(R.id.mtvDebug);
@@ -553,7 +633,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mPageUrls = conf.mPageUrls;
 			mPages = new HashMap<Integer, Page>();
 			for (int key : conf.mPages.keySet()) {
-				mPages.put(key, new Page(key, conf.mPages.get(key).mUrl));
+				mPages.put(key, new Page(mPages.get(key)));
 			}
 
 			if (App.DEBUG > 0) {
@@ -584,7 +664,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 			if (mChapter.pageIndexLastRead != mPageIndexLoading) {
 				AppUtils.logW(this, "mPageIndexCurrent != mPageIndexLoading");
-				// changePage(mPageIndexLoading);
+				changePage(mPageIndexLoading);
 			} else {
 				AppUtils.logW(this, "mPageIndexCurrent == mPageIndexLoading");
 				// changePage(mPageIndexLoading);
@@ -668,7 +748,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		conf.mtvDebugText = mtvDebug.getText();
 		conf.msvScrollerVisibility = msvScroller.getVisibility();
 
-		conf.mZoomMode = mZoomMode;
 		conf.mPageViewImage = mPageView.getImage();
 
 		conf.mvgTitleBarVisibility = mvgTitleBar.getVisibility();
@@ -693,14 +772,28 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.menu_chapter, menu);
+		mmiZoomFitWidthOrHeight = menu.findItem(R.id.mmiZoomFitWidthOrHeight);
 		mmiZoomFitWidthAutoSplit = menu.findItem(R.id.mmiZoomFitWidthAutoSplit);
-		mmiZoomFitWidthAutoSplit.setChecked(mZoomMode == ZoomMode.FIT_WIDTH_AUTO_SPLIT);
 		mmiZoomFitWidth = menu.findItem(R.id.mmiZoomFitWidth);
-		mmiZoomFitWidth.setChecked(mZoomMode == ZoomMode.FIT_WIDTH);
 		mmiZoomFitHeight = menu.findItem(R.id.mmiZoomFitHeight);
-		mmiZoomFitHeight.setChecked(mZoomMode == ZoomMode.FIT_HEIGHT);
 		mmiZoomFitScreen = menu.findItem(R.id.mmiZoomFitScreen);
-		mmiZoomFitScreen.setChecked(mZoomMode == ZoomMode.FIT_SCREEN);
+		switch (mZoomMode) {
+		case FIT_WIDTH_OR_HEIGHT:
+			mmiZoomFitWidthOrHeight.setChecked(true);
+			break;
+		case FIT_WIDTH_AUTO_SPLIT:
+			mmiZoomFitWidthAutoSplit.setChecked(true);
+			break;
+		case FIT_WIDTH:
+			mmiZoomFitWidth.setChecked(true);
+			break;
+		case FIT_HEIGHT:
+			mmiZoomFitHeight.setChecked(true);
+			break;
+		case FIT_SCREEN:
+			mmiZoomFitScreen.setChecked(true);
+			break;
+		}
 		return true;
 	}
 
@@ -708,6 +801,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getGroupId() == R.id.mmgZoomGroup) {
 			switch (item.getItemId()) {
+			case R.id.mmiZoomFitWidthOrHeight:
+				mZoomMode = ZoomMode.FIT_WIDTH_OR_HEIGHT;
+				break;
 			case R.id.mmiZoomFitWidthAutoSplit:
 				mZoomMode = ZoomMode.FIT_WIDTH_AUTO_SPLIT;
 				break;
@@ -721,16 +817,20 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				mZoomMode = ZoomMode.FIT_SCREEN;
 				break;
 			}
-			mmiZoomFitWidthAutoSplit.setChecked(mZoomMode == ZoomMode.FIT_WIDTH_AUTO_SPLIT);
-			mmiZoomFitWidth.setChecked(mZoomMode == ZoomMode.FIT_WIDTH);
-			mmiZoomFitHeight.setChecked(mZoomMode == ZoomMode.FIT_HEIGHT);
-			mmiZoomFitScreen.setChecked(mZoomMode == ZoomMode.FIT_SCREEN);
-			mZoomControl.getZoomState().setDefaultZoom(computeDefaultZoom(mZoomMode, mPageView));
-			mZoomControl.getZoomState().notifyObservers();
-			mZoomControl.startFling(0, 0);
-			return true;
+			App.setPageZoomMode(mZoomMode);
+		} else {
+			switch (item.getItemId()) {
+			case R.id.mmiRefresh:
+				refreshPage();
+				break;
+			case R.id.mmiPreferences:
+				startActivity(new Intent(this, ActivityPreference.class));
+				break;
+			default:
+				return super.onOptionsItemSelected(item);
+			}
 		}
-		return super.onOptionsItemSelected(item);
+		return true;
 	}
 
 	@Override
@@ -750,6 +850,42 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		case R.id.mbtnPrev:
 			changePage(false);
 			break;
+		}
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		if (key.equals("iPageOrientation")) {
+			setRequestedOrientation(App.getPageOrientation());
+		} else if (key.equals("iPageZoomMode")) {
+			mZoomMode = App.getPageZoomMode();
+
+			if (mmiZoomFitWidthAutoSplit != null) {
+				switch (mZoomMode) {
+				case FIT_WIDTH_OR_HEIGHT:
+					mmiZoomFitWidthOrHeight.setChecked(true);
+					break;
+				case FIT_WIDTH_AUTO_SPLIT:
+					mmiZoomFitWidthAutoSplit.setChecked(true);
+					break;
+				case FIT_WIDTH:
+					mmiZoomFitWidth.setChecked(true);
+					break;
+				case FIT_HEIGHT:
+					mmiZoomFitHeight.setChecked(true);
+					break;
+				case FIT_SCREEN:
+					mmiZoomFitScreen.setChecked(true);
+					break;
+				}
+			}
+
+			mZoomControl.stopFling();
+			mZoomControl.getZoomState().setDefaultZoom(computeDefaultZoom(mZoomMode, mPageView));
+			mZoomControl.getZoomState().notifyObservers();
+			mZoomControl.startFling(0, 0);
+		} else if (key.equals("iPreloadPages")) {
+			mPreloadMaxPages = App.getPreloadPages();
 		}
 	}
 
@@ -795,11 +931,12 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void loadChapter() {
-		// Debug
-		printDebug(mChapter.getUrl(), "Downloading");
-
+		String url = mChapter.getUrl();
 		mSourceDownloader = new SourceDownloader(SourceDownloader.MODE_CHAPTER);
-		mSourceDownloader.download(mChapter.getUrl());
+		mSourceDownloader.download(url);
+
+		// Debug
+		printDebug(url, "Downloading");
 	}
 
 	private void processChapterSource(String source) {
@@ -811,24 +948,41 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			return;
 		}
 
-		String urlImgServers = mChapter.getDynamicImgServersUrl();
-		if (TextUtils.isEmpty(urlImgServers)) {
-			setMessage(String.format(getString(R.string.ui_error_on_imgsvr_url), getSiteName()));
-		} else {
-			if (AppCache.checkCacheForData(urlImgServers, 3600)) {
-				// Debug
-				printDebug(urlImgServers, "Loading");
-
-				source = AppCache.readCacheForData(urlImgServers);
-				processImgServersSource(source);
+		// Using Dynamic Image Server
+		if (mManga.usingDynamicImgServer()) {
+			String urlImgServers = mChapter.getDynamicImgServersUrl();
+			if (TextUtils.isEmpty(urlImgServers)) {
+				setMessage(String.format(getString(R.string.ui_error_on_imgsvr_url), getSiteName()));
 			} else {
-				// Debug
-				printDebug(urlImgServers, "Downloading");
+				if (AppCache.checkCacheForData(urlImgServers, 3600)) {
+					// Debug
+					printDebug(urlImgServers, "Loading");
 
-				mSourceDownloader.cancelDownload();
-				mSourceDownloader = new SourceDownloader(SourceDownloader.MODE_IMG_SERVERS);
-				mSourceDownloader.download(urlImgServers);
+					source = AppCache.readCacheForData(urlImgServers);
+					processImgServersSource(source);
+				} else {
+					// Debug
+					printDebug(urlImgServers, "Downloading");
+
+					mSourceDownloader.cancelDownload();
+					mSourceDownloader = new SourceDownloader(SourceDownloader.MODE_IMG_SERVERS);
+					mSourceDownloader.download(urlImgServers);
+				}
 			}
+		}
+		// Direct/Redirect image URL
+		else {
+			mPages = new HashMap<Integer, Page>();
+			for (int i = 0; i < mPageUrls.length; i++) {
+				Page page = new Page(i + 1, mPageUrls[i], mManga.usingImgRedirect());
+				mPages.put(i + 1, page);
+			}
+
+			mChapter.pageIndexMax = mPages.size();
+			mProcessed = true;
+
+			initalPage();
+			return;
 		}
 	}
 
@@ -869,31 +1023,34 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	private void initalPage() {
 		// TODO Update database
-		final AppSQLite db = App.DATABASE.open();
-		AppUtils.logI(this, "Add to Favorite(Chapter).");
-		try {
-			long id = db.insertChapter(mChapter);
-			AppUtils.logD(this, "Add as ID " + id + ".");
-		} catch (SQLException e) {
-			AppUtils.logE(this, e.getMessage());
+		if (mManga.isFavorite) {
+			final AppSQLite db = App.DATABASE.open();
+			AppUtils.logI(this, "Add to Favorite(Chapter).");
+			try {
+				long id = db.insertChapter(mChapter);
+				mChapter._id = id;
+				mChapter.isFavorite = true;
+				AppUtils.logD(this, "Add as ID " + id + ".");
+			} catch (SQLException e) {
+				AppUtils.logE(this, e.getMessage());
+			}
+			db.close();
 		}
-		db.close();
 
-		changePage(1);
+		changePage(Math.max(1, mChapter.pageIndexLastRead));
 	}
 
 	private void changePage(int pageIndex) {
 		if (pageIndex <= 0 || pageIndex > mChapter.pageIndexMax) {
+			mChangePageMode = ChangePageMode.NONE;
 			return;
 		}
 
 		AppUtils.logI(this, String.format("Change to Page %d.", pageIndex));
 
-		// TODO Update database
-
 		mPageIndexLoading = pageIndex;
 		mPreloadPageIndexQueue.clear();
-		for (int i = 1; i <= App.IMG_PRELOAD_MAX; i++) {
+		for (int i = 1; i <= mPreloadMaxPages; i++) {
 			mPreloadPageIndexQueue.add(mPageIndexLoading + i);
 		}
 
@@ -916,18 +1073,21 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		// Prev chapter
 		if (mPageIndexGoto < 1) {
 			AppUtils.popupMessage(this, "First Page");
+			mZoomControl.startFling(0, 0);
 		}
 		// Next chapter
 		else if (mPageIndexGoto > mChapter.pageIndexMax) {
 			AppUtils.popupMessage(this, "Last Page");
+			mZoomControl.startFling(0, 0);
 		} else {
+			mChangePageMode = nextpage ? ChangePageMode.NEXT : ChangePageMode.PREV;
+			mZoomControl.startFling(0, 0);
 			changePage(mPageIndexGoto);
 		}
 	}
 
 	private void preloadPage(int pageIndex) {
-		if (pageIndex - mPageIndexLoading <= App.IMG_PRELOAD_MAX
-				&& pageIndex <= mChapter.pageIndexMax) {
+		if (pageIndex - mPageIndexLoading <= mPreloadMaxPages && pageIndex <= mChapter.pageIndexMax) {
 			AppUtils.logI(this, String.format("Preload Page %d.", pageIndex));
 			mPages.get(pageIndex).download();
 		} else {
@@ -935,10 +1095,15 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 	}
 
+	private void refreshPage() {
+		Page page = mPages.get(mPageIndexLoading);
+		page.download(true);
+	}
+
 	private void notifyPageDownloaded(Page page) {
 		AppUtils.logI(this, String.format("Notify that Page %d downloaded.", page.mPageIndex));
 
-		// current page
+		// Current page
 		if (page.mPageIndex == mPageIndexLoading) {
 			Bitmap bitmap = page.getBitmap();
 			if (bitmap != null) {
@@ -946,12 +1111,26 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				setImage(bitmap);
 				mtvTitle.setText(getCustomTitle());
 				showTitleBar();
+
+				// TODO Update database
+				if (mChapter.isFavorite) {
+					final AppSQLite db = App.DATABASE.open();
+					AppUtils.logI(this, "Update Chapter in Favorite.");
+					try {
+						if (db.updateChapter(mChapter) == 0) {
+							AppUtils.logE(this, "Fail to update Chapter in Favorite.");
+						}
+					} catch (SQLException e) {
+						AppUtils.logE(this, e.getMessage());
+					}
+					db.close();
+				}
 			} else {
 				AppUtils.logE(this, "Invalid bitmap.");
 			}
 		}
 
-		// preload page
+		// Preload page
 		if (mPreloadPageIndexQueue.isEmpty()) {
 			hideScroller();
 		} else {
@@ -997,6 +1176,14 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		mPageView.setImage(bitmap);
 		mZoomControl.getZoomState().setDefaultZoom(computeDefaultZoom(mZoomMode, mPageView));
 		mZoomControl.getZoomState().notifyObservers();
+		switch (mChangePageMode) {
+		case NEXT:
+			mZoomControl.pan(0.5f, 0f);
+			break;
+		case PREV:
+			mZoomControl.pan(-0.5f, 0f);
+			break;
+		}
 		mZoomControl.startFling(0, 0);
 	}
 
@@ -1021,7 +1208,16 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		final float aq = view.getAspectQuotient().get();
 		float zoom = 1f;
 
-		if (mode == ZoomMode.FIT_WIDTH || mode == ZoomMode.FIT_WIDTH_AUTO_SPLIT) {
+		if (mode == ZoomMode.FIT_WIDTH_OR_HEIGHT) {
+			// Over width
+			if (aq > 1f) {
+				zoom = aq;
+			}
+			// Over height
+			else {
+				zoom = 1f / aq;
+			}
+		} else if (mode == ZoomMode.FIT_WIDTH || mode == ZoomMode.FIT_WIDTH_AUTO_SPLIT) {
 			// Over height
 			if (aq < 1f) {
 				zoom = 1f / aq;

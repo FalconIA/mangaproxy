@@ -47,13 +47,17 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	@Override
 	protected void onPreExecute() {
 		logD("Download start.");
-		mListener.onPreDownload();
+		if (mListener != null) {
+			mListener.onPreDownload();
+		}
 	}
 
 	@Override
 	protected void onPostExecute(byte[] result) {
 		logD("Download done.");
-		mListener.onPostDownload(result);
+		if (mListener != null) {
+			mListener.onPostDownload(result);
+		}
 	}
 
 	@Override
@@ -64,7 +68,9 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 
 	@Override
 	protected void onProgressUpdate(Integer... values) {
-		mListener.onDownloadProgressUpdate(values[0], mFileSize);
+		if (mListener != null) {
+			mListener.onDownloadProgressUpdate(values[0], mFileSize);
+		}
 	}
 
 	protected byte[] download(String url) {

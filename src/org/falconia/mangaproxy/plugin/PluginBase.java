@@ -55,6 +55,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected static final String Catched_total_page = "Catched total page of %d.";
 	protected static final String Catched_in_section = "Catched '%s' in section %d, { %s:%s }.";
 
+	protected static final String Process_Time_GenreList = "Process GenreList in %dms.";
 	protected static final String Process_Time_MangaList = "Process MangaList in %dms.";
 	protected static final String Process_Time_AllMangaList = "Process MangaList(All mangas) in %dms.";
 	protected static final String Process_Time_ChapterList = "Process ChapterList in %dms.";
@@ -98,8 +99,22 @@ public abstract class PluginBase implements ITag, IPlugin {
 	}
 
 	@Override
+	public Genre getGenreAll() {
+		return new Genre(Genre.GENRE_ALL_ID, App.UI_GENRE_ALL_TEXT, getSiteId());
+	}
+
+	@Override
+	public String getPageRedirectUrl(String source) {
+		if (usingImgRedirect()) {
+			throw new RuntimeException("The method should to be overrode.");
+		} else {
+			throw new RuntimeException("The site is unsupported for Image Redirect.");
+		}
+	}
+
+	@Override
 	public boolean setDynamicImgServers(String source, Chapter chapter) {
-		if (isDynamicImgServer()) {
+		if (usingDynamicImgServer()) {
 			throw new RuntimeException("The method should to be overrode.");
 		} else {
 			throw new RuntimeException("The site is unsupported of Dynamic Img Server.");
@@ -165,6 +180,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 	}
 
 	protected String parseName(String string) {
+		string = string.replace("&nbsp;", " ");
 		return string.trim();
 	}
 
@@ -173,9 +189,6 @@ public abstract class PluginBase implements ITag, IPlugin {
 	}
 
 	protected boolean parseIsCompleted(String string) {
-		if (string.matches("\\s*经典\\s*")) {
-			return true;
-		}
 		return string.indexOf("完") >= 0;
 	}
 
