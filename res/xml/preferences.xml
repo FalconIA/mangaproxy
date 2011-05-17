@@ -2,9 +2,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
 	android:title="Preferences">
 	<PreferenceCategory android:title="General">
-		<CheckBoxPreference android:title="Favorite Auto-update"
-			android:summary="Automagically updates favorites when open."
-			android:key="bFavoriteAutoUpdate" android:defaultValue="false" />
+		<CheckBoxPreference android:key="bFavoriteAutoUpdate"
+			android:title="Favorite Auto-update" android:summary="Automagically updates favorites when open."
+			android:defaultValue="false" />
 		<CheckBoxPreference android:key="bRightToLeftReading"
 			android:title="Right-to-Left Reading" android:summary="Read peags using Right-to-Left direction."
 			android:defaultValue="true" android:enabled="false" />

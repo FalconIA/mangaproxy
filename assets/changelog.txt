@@ -14,6 +14,13 @@
 显示信息：单击屏幕
 
 
+Version 1.1 (Beta)
+==================
+- Auto update favorite when start if set.
+- New function to check new version.
+- Change auto-orientation from sensor to user.
+- Fix crash of orientation when loading image.
+
 Version 1.0 (Beta)
 ==================
 - New plugin for site DM5(www.dm5.com).
