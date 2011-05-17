@@ -12,6 +12,8 @@ import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
 import org.falconia.mangaproxy.task.OnSourceProcessListener;
 import org.falconia.mangaproxy.task.SourceProcessTask;
+import org.falconia.mangaproxy.utils.HttpUtils;
+import org.falconia.mangaproxy.utils.Regex;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -20,6 +22,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -31,10 +34,12 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public final class ActivityFavoriteList extends ActivityBase implements OnClickListener {
@@ -71,8 +76,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 				return;
 			}
 
-			String source = EncodingUtils.getString(result, 0, result.length,
-					mUpdatedManga.getSiteCharset());
+			String source = EncodingUtils.getString(result, mUpdatedManga.getSiteCharset());
 			mProcessTask = new SourceProcessTask(this);
 			mProcessTask.execute(source);
 		}
@@ -189,6 +193,57 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		}
 	}
 
+	private final class VersionChecker implements OnDownloadListener {
+
+		private DownloadTask mDownloader;
+
+		@Override
+		public void onPreDownload() {
+		}
+
+		@Override
+		public void onPostDownload(byte[] result) {
+			AppUtils.logV(this, "onPostDownload()");
+
+			if (result == null || result.length == 0) {
+				AppUtils.logE(this, "Downloaded empty source.");
+				return;
+			}
+
+			try {
+				String source = EncodingUtils.getString(result, HttpUtils.CHARSET_UTF8);
+				ArrayList<String> groups = Regex
+						.match("Version (.+?) / VersionCode (\\d+)", source);
+				String versionName = groups.get(1).trim();
+				int versionCode = Integer.parseInt(groups.get(2));
+				if (versionCode > App.VERSION_CODE) {
+					mVersionCode = versionCode;
+					updateNewVersion(versionName);
+				} else {
+					updateNewVersion(null);
+				}
+			} catch (Exception e) {
+				AppUtils.logE(this, "Fail to chech new version.");
+			}
+		}
+
+		@Override
+		public void onDownloadProgressUpdate(int value, int total) {
+		}
+
+		public void check() {
+			mDownloader = new DownloadTask(this);
+			mDownloader.execute("http://code.google.com/p/manga-proxy/wiki/LatestVersion");
+		}
+
+		public void cancel() {
+			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
+				AppUtils.logD(this, "Cancel DownloadTask.");
+				mDownloader.cancel(true);
+			}
+		}
+	}
+
 	private final class FavoriteListAdapter extends CursorAdapter {
 
 		final class ViewHolder {
@@ -285,6 +340,11 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	private AppSQLite mDB;
 
 	private Updater mUpdater;
+	private VersionChecker mChecker;
+
+	private LinearLayout mNewVersionPanel;
+	private TextView mNewVersion;
+	private int mVersionCode = -1;
 
 	private boolean mExit = false;
 
@@ -306,16 +366,42 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		AppUtils.logV(this, "onCreate()");
 
 		requestWindowFeature(Window.FEATURE_PROGRESS);
 		setContentView(R.layout.activity_favorite_list);
 		setTitle(String.format("%s %s - FalconIA", App.NAME, App.VERSION_NAME));
 		setNoItemsMessage(R.string.ui_no_favorite_items);
 
+		mNewVersionPanel = (LinearLayout) findViewById(R.id.mvgNewVersion);
+		mNewVersionPanel.setVisibility(View.GONE);
+		mNewVersion = (TextView) findViewById(R.id.mtvNewVersion);
+		findViewById(R.id.mbtnUpdate).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (mVersionCode >= 0 && mVersionCode > App.VERSION_CODE) {
+					downloadNewVersion();
+				}
+			}
+		});
+
 		if (App.getShowChangelog()) {
 			startActivity(new Intent(ActivityFavoriteList.this, ActivityChangelog.class));
 		}
+
+		if (App.FIRST_START && App.getFavoriteAutoUpdate()) {
+			getListView().getViewTreeObserver().addOnGlobalLayoutListener(
+					new OnGlobalLayoutListener() {
+						@Override
+						public void onGlobalLayout() {
+							getListView().getViewTreeObserver().removeGlobalOnLayoutListener(this);
+							App.FIRST_START = false;
+
+							refresh();
+						}
+					});
+		}
+
+		checkNewVersion();
 
 		mDB = App.DATABASE.open();
 		setupListView(new FavoriteListAdapter(this, null, true));
@@ -324,7 +410,6 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onResume() {
 		super.onResume();
-		AppUtils.logV(this, "onResume()");
 
 		mListAdapter.notifyDataSetInvalidated();
 	}
@@ -332,7 +417,14 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onStop() {
 		super.onStop();
-		AppUtils.logV(this, "onStop()");
+
+		if (mUpdater != null) {
+			mUpdater.cancel();
+		}
+
+		if (mChecker != null) {
+			mChecker.cancel();
+		}
 
 		mDB.close();
 	}
@@ -340,7 +432,6 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		AppUtils.logV(this, "onRestart()");
 
 		if (!mDB.isOpen()) {
 			mDB = App.DATABASE.open();
@@ -350,11 +441,6 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		AppUtils.logV(this, "onDestroy()");
-
-		if (mUpdater != null) {
-			mUpdater.cancel();
-		}
 
 		if (mExit) {
 			System.exit(0);
@@ -508,6 +594,34 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			mUpdater.queue(mDB.getAllMangas());
 			mUpdater.update();
 		}
+	}
+
+	private void checkNewVersion() {
+		if (mChecker == null) {
+			mChecker = new VersionChecker();
+		}
+		mChecker.check();
+	}
+
+	private void updateNewVersion(String newVersion) {
+		mChecker = null;
+		if (TextUtils.isEmpty(newVersion)) {
+			mNewVersionPanel.setVisibility(View.GONE);
+		} else {
+			mNewVersion.setText(String.format(getString(R.string.ui_has_new_version_format),
+					App.NAME, newVersion));
+			mNewVersionPanel.setVisibility(View.VISIBLE);
+		}
+	}
+
+	private void downloadNewVersion() {
+		String url = String.format(
+				"http://manga-proxy.googlecode.com/files/org.falconia.mangaproxy-%d.apk",
+				mVersionCode);
+		Intent i = new Intent(Intent.ACTION_VIEW);
+		i.setData(Uri.parse(url));
+		i = Intent.createChooser(i, null);
+		startActivity(i);
 	}
 
 }

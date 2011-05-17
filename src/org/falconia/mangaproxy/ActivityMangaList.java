@@ -109,7 +109,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 				return;
 			}
 
-			String source = EncodingUtils.getString(result, 0, result.length, mCharset);
+			String source = EncodingUtils.getString(result, mCharset);
 
 			setMode(MODE_PROCESS);
 			ActivityMangaList.this.mSourceProcessTask = new SourceProcessTask(this);

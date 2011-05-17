@@ -150,6 +150,11 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 		return null;
 	}
 
+	public void cancelDownload() {
+		mCancelled = true;
+		cancel(true);
+	}
+
 	private String getTag() {
 		return getClass().getSimpleName();
 	}
