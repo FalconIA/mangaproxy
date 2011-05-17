@@ -213,7 +213,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 			case MODE_DOWNLOAD:
 				AppUtils.logV(this, "click() @MODE_DOWNLOAD");
 				if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
-					mDownloader.cancel(true);
+					mDownloader.cancelDownload();
 				}
 				setMode(MODE_DEFAULT);
 				break;
@@ -228,7 +228,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		public void cancelDownload() {
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
-				mDownloader.cancel(true);
+				mDownloader.cancelDownload();
 			}
 		}
 	}

@@ -188,7 +188,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		private void cancelDownload() {
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
-				mDownloader.cancel(true);
+				mDownloader.cancelDownload();
 			}
 		}
 	}
@@ -239,7 +239,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		public void cancel() {
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
-				mDownloader.cancel(true);
+				mDownloader.cancelDownload();
 			}
 		}
 	}
