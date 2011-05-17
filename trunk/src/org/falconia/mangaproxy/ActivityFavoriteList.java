@@ -1,15 +1,26 @@
 package org.falconia.mangaproxy;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
+import org.apache.http.util.EncodingUtils;
+import org.falconia.mangaproxy.data.ChapterList;
 import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.data.Site;
 import org.falconia.mangaproxy.plugin.Plugins;
+import org.falconia.mangaproxy.task.DownloadTask;
+import org.falconia.mangaproxy.task.OnDownloadListener;
+import org.falconia.mangaproxy.task.OnSourceProcessListener;
+import org.falconia.mangaproxy.task.SourceProcessTask;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -20,6 +31,7 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
@@ -27,12 +39,163 @@ import android.widget.TextView;
 
 public final class ActivityFavoriteList extends ActivityBase implements OnClickListener {
 
+	private final class Updater implements OnDownloadListener, OnSourceProcessListener {
+
+		private final LinkedList<Manga> mQueue;
+
+		private DownloadTask mDownloader;
+		private SourceProcessTask mProcessTask;
+
+		private Manga mUpdatedManga;
+		private int mUpdated;
+		private boolean mUpdating;
+
+		public Updater() {
+			mQueue = new LinkedList<Manga>();
+			mUpdating = false;
+		}
+
+		@Override
+		public void onPreDownload() {
+			AppUtils.logV(this, "onPreDownload()");
+
+		}
+
+		@Override
+		public void onPostDownload(byte[] result) {
+			AppUtils.logV(this, "onPostDownload()");
+
+			if (result == null || result.length == 0) {
+				AppUtils.logE(this, "Downloaded empty source.");
+				dequeue();
+				return;
+			}
+
+			String source = EncodingUtils.getString(result, 0, result.length,
+					mUpdatedManga.getSiteCharset());
+			mProcessTask = new SourceProcessTask(this);
+			mProcessTask.execute(source);
+		}
+
+		@Override
+		public void onDownloadProgressUpdate(int value, int total) {
+
+		}
+
+		@Override
+		public int onSourceProcess(String source) {
+			ChapterList list = mUpdatedManga.getChapterList(source);
+			if (list.size() > 0) {
+				mUpdatedManga.latestChapterId = list.getChapterId(0);
+				mUpdatedManga.latestChapterDisplayname = list.getDisplayname(0);
+			}
+			return list.size();
+		}
+
+		@Override
+		public void onPreSourceProcess() {
+
+		}
+
+		@Override
+		public void onPostSourceProcess(int size) {
+			if (size <= 0) {
+				AppUtils.logE(this, "Fail to process source.");
+			} else {
+				if (mDB.updateManga(mUpdatedManga) > 0) {
+					AppUtils.logD(this, String.format("Updated manga %s.", mUpdatedManga));
+					mListAdapter.notifyDataSetInvalidated();
+				} else {
+					AppUtils.logE(this, String.format("Fail to update manga %s.", mUpdatedManga));
+				}
+			}
+			dequeue();
+			update(mQueue.peek());
+		}
+
+		public void queue(ArrayList<Manga> allMangas) {
+			for (Manga manga : allMangas) {
+				queue(manga);
+			}
+		}
+
+		public void update() {
+			if (!mUpdating && mQueue.size() > 0) {
+				AppUtils.logD(this, "Update mangas.");
+
+				mUpdating = true;
+				setProgressBarVisibility(true);
+
+				update(mQueue.peek());
+			}
+		}
+
+		public void cancel() {
+			cancelDownload();
+			clear();
+		}
+
+		public boolean isUpdating() {
+			return mUpdating;
+		}
+
+		private int size() {
+			return mQueue.size() + mUpdated;
+		}
+
+		private void queue(Manga manga) {
+			mQueue.addLast(manga);
+		}
+
+		private void dequeue() {
+			mQueue.removeFirst();
+			mUpdated++;
+		}
+
+		private void clear() {
+			mQueue.clear();
+			mUpdatedManga = null;
+			mUpdated = 0;
+			mUpdating = false;
+		}
+
+		private void update(Manga manga) {
+			updateProgress();
+
+			if (manga == null) {
+				AppUtils.logD(this, "Update mangas completed.");
+
+				// setProgressBarVisibility(false);
+				setProgress(10000);
+				clear();
+			} else {
+				AppUtils.logD(this, String.format("Update manga %s.", manga));
+
+				mUpdatedManga = manga;
+				mDownloader = new DownloadTask(this);
+				mDownloader.execute(manga.getUrl());
+			}
+		}
+
+		private void updateProgress() {
+			setProgress(10000 * mUpdated / size());
+		}
+
+		private void cancelDownload() {
+			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
+				AppUtils.logD(this, "Cancel DownloadTask.");
+				mDownloader.cancel(true);
+			}
+		}
+	}
+
 	private final class FavoriteListAdapter extends CursorAdapter {
 
 		final class ViewHolder {
 			public TextView tvDisplayname;
 			public TextView tvDetails;
 			public TextView tvCompleted;
+			public TextView tvSiteName;
 			public CheckBox cbFavorite;
 		}
 
@@ -57,6 +220,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			holder.tvDisplayname = (TextView) view.findViewById(R.id.mtvDisplayname);
 			holder.tvDetails = (TextView) view.findViewById(R.id.mtvDetails);
 			holder.tvCompleted = (TextView) view.findViewById(R.id.mtvCompleted);
+			holder.tvSiteName = (TextView) view.findViewById(R.id.mtvSiteName);
+			holder.tvSiteName.setVisibility(View.VISIBLE);
 			holder.cbFavorite = (CheckBox) view.findViewById(R.id.mcbFavorite);
 			holder.cbFavorite.setOnClickListener(ActivityFavoriteList.this);
 			view.setTag(holder);
@@ -74,6 +239,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 						android.R.color.primary_text_dark));
 			}
 			holder.tvCompleted.setVisibility(manga.isCompleted ? View.VISIBLE : View.GONE);
+			holder.tvSiteName.setText(manga.getSiteName());
 			holder.cbFavorite.setChecked(manga.isFavorite);
 			holder.cbFavorite.setTag(manga);
 
@@ -98,20 +264,27 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 						android.R.color.primary_text_dark));
 			}
 			holder.tvCompleted.setVisibility(manga.isCompleted ? View.VISIBLE : View.GONE);
+			holder.tvSiteName.setText(manga.getSiteName());
 			holder.cbFavorite.setChecked(manga.isFavorite);
 			holder.cbFavorite.setTag(manga);
 		}
 
 		@Override
 		public void notifyDataSetInvalidated() {
-			Cursor cursor = mDB.getMangasCursor(null, null);
-			changeCursor(cursor);
+			try {
+				Cursor cursor = mDB.getAllMangasCursor();
+				changeCursor(cursor);
+			} catch (SQLException e) {
+				AppUtils.logE(this, e.getMessage());
+			}
 			super.notifyDataSetInvalidated();
 		}
 
 	}
 
 	private AppSQLite mDB;
+
+	private Updater mUpdater;
 
 	private boolean mExit = false;
 
@@ -133,9 +306,16 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		AppUtils.logV(this, "onCreate()");
 
+		requestWindowFeature(Window.FEATURE_PROGRESS);
 		setContentView(R.layout.activity_favorite_list);
+		setTitle(String.format("%s %s - FalconIA", App.NAME, App.VERSION_NAME));
 		setNoItemsMessage(R.string.ui_no_favorite_items);
+
+		if (App.getShowChangelog()) {
+			startActivity(new Intent(ActivityFavoriteList.this, ActivityChangelog.class));
+		}
 
 		mDB = App.DATABASE.open();
 		setupListView(new FavoriteListAdapter(this, null, true));
@@ -144,6 +324,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onResume() {
 		super.onResume();
+		AppUtils.logV(this, "onResume()");
 
 		mListAdapter.notifyDataSetInvalidated();
 	}
@@ -151,6 +332,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onStop() {
 		super.onStop();
+		AppUtils.logV(this, "onStop()");
 
 		mDB.close();
 	}
@@ -158,6 +340,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onRestart() {
 		super.onRestart();
+		AppUtils.logV(this, "onRestart()");
 
 		if (!mDB.isOpen()) {
 			mDB = App.DATABASE.open();
@@ -167,6 +350,11 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		AppUtils.logV(this, "onDestroy()");
+
+		if (mUpdater != null) {
+			mUpdater.cancel();
+		}
 
 		if (mExit) {
 			System.exit(0);
@@ -196,17 +384,25 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		MenuItem menuSource = menu.findItem(R.id.mmiSource);
 		SubMenu submenuSource = menuSource.getSubMenu();
 		for (int pluginId : Plugins.getPluginIds()) {
-			submenuSource.add(R.id.mmgSourceGroup, pluginId, Menu.NONE, Plugins.getPlugin(pluginId)
-					.getDisplayname());
+			submenuSource.add(R.id.mmgSourceGroup, pluginId, pluginId - 1000,
+					Plugins.getPlugin(pluginId).getDisplayname());
 		}
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getGroupId()) {
-		case R.id.mmgSourceGroup:
+		if (item.getGroupId() == R.id.mmgSourceGroup) {
 			onSourceSelected(item.getItemId());
+			return true;
+		}
+
+		switch (item.getItemId()) {
+		case R.id.mmiRefresh:
+			refresh();
+			return true;
+		case R.id.mmiPreferences:
+			startActivity(new Intent(this, ActivityPreference.class));
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -289,14 +485,29 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			}
 		} else {
 			AppUtils.logI(this, "Remove from Favorite.");
-			int deleted;
-			if ((deleted = mDB.deleteManga(manga)) == 0) {
-				AppUtils.logE(this, "Remove none.");
-			} else {
-				AppUtils.logW(this, "Remove " + deleted + " mangas.");
+			try {
+				int deleted;
+				if ((deleted = mDB.deleteManga(manga)) == 0) {
+					AppUtils.logE(this, "Remove none.");
+				} else {
+					AppUtils.logW(this, "Remove " + (deleted / 1000) + " mangas "
+							+ (deleted % 1000) + " chapters.");
+				}
+			} catch (SQLException e) {
+				AppUtils.logE(this, e.getMessage());
 			}
 		}
 		mListAdapter.notifyDataSetInvalidated();
+	}
+
+	private void refresh() {
+		if (mUpdater == null) {
+			mUpdater = new Updater();
+		}
+		if (!mUpdater.isUpdating()) {
+			mUpdater.queue(mDB.getAllMangas());
+			mUpdater.update();
+		}
 	}
 
 }

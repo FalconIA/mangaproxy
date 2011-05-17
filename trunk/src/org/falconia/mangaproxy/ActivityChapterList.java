@@ -13,6 +13,9 @@ import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -207,6 +210,13 @@ public final class ActivityChapterList extends ActivityBase {
 	}
 
 	@Override
+	protected void onRestart() {
+		super.onRestart();
+
+		mListAdapter.notifyDataSetChanged();
+	}
+
+	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 
@@ -238,6 +248,28 @@ public final class ActivityChapterList extends ActivityBase {
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_base_list, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.mmiRefresh:
+			mProcessed = false;
+			mSourceDownloader.download(mManga.getUrl());
+			return true;
+		case R.id.mmiPreferences:
+			startActivity(new Intent(this, ActivityPreference.class));
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		ActivityChapter.IntentHandler.startActivityChapter(this, mManga,
 				mChapterList.getAt(position));
@@ -247,7 +279,6 @@ public final class ActivityChapterList extends ActivityBase {
 	public int onSourceProcess(String source) {
 		mChapterList = mManga.getChapterList(source);
 		mManga.chapterList = mChapterList;
-		mManga.latestChapterDisplayname = mChapterList.getDisplayname(0);
 		return mChapterList.size();
 	}
 
@@ -255,11 +286,14 @@ public final class ActivityChapterList extends ActivityBase {
 	public void onPostSourceProcess(int result) {
 		// Update manga in database
 		if (mManga.isFavorite && result > 0) {
+			mManga.latestChapterId = mChapterList.getChapterId(0);
+			mManga.latestChapterDisplayname = mChapterList.getDisplayname(0);
+
 			final AppSQLite db = App.DATABASE.open();
 			try {
-				AppUtils.logI(this, "Update manga in favorite.");
+				AppUtils.logI(this, "Update Manga in Favorite.");
 				if (db.updateManga(mManga) == 0) {
-					AppUtils.logE(this, "Fail to update manga in favorite.");
+					AppUtils.logE(this, "Fail to update Manga in Favorite.");
 				}
 			} catch (SQLException e) {
 				AppUtils.logE(this, e.getMessage());
@@ -269,6 +303,10 @@ public final class ActivityChapterList extends ActivityBase {
 
 		mListAdapter.notifyDataSetChanged();
 		getListView().requestFocus();
+
+		if (mManga.isFavorite && result > 0 && mManga.lastReadChapterId != null) {
+			getListView().setSelection(mChapterList.indexOfChapterId(mManga.lastReadChapterId));
+		}
 
 		super.onPostSourceProcess(result);
 	}

@@ -1,8 +1,8 @@
 package org.falconia.mangaproxy.data;
 
 import java.io.Serializable;
+import java.util.TimeZone;
 
-import org.falconia.mangaproxy.App;
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugins;
 
@@ -11,11 +11,7 @@ public final class Genre implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static final String GENRE_UNKNOWN_ID = "GENRE_UNKNOWN";
-	public static final String GENRE_ALL_ID = "GENRE_UNKNOWN";
-
-	public static Genre getGenreAll(int siteId) {
-		return new Genre(GENRE_ALL_ID, App.UI_GENRE_ALL_TEXT, siteId);
-	}
+	public static final String GENRE_ALL_ID = "GENRE_ALL";
 
 	public final int siteId;
 	public final String genreId;
@@ -37,6 +33,10 @@ public final class Genre implements Serializable {
 
 	public String getSiteDisplayname() {
 		return getPlugin().getDisplayname();
+	}
+
+	public TimeZone getTimeZone() {
+		return getPlugin().getTimeZone();
 	}
 
 	public String getUrl(int page) {

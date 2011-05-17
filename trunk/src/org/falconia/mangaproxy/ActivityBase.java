@@ -37,13 +37,13 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 
 	protected final class SourceDownloader implements OnDownloadListener, OnCancelListener {
 
-		private final DownloadTask mDownloader;
 		private final String mCharset;
+
+		private DownloadTask mDownloader;
 		private ProgressDialog mDownloadDialog;
 		private String mMessage;
 
 		public SourceDownloader() {
-			mDownloader = new DownloadTask(this);
 			mCharset = Plugins.getPlugin(getSiteId()).getCharset();
 		}
 
@@ -118,6 +118,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 		}
 
 		public void download(String url) {
+			mDownloader = new DownloadTask(this);
 			mDownloader.execute(url);
 		}
 

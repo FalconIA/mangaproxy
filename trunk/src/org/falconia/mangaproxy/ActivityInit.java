@@ -50,7 +50,10 @@ public final class ActivityInit extends Activity implements OnClickListener {
 		AppUtils.logV(this, "onCreate()");
 
 
-		if (App.DEBUG >= 0) {
+		if (App.DEBUG == -2) {
+			startActivity(new Intent(this, ActivityChangelog.class));
+			return;
+		} else if (App.DEBUG >= 0) {
 			sitchMode(App.DEBUG);
 			return;
 		}

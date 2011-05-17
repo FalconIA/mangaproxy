@@ -3,15 +3,13 @@
 	<item android:id="@+id/mmiZoom" android:icon="@drawable/ic_menu_chat_dashboard"
 		android:title="@string/menu_item_zoom">
 		<menu>
-			<group android:id="@+id/mmgZoomGroup">
-				<item android:id="@+id/mmiZoomFitWidthAutoSplit" android:checkable="true"
-					android:title="@string/menu_item_zoom_fit_width_auto_split" />
-				<item android:id="@+id/mmiZoomFitWidth" android:checkable="true"
-					android:title="@string/menu_item_zoom_fit_width" />
-				<item android:id="@+id/mmiZoomFitHeight" android:checkable="true"
-					android:title="@string/menu_item_zoom_fit_height" />
-				<item android:id="@+id/mmiZoomFitScreen" android:checkable="true"
-					android:title="@string/menu_item_zoom_fit_screen" />
+			<group android:id="@+id/mmgZoomGroup"
+				android:checkableBehavior="single">
+				<item android:id="@+id/mmiZoomFitWidthOrHeight" android:title="@string/menu_item_zoom_fit_width_or_height" />
+				<item android:id="@+id/mmiZoomFitWidthAutoSplit" android:title="@string/menu_item_zoom_fit_width_auto_split" />
+				<item android:id="@+id/mmiZoomFitWidth" android:title="@string/menu_item_zoom_fit_width" />
+				<item android:id="@+id/mmiZoomFitHeight" android:title="@string/menu_item_zoom_fit_height" />
+				<item android:id="@+id/mmiZoomFitScreen" android:title="@string/menu_item_zoom_fit_screen" />
 			</group>
 		</menu>
 	</item>

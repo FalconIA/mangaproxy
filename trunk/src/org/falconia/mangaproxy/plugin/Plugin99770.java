@@ -65,7 +65,12 @@ public class Plugin99770 extends PluginBase {
 	}
 
 	@Override
-	public boolean isDynamicImgServer() {
+	public boolean usingImgRedirect() {
+		return false;
+	}
+
+	@Override
+	public boolean usingDynamicImgServer() {
 		return true;
 	}
 
@@ -139,10 +144,17 @@ public class Plugin99770 extends PluginBase {
 
 	@Override
 	protected String parseGenreName(String string) {
-		string = super.parseName(string);
+		string = super.parseGenreName(string);
 		string = string.replaceAll("^漫画$", "视界漫画");
-		string = string.replaceAll("[1-9]$", "0");
 		return string;
+	}
+
+	@Override
+	protected boolean parseIsCompleted(String string) {
+		if (string.matches("\\s*经典\\s*")) {
+			return true;
+		}
+		return string.indexOf("完") >= 0;
 	}
 
 	@Override
@@ -260,11 +272,11 @@ public class Plugin99770 extends PluginBase {
 
 					for (ArrayList<String> match : matches) {
 						// logV(match.get(0));
-						Manga manga = new Manga(parseId(match.get(1)), match.get(2), section,
-								getSiteId());
+						Manga manga = new Manga(parseId(match.get(1)), parseName(match.get(2)),
+								section, getSiteId());
 						manga.chapterCount = parseInt(match.get(3));
 						manga.isCompleted = parseIsCompleted(match.get(4));
-						manga.details = "Hit: " + parseInt(match.get(5));
+						manga.details = "HIT: " + parseInt(match.get(5));
 						manga.setDetailsTemplate("%chapterCount%, %details%");
 						list.add(manga, true);
 						// logV(manga.toLongString());
@@ -397,7 +409,7 @@ public class Plugin99770 extends PluginBase {
 			logV(Catched_in_section, groups.get(3), 3, section, manga.updatedAt.getTime());
 
 			section = "ul";
-			// logV(groups.get(3));
+			// logV(groups.get(4));
 			pattern = "(?is)(?:<li>|<div.*?>)<a href=\"?/\\w+/\\d+/(\\d+)/\\?s=(\\d+)\"? .*?>(?:<.*?>)?(.*?)</a>";
 			matches = Regex.matchAll(pattern, groups.get(4));
 			logD(Catched_count_in_section, matches.size(), section);

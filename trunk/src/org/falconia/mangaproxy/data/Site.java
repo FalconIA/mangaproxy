@@ -42,6 +42,11 @@ public final class Site implements Serializable {
 		mSiteId = plugin.getSiteId();
 	}
 
+	public Site(int siteId) {
+		mPlugin = Plugins.getPlugin(siteId);
+		mSiteId = siteId;
+	}
+
 	public String getName() {
 		return mPlugin.getName();
 	}
@@ -54,11 +59,15 @@ public final class Site implements Serializable {
 		return mPlugin.getGenreListUrl();
 	}
 
+	public Genre getGenreAll() {
+		return mPlugin.getGenreAll();
+	}
+
 	public GenreList getGenreList(String source) {
 		GenreList list = new GenreList(mSiteId);
 		GenreList listParsed = mPlugin.getGenreList(source);
 		if (listParsed != null && listParsed.size() > 0) {
-			list.add(Genre.getGenreAll(mSiteId));
+			list.add(getGenreAll());
 			list.addAll(listParsed.toArray());
 		}
 

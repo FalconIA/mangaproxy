@@ -46,7 +46,7 @@ public final class DebugActivity extends Activity implements OnTouchListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.acrivity_debug);
+		setContentView(R.layout.activity_debug);
 		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
 		Configuration conf = (Configuration) getLastNonConfigurationInstance();

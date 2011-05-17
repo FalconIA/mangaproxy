@@ -10,6 +10,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -46,7 +49,6 @@ public final class ActivityGenreList extends ActivityBase {
 			public TextView tvDisplayname;
 		}
 
-		private GenreList mGenreList;
 		private LayoutInflater mInflater;
 
 		public GenreListAdapter() {
@@ -100,11 +102,6 @@ public final class ActivityGenreList extends ActivityBase {
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
 			// TODO Auto-generated method stub
 
-		}
-
-		public void setGenreList(GenreList genreList) {
-			mGenreList = genreList;
-			notifyDataSetChanged();
 		}
 
 	}
@@ -167,7 +164,7 @@ public final class ActivityGenreList extends ActivityBase {
 		super.onRestoreInstanceState(savedInstanceState);
 
 		mGenreList = (GenreList) savedInstanceState.getSerializable(BUNDLE_KEY_GENRE_LIST);
-		((GenreListAdapter) mListAdapter).setGenreList(mGenreList);
+		mListAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -187,6 +184,28 @@ public final class ActivityGenreList extends ActivityBase {
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_base_list, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.mmiRefresh:
+			mProcessed = false;
+			mSourceDownloader.download(mSite.getGenreListUrl());
+			return true;
+		case R.id.mmiPreferences:
+			startActivity(new Intent(this, ActivityPreference.class));
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Genre genre = mGenreList.getAt(position);
 		ActivityMangaList.IntentHandler.startActivityMangaList(this, genre);
@@ -200,7 +219,7 @@ public final class ActivityGenreList extends ActivityBase {
 
 	@Override
 	public void onPostSourceProcess(int result) {
-		((GenreListAdapter) mListAdapter).setGenreList(mGenreList);
+		mListAdapter.notifyDataSetChanged();
 		getListView().requestFocus();
 
 		super.onPostSourceProcess(result);

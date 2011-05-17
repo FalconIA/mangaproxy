@@ -1,11 +1,13 @@
 package org.falconia.mangaproxy;
 
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 import org.apache.http.util.EncodingUtils;
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.data.MangaList;
+import org.falconia.mangaproxy.data.Site;
 import org.falconia.mangaproxy.plugin.Plugins;
 import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
@@ -22,6 +24,9 @@ import android.database.SQLException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -54,7 +59,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		}
 
 		public static void startActivityAllMangaList(Context context, int siteId) {
-			context.startActivity(getIntent(context, Genre.getGenreAll(siteId)));
+			context.startActivity(getIntent(context, (new Site(siteId)).getGenreAll()));
 		}
 
 	}
@@ -105,7 +110,6 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 			}
 
 			String source = EncodingUtils.getString(result, 0, result.length, mCharset);
-			// AppUtils.logV(this, source);
 
 			setMode(MODE_PROCESS);
 			ActivityMangaList.this.mSourceProcessTask = new SourceProcessTask(this);
@@ -280,8 +284,11 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 				holder = (ViewHolder) convertView.getTag();
 			}
 
-			if (mFavoriteMangaList != null) {
-				manga.isFavorite = mFavoriteMangaList.containsKey(manga.mangaId);
+			if (mFavoriteMangaList != null && mFavoriteMangaList.containsKey(manga.mangaId)) {
+				final Manga mangaFav = mFavoriteMangaList.get(manga.mangaId);
+				manga._id = mangaFav._id;
+				manga.lastReadChapterId = mangaFav.lastReadChapterId;
+				manga.isFavorite = true;
 			}
 
 			holder.tvDisplayname.setText(manga.displayname);
@@ -391,6 +398,13 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 	}
 
 	@Override
+	protected void onRestart() {
+		super.onRestart();
+
+		mListAdapter.notifyDataSetChanged();
+	}
+
+	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 	}
@@ -430,6 +444,35 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 			dialog = super.onCreateDialog(id);
 		}
 		return dialog;
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_base_list, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.mmiRefresh:
+			mProcessed = false;
+			if (mPageMax > 0) {
+				mPageLoaded = 0;
+				getListView().removeFooterView(mNextPageDownloader.getFooter());
+			}
+			if (mSourceDownloader == null) {
+				mSourceDownloader = new SourceDownloader();
+			}
+			mSourceDownloader.download(mUrl);
+			return true;
+		case R.id.mmiPreferences:
+			startActivity(new Intent(this, ActivityPreference.class));
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	@Override
@@ -504,7 +547,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 	}
 
 	private void startProcessSource(String source, boolean writeCache) {
-		if (writeCache && mGenre.isGenreAll()) {
+		if (writeCache && mGenre.isGenreAll() && source.length() > 200000) {
 			AppCache.writeCacheForData(source, mUrl);
 			AppUtils.popupMessage(this, R.string.popup_cache_save_allmanga);
 		}
@@ -544,6 +587,9 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		if (add) {
 			AppUtils.logI(this, "Add to Favorite.");
 			try {
+				manga.updatedAt = new GregorianCalendar(mGenre.getTimeZone());
+				manga.updatedAt.setTimeInMillis(System.currentTimeMillis());
+
 				long id = db.insertManga(manga);
 				manga._id = id;
 				manga.isFavorite = true;

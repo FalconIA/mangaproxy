@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="match_parent" android:layout_width="match_parent"
+	android:orientation="vertical">
+	<ScrollView android:layout_height="match_parent"
+		android:layout_width="match_parent" android:orientation="vertical"
+		android:layout_weight="1.0" android:padding="10.0dip">
+		<TextView android:layout_height="wrap_content"
+			android:layout_width="match_parent" android:id="@+id/mtvMain"
+			android:typeface="monospace" />
+	</ScrollView>
+	<LinearLayout android:layout_height="wrap_content"
+		android:layout_width="match_parent" android:orientation="vertical"
+		android:layout_centerInParent="true" android:layout_alignParentBottom="true">
+		<Button android:layout_height="wrap_content"
+			android:layout_width="match_parent" android:id="@+id/mbtnOk"
+			android:text="@string/dialog_ok" />
+	</LinearLayout>
+</LinearLayout>

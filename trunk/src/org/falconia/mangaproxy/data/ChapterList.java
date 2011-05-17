@@ -43,6 +43,10 @@ public final class ChapterList implements Serializable, ISiteId, Collection<Chap
 		return get(getChapterId(position));
 	}
 
+	public int indexOfChapterId(String chapterId) {
+		return mChapterKeyList.indexOf(chapterId);
+	}
+
 	@Override
 	public boolean add(Chapter chapter) {
 		String key = chapter.chapterId;

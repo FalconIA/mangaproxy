@@ -57,6 +57,10 @@ public final class GenreList implements Serializable, ISiteId, Iterable<Genre> {
 		return mGenreList.get(position);
 	}
 
+	public void removeAt(int position) {
+		mGenreList.remove(position);
+	}
+
 	public int size() {
 		return mGenreList.size();
 	}
