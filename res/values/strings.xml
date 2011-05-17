@@ -65,7 +65,7 @@
 	<string name="ui_downloading_page">Downloading Page %d ...</string>
 	<string name="ui_preference">Preferences</string>
 	<string name="ui_has_new_version_format">There is a new version of %1$s %2$s.</string>
-	<string name="ui_btn_update_app">Go to download page on Google Code</string>
+	<string name="ui_btn_update_app">Download new version from Google Code</string>
 	<string name="popup_loaded_page">Loaded Page %d of current Genre.</string>
 	<string name="popup_cache_save_allmanga">Cached the source of all manga.</string>
 	<string name="popup_cache_load_allmanga">Loaded the source of all manga from cache.</string>
