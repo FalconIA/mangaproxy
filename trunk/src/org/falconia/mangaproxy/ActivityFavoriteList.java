@@ -407,6 +407,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 
 	@Override
 	protected void onResume() {
+		System.gc();
+
 		super.onResume();
 
 		mListAdapter.notifyDataSetInvalidated();

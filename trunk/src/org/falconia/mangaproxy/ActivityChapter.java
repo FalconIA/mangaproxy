@@ -679,6 +679,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	@Override
 	protected void onResume() {
+		System.gc();
+
 		super.onResume();
 		AppUtils.logV(this, "onResume()");
 	}

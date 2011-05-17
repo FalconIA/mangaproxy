@@ -167,7 +167,8 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 
 	@Override
 	protected void onResume() {
-		// System.gc();
+		System.gc();
+
 		super.onResume();
 		AppUtils.logV(this, "onResume()");
 	}
