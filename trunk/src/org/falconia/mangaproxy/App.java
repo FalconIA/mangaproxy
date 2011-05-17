@@ -58,6 +58,8 @@ public final class App extends Application {
 
 	public static AppSQLite DATABASE;
 
+	public static boolean FIRST_START = false;
+
 	// Genre
 	public static String UI_GENRE_ALL_TEXT = "All";
 
@@ -90,8 +92,13 @@ public final class App extends Application {
 		return null;
 	}
 
+	public static boolean getFavoriteAutoUpdate() {
+		return getSharedPreferences().getString("bFavoriteAutoUpdate", "false").equalsIgnoreCase(
+				"true");
+	}
+
 	public static int getPageOrientation() {
-		return Integer.parseInt(getSharedPreferences().getString("iPageOrientation", "4"));
+		return Integer.parseInt(getSharedPreferences().getString("iPageOrientation", "2"));
 	}
 
 	public static ZoomMode getPageZoomMode() {
@@ -143,12 +150,5 @@ public final class App extends Application {
 		UI_AUTHOR = getString(R.string.ui_author);
 		UI_LAST_UPDATE = getString(R.string.ui_last_update);
 
-		// SharedPreferences
-		// if (getPageOrientation() == -1) {
-		// APP_PREFERENCES.edit().putString("iOrientation", "4").commit();
-		// }
-		// if (getPageDefaultZoomMode() == null) {
-		// APP_PREFERENCES.edit().putString("iPagesZoomMode", "0").commit();
-		// }
 	}
 }

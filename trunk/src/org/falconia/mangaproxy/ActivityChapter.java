@@ -163,7 +163,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				return;
 			}
 
-			String source = EncodingUtils.getString(result, 0, result.length, mCharset);
+			String source = EncodingUtils.getString(result, mCharset);
 
 			switch (mMode) {
 			case MODE_CHAPTER:
@@ -362,14 +362,14 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					mDownloader = new DownloadTask(null, mChapter.getUrl());
 					mDownloader.execute(mUrl);
 
-					byte[] result = new byte[0];
+					byte[] result = null;
 					try {
 						result = mDownloader.get();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 
-					String source = EncodingUtils.getString(result, 0, result.length, mCharset);
+					String source = EncodingUtils.getString(result, mCharset);
 					String url = mChapter.getPageRedirectUrl(source);
 					if (TextUtils.isEmpty(url)) {
 						onPostDownload(result);
@@ -399,7 +399,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
 
-				mDownloader.cancel(true);
+				// mDownloader.cancel(true);
+				mDownloader.cancelDownload();
 				mUrlRedirected = null;
 				mIsDownloaded = false;
 				mIsDownloading = false;
@@ -633,7 +634,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mPageUrls = conf.mPageUrls;
 			mPages = new HashMap<Integer, Page>();
 			for (int key : conf.mPages.keySet()) {
-				mPages.put(key, new Page(mPages.get(key)));
+				mPages.put(key, new Page(conf.mPages.get(key)));
 			}
 
 			if (App.DEBUG > 0) {
@@ -664,11 +665,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 			if (mChapter.pageIndexLastRead != mPageIndexLoading) {
 				AppUtils.logW(this, "mPageIndexCurrent != mPageIndexLoading");
-				changePage(mPageIndexLoading);
 			} else {
 				AppUtils.logW(this, "mPageIndexCurrent == mPageIndexLoading");
-				// changePage(mPageIndexLoading);
 			}
+			changePage(mPageIndexLoading);
 		}
 	}
 

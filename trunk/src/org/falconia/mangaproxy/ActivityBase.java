@@ -74,7 +74,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 				return;
 			}
 
-			String source = EncodingUtils.getString(result, 0, result.length, mCharset);
+			String source = EncodingUtils.getString(result, mCharset);
 			// AppUtils.logV(this, source);
 
 			startProcessSource(source);
