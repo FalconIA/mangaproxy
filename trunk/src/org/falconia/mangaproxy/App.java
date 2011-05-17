@@ -58,7 +58,7 @@ public final class App extends Application {
 
 	public static AppSQLite DATABASE;
 
-	public static boolean FIRST_START = false;
+	public static boolean FIRST_START = true;
 
 	// Genre
 	public static String UI_GENRE_ALL_TEXT = "All";
@@ -93,8 +93,7 @@ public final class App extends Application {
 	}
 
 	public static boolean getFavoriteAutoUpdate() {
-		return getSharedPreferences().getString("bFavoriteAutoUpdate", "false").equalsIgnoreCase(
-				"true");
+		return getSharedPreferences().getBoolean("bFavoriteAutoUpdate", false);
 	}
 
 	public static int getPageOrientation() {

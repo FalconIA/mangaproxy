@@ -388,18 +388,16 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			startActivity(new Intent(ActivityFavoriteList.this, ActivityChangelog.class));
 		}
 
-		if (App.FIRST_START && App.getFavoriteAutoUpdate()) {
-			getListView().getViewTreeObserver().addOnGlobalLayoutListener(
-					new OnGlobalLayoutListener() {
-						@Override
-						public void onGlobalLayout() {
-							getListView().getViewTreeObserver().removeGlobalOnLayoutListener(this);
-							App.FIRST_START = false;
-
-							refresh();
-						}
-					});
-		}
+		getListView().getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				getListView().getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				if (App.FIRST_START && App.getFavoriteAutoUpdate()) {
+					refresh();
+				}
+				App.FIRST_START = false;
+			}
+		});
 
 		checkNewVersion();
 
