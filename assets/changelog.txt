@@ -14,6 +14,9 @@
 显示信息：单击屏幕
 
 
+Version 1.2 (Beta)
+==================
+- Fix URL with Chinese character.
 Version 1.1 (Beta)
 ==================
 - Auto update favorite when start if set.

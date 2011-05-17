@@ -2,6 +2,9 @@ package org.falconia.mangaproxy.utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.falconia.mangaproxy.AppUtils;
 
@@ -33,5 +36,29 @@ public final class HttpUtils {
 			AppUtils.logE(TAG, "Invalid URL.");
 		}
 		return null;
+	}
+
+	public static String urlencode(String url) {
+		try {
+
+			Pattern p = Pattern.compile("^(?:https?|ftp)://|[^a-zA-Z0-9=?&/~`!@#$%^()+.*_-]+");
+			Matcher m = p.matcher(url);
+
+			String urlNew = "";
+			int end = 0;
+
+			m.find();
+			while (m.find()) {
+				urlNew += url.substring(end, m.start());
+				urlNew += URLEncoder.encode(m.group(), CHARSET_UTF8);
+				end = m.end();
+			}
+			urlNew += url.substring(end, url.length());
+			url = urlNew;
+			AppUtils.logV(TAG, "New URL: " + urlNew);
+
+		} catch (Exception e) {
+		}
+		return url;
 	}
 }
