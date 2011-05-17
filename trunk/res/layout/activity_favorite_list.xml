@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent">
-	<ListView android:layout_width="match_parent"
-		android:fastScrollEnabled="true" android:id="@android:id/list"
-		android:layout_height="match_parent" />
-	<include layout="@layout/list_empty" />
-</FrameLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:orientation="vertical">
+	<RelativeLayout android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_weight="1.0">
+		<ListView android:layout_width="match_parent"
+			android:fastScrollEnabled="true" android:id="@android:id/list"
+			android:layout_height="match_parent" />
+		<include layout="@layout/list_empty" />
+	</RelativeLayout>
+	<LinearLayout android:id="@+id/mvgNewVersion"
+		android:layout_height="wrap_content" android:layout_width="match_parent"
+		android:orientation="vertical">
+		<TextView android:id="@+id/mtvNewVersion"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:text="@string/ui_has_new_version_format"
+			android:layout_margin="5.0dip" />
+		<Button android:id="@+id/mbtnUpdate" android:layout_width="match_parent"
+			android:layout_height="wrap_content" android:text="@string/ui_btn_update_app" />
+	</LinearLayout>
+</LinearLayout>
