@@ -15,7 +15,7 @@ public final class CrashExceptionHandler implements UncaughtExceptionHandler {
 	private UncaughtExceptionHandler defaultUEH;
 
 	public CrashExceptionHandler() {
-        defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
+		defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public final class CrashExceptionHandler implements UncaughtExceptionHandler {
 
 		writeToFile(stacktrace);
 
-        defaultUEH.uncaughtException(thread, ex);
+		defaultUEH.uncaughtException(thread, ex);
 	}
 
 	private void writeToFile(String stacktrace) {

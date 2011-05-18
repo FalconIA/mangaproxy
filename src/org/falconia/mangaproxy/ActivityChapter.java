@@ -105,8 +105,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		private CharSequence mtvDebugText;
 		private int msvScrollerVisibility;
 
-		private Bitmap mPageViewImage;
-
 		private int mvgTitleBarVisibility;
 	}
 
@@ -307,7 +305,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					AppUtils.popupMessage(ActivityChapter.this, String.format(
 							getString(R.string.popup_fail_to_download_page), mPageIndex,
 							App.MAX_RETRY_DOWNLOAD_IMG));
+					mRetriedTimes = 0;
 					mPageIndexLoading = mChapter.pageIndexLastRead;
+					mDownloader = null;
+					mIsDownloading = false;
 					hideStatusBar();
 				}
 				return;
@@ -324,6 +325,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				mBitmap = BitmapFactory.decodeByteArray(result, 0, result.length);
 			}
 
+			mDownloader = null;
+			mRetriedTimes = 0;
 			mIsDownloaded = true;
 			mIsDownloading = false;
 
@@ -438,9 +441,12 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				AppUtils.logD(this, "Cancel DownloadTask.");
 				mDownloader.cancelDownload();
 			}
+			mDownloader = null;
 			mUrlRedirected = null;
+			mRetriedTimes = 0;
 			mIsDownloaded = false;
 			mIsDownloading = false;
+			recycle();
 		}
 
 		public void recycle() {
@@ -493,7 +499,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private Manga mManga;
 	private Chapter mChapter;
 
+	private Bitmap mBitmap;
+
 	private boolean mProcessed;
+	private boolean mDead;
 
 	private ChangePageMode mChangePageMode;
 
@@ -533,7 +542,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private final Runnable mHideTitleBarRunnable;
 
 	public ActivityChapter() {
+
 		mProcessed = false;
+		mDead = false;
 		mChangePageMode = ChangePageMode.NONE;
 		// mPageIndexCurrent = 0;
 		mPageIndexLoading = 0;
@@ -571,9 +582,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
 		// Crash Handler
-		Thread.setDefaultUncaughtExceptionHandler(new CrashExceptionHandler());
+		if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CrashExceptionHandler)) {
+			Thread.setDefaultUncaughtExceptionHandler(new CrashExceptionHandler());
+		}
 
 		super.onCreate(savedInstanceState);
 		AppUtils.logV(this, "onCreate()");
@@ -690,7 +702,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				public void onGlobalLayout() {
 					AppUtils.logV(ActivityChapter.this, "onGlobalLayout()");
 					mPageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-					setImage(conf.mPageViewImage);
+					mZoomControl.getZoomState().setDefaultZoom(
+							computeDefaultZoom(mZoomMode, mPageView));
+					mZoomControl.getZoomState().notifyObservers();
 				}
 			});
 
@@ -736,10 +750,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	@Override
 	protected void onDestroy() {
-		System.gc();
-
 		super.onDestroy();
 		AppUtils.logV(this, "onDestroy()");
+
+		if (mBitmap != null) {
+			mBitmap.recycle();
+			mBitmap = null;
+		}
 
 		if (mPages != null) {
 			for (int key : mPages.keySet()) {
@@ -751,13 +768,23 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 
 		App.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+		// Debug controls
+		mHideScrollerHandler.removeCallbacks(mHideScrollerRunnable);
+		mtvDebug.setOnClickListener(null);
+		// Buttons
 		findViewById(R.id.mbtnNext).setOnClickListener(null);
 		findViewById(R.id.mbtnPrev).setOnClickListener(null);
-		mHideScrollerHandler.removeCallbacks(mHideScrollerRunnable);
+		// Title bar
 		mHideTitleBarHandler.removeCallbacks(mHideTitleBarRunnable);
-		mPageView.setOnTouchListener(null);
-		mtvDebug.setOnClickListener(null);
 		mtvTitle.setOnClickListener(null);
+		// Page image
+		mPageView.setOnTouchListener(null);
+		mPageView.setImage(null);
+		mZoomControl.getZoomState().deleteObservers();
+		mZoomControl = null;
+		mZoomListener = null;
+
+		System.gc();
 	}
 
 	@Override
@@ -792,8 +819,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		conf.mtvDebugText = mtvDebug.getText();
 		conf.msvScrollerVisibility = msvScroller.getVisibility();
-
-		conf.mPageViewImage = mPageView.getImage();
 
 		conf.mvgTitleBarVisibility = mvgTitleBar.getVisibility();
 
@@ -843,7 +868,21 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if (mDead) {
+			for (int i = 0; i < menu.size(); i++) {
+				menu.getItem(i).setEnabled(false);
+			}
+		}
+		return true;
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		if (mDead) {
+			return true;
+		}
+
 		if (item.getGroupId() == R.id.mmgZoomGroup) {
 			switch (item.getItemId()) {
 			case R.id.mmiZoomFitWidthOrHeight:
@@ -1148,24 +1187,39 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		// Current page
 		if (page.mPageIndex == mPageIndexLoading) {
+			// Recycle image
+			if (mBitmap != null) {
+				mBitmap.recycle();
+				mBitmap = null;
+
+				System.gc();
+			}
 			// Get image
-			final Bitmap bitmap;
 			try {
-				bitmap = page.getBitmap();
+				mBitmap = page.getBitmap();
 			} catch (OutOfMemoryError e) {
 				AppUtils.logE(this, "Out of Memory: " + e.getMessage());
 				AppUtils.popupMessage(App.CONTEXT, R.string.popup_out_of_memory);
-				finish();
+				setMessage(getString(R.string.ui_error_out_of_memory));
+				mDead = true;
+				if (mBitmap != null) {
+					mBitmap.recycle();
+					mBitmap = null;
+				}
+				setImage(mBitmap);
+				findViewById(R.id.mbtnNext).setClickable(false);
+				findViewById(R.id.mbtnPrev).setClickable(false);
+				mvgTitleBar.setVisibility(View.VISIBLE);
+				mPageView.setOnTouchListener(null);
+				// finish();
 				return;
 			}
-
-			if (bitmap != null) {
+			// Set image
+			if (mBitmap != null) {
 				mChapter.pageIndexLastRead = mPageIndexLoading;
-				setImage(bitmap);
+				setImage(mBitmap);
 				mtvTitle.setText(getCustomTitle());
 				showTitleBar();
-
-				System.gc();
 
 				// TODO Update database
 				if (mChapter.isFavorite) {
@@ -1212,7 +1266,11 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void setupZoomState() {
-		mPageView.setImage(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_4444));
+		if (mBitmap != null) {
+			mBitmap.recycle();
+		}
+		mBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_4444);
+		mPageView.setImage(mBitmap);
 		mZoomControl.getZoomState().setAlignX(AlignX.Right);
 		mZoomControl.getZoomState().setAlignY(AlignY.Top);
 		mZoomControl.getZoomState().setPanX(0.0f);

@@ -14,6 +14,9 @@
 显示信息：单击屏幕
 
 
+Version 1.2.2 (Beta)
+====================
+- Reduce leak of memory.
 Version 1.2.1 (Beta)
 ====================
 - Warning when Out of Memory (try to fix later).
