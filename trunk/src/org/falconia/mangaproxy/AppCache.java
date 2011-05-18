@@ -23,7 +23,7 @@ public final class AppCache {
 	}
 
 	public static boolean checkCacheForData(String url, long cacheMinutes) {
-		String key = hashKey(url);
+		final String key = hashKey(url);
 		cacheMinutes = (cacheMinutes <= 0 ? Long.MAX_VALUE : cacheMinutes * 1000);
 		try {
 			File file = getExternalCacheFile(key);
@@ -39,7 +39,7 @@ public final class AppCache {
 	}
 
 	public static boolean checkCacheForImage(String url, String type, long cacheMinutes) {
-		String key = hashKey(url);
+		final String key = hashKey(url);
 		cacheMinutes = (cacheMinutes <= 0 ? Long.MAX_VALUE : cacheMinutes * 1000);
 		try {
 			File file = getExternalCacheImageFile(key, type);
@@ -55,7 +55,7 @@ public final class AppCache {
 	}
 
 	public static int wipeCacheForImage(String type) {
-		File file;
+		final File file;
 		try {
 			file = getExternalCacheImageFile(type, null);
 		} catch (IOException e) {
@@ -78,8 +78,8 @@ public final class AppCache {
 
 	public static boolean writeCacheForData(String data, String url) {
 		AppUtils.logD(TAG, String.format("Write cache for: %s", url));
-		String key = hashKey(url);
-		File file;
+		final String key = hashKey(url);
+		final File file;
 		try {
 			file = getExternalCacheFile(key);
 		} catch (IOException e) {
@@ -104,8 +104,8 @@ public final class AppCache {
 
 	public static boolean writeCacheForImage(byte[] data, String url, String type) {
 		AppUtils.logD(TAG, String.format("Write cache for: %s", url));
-		String key = hashKey(url);
-		File file;
+		final String key = hashKey(url);
+		final File file;
 		try {
 			file = getExternalCacheImageFile(key, type);
 		} catch (IOException e) {
@@ -130,8 +130,8 @@ public final class AppCache {
 
 	public static String readCacheForData(String url) {
 		AppUtils.logD(TAG, String.format("Read cache for: %s", url));
-		String key = hashKey(url);
-		File file;
+		final String key = hashKey(url);
+		final File file;
 		try {
 			file = getExternalCacheFile(key);
 		} catch (IOException e) {
@@ -160,8 +160,8 @@ public final class AppCache {
 
 	public static Bitmap readCacheForImage(String url, String type) {
 		AppUtils.logD(TAG, String.format("Read cache for: %s", url));
-		String key = hashKey(url);
-		File file;
+		final String key = hashKey(url);
+		final File file;
 		try {
 			file = getExternalCacheImageFile(key, type);
 		} catch (IOException e) {
@@ -172,9 +172,8 @@ public final class AppCache {
 				AppUtils.logE(TAG, String.format("File not exists: %s", file.getPath()));
 				return null;
 			}
-			Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
 			AppUtils.logD(TAG, String.format("Read file: %s", file.getPath()));
-			return bitmap;
+			return BitmapFactory.decodeFile(file.getPath());
 		} catch (Exception e) {
 			e.printStackTrace();
 			AppUtils.logE(TAG, String.format("Cannot read cache: %s", file.getPath()));

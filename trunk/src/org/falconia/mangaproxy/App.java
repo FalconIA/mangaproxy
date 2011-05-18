@@ -74,6 +74,7 @@ public final class App extends Application {
 	// Settings
 	// public static int IMG_PRELOAD_MAX = 2;
 	public static float WIDTH_AUTO_SPLIT_MARGIN = .2f;
+	public static int MAX_RETRY_DOWNLOAD_IMG = 3;
 
 	static {
 
