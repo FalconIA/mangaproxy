@@ -153,6 +153,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	}
 
 	public void cancelDownload() {
+		logD("Download cancelling.");
 		mCancelled = true;
 		cancel(true);
 	}
