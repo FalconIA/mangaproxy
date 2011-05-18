@@ -381,6 +381,7 @@ public final class AppSQLite {
 	public int updateChapter(Chapter chapter) throws SQLException {
 		String selection = String.format("%s=%d", KEY_ROW_ID, chapter._id);
 		ContentValues values = new ContentValues();
+		values.put(KEY_PAGE_MAX, chapter.pageIndexMax);
 		values.put(KEY_PAGE_LAST_READ, chapter.pageIndexLastRead);
 		return db.update(DATABASE_TABLE_CHAPTER, values, selection, null);
 	}
