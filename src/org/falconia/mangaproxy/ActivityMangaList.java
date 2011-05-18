@@ -124,7 +124,10 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 
 		@Override
 		public void onDownloadProgressUpdate(int value, int total) {
-			mMessage.setText(String.format(getString(R.string.ui_download_page), (value) / 1024.0f));
+			if (mMode == MODE_DOWNLOAD) {
+				mMessage.setText(String.format(getString(R.string.ui_download_page),
+						(value) / 1024.0f));
+			}
 		}
 
 		@Override
