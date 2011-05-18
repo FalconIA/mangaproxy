@@ -41,7 +41,7 @@ public final class HttpUtils {
 	public static String urlencode(String url) {
 		try {
 
-			Pattern p = Pattern.compile("^(?:https?|ftp)://|[^a-zA-Z0-9=?&/~`!@#$%^()+.*_-]+");
+			Pattern p = Pattern.compile("^(?:https?|ftp)://|[^a-zA-Z0-9=?&/: ~`!@#$%^()+.*_-]+");
 			Matcher m = p.matcher(url);
 
 			String urlNew = "";
@@ -54,7 +54,7 @@ public final class HttpUtils {
 				end = m.end();
 			}
 			urlNew += url.substring(end, url.length());
-			url = urlNew;
+			url = urlNew.replace(" ", "%20");
 			AppUtils.logV(TAG, "New URL: " + urlNew);
 
 		} catch (Exception e) {
