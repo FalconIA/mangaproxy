@@ -14,6 +14,7 @@ import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
 import org.falconia.mangaproxy.ui.ZoomViewOnTouchListener;
 import org.falconia.mangaproxy.utils.FormatUtils;
+import org.falconia.mangaproxy.utils.HttpUtils;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -42,7 +43,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -60,11 +60,14 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		private static final String BUNDLE_KEY_MANGA_DATA = "BUNDLE_KEY_MANGA_DATA";
 		private static final String BUNDLE_KEY_CHAPTER_DATA = "BUNDLE_KEY_CHAPTER_DATA";
+		private static final String BUNDLE_KEY_PAGE_URLS_DATA = "BUNDLE_KEY_PAGE_URLS_DATA";
 
-		private static Intent getIntent(Context context, Manga manga, Chapter chapter) {
+		private static Intent getIntent(Context context, Manga manga, Chapter chapter,
+				String[] pageUrls) {
 			Bundle bundle = new Bundle();
 			bundle.putSerializable(BUNDLE_KEY_MANGA_DATA, manga);
 			bundle.putSerializable(BUNDLE_KEY_CHAPTER_DATA, chapter);
+			bundle.putStringArray(BUNDLE_KEY_PAGE_URLS_DATA, pageUrls);
 			Intent i = new Intent(context, ActivityChapter.class);
 			i.putExtras(bundle);
 			return i;
@@ -79,11 +82,32 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					.getSerializable(BUNDLE_KEY_CHAPTER_DATA);
 		}
 
+		protected static String[] getPageUrls(ActivityChapter activity) {
+			return activity.getIntent().getExtras().getStringArray(BUNDLE_KEY_PAGE_URLS_DATA);
+		}
+
 		public static void startActivityChapter(Context context, Manga manga, Chapter chapter) {
-			context.startActivity(getIntent(context, manga, chapter));
+			context.startActivity(getIntent(context, manga, chapter, null));
 			AppCache.wipeCacheForImage(TYPE);
 		}
 
+	}
+
+	private final static class Configuration {
+		private boolean mProcessed;
+
+		private String[] mPageUrls;
+		private HashMap<Integer, Page> mPages;
+		private int mPageIndexMax;
+		private int mPageIndexCurrent;
+		private int mPageIndexLoading;
+
+		private CharSequence mtvDebugText;
+		private int msvScrollerVisibility;
+
+		private Bitmap mPageViewImage;
+
+		private int mvgTitleBarVisibility;
 	}
 
 	private final class PageViewOnTouchListener extends ZoomViewOnTouchListener {
@@ -226,10 +250,12 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		private final boolean mIsRedirect;
 		private String mUrlRedirected;
 
+		private int mRetriedTimes;
+
 		private boolean mIsDownloaded;
 		private boolean mIsDownloading;
 
-		private transient Bitmap mBitmap;
+		private Bitmap mBitmap;
 
 		public Page(int pageIndex, String url, boolean isRedirect) {
 			mCharset = mChapter.getSiteCharset();
@@ -238,14 +264,12 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mUrl = url;
 			mIsRedirect = isRedirect;
 
+			mRetriedTimes = 0;
+
 			mIsDownloaded = false;
 			mIsDownloading = false;
 
 			checkCache();
-		}
-
-		public Page(int pageIndex, String url) {
-			this(pageIndex, url, false);
 		}
 
 		public Page(Page page) {
@@ -273,10 +297,19 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
 				setMessage(String.format(getString(R.string.ui_error_on_download), getSiteName()));
-				hideStatusBar();
 
 				// TODO Retry to downlaod
-
+				if (mRetriedTimes < App.MAX_RETRY_DOWNLOAD_IMG) {
+					mRetriedTimes++;
+					mIsDownloading = false;
+					download();
+				} else {
+					AppUtils.popupMessage(ActivityChapter.this, String.format(
+							getString(R.string.popup_fail_to_download_page), mPageIndex,
+							App.MAX_RETRY_DOWNLOAD_IMG));
+					mPageIndexLoading = mChapter.pageIndexLastRead;
+					hideStatusBar();
+				}
 				return;
 			}
 
@@ -301,13 +334,15 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			// Debug
 			printDebug(mUrl, "Downloaded");
 
+			System.gc();
+
 			notifyPageDownloaded(this);
 		}
 
 		@Override
 		public void onDownloadProgressUpdate(int value, int total) {
 			if (mPageIndex == mPageIndexLoading) {
-				if (value == 0) {
+				if (value == 0 || mpbDownload.getMax() != total) {
 					mpbDownload.setMax(total);
 				}
 				mpbDownload.setProgress(value);
@@ -368,6 +403,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+					if (result == null) {
+						result = new byte[0];
+					}
 
 					String source = EncodingUtils.getString(result, mCharset);
 					String url = mChapter.getPageRedirectUrl(source);
@@ -398,17 +436,17 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		public void cancelDownload() {
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
-
 				mDownloader.cancelDownload();
-				mUrlRedirected = null;
-				mIsDownloaded = false;
-				mIsDownloading = false;
 			}
+			mUrlRedirected = null;
+			mIsDownloaded = false;
+			mIsDownloading = false;
 		}
 
 		public void recycle() {
 			if (mBitmap != null) {
 				mBitmap.recycle();
+				mBitmap = null;
 			}
 		}
 
@@ -425,31 +463,19 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		private void showStatusBar() {
 			mpbDownload.setProgress(0);
-			mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page),
-					mPageIndexLoading));
+			if (mRetriedTimes > 0) {
+				mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page_retry),
+						mPageIndexLoading, mRetriedTimes));
+			} else {
+				mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page),
+						mPageIndexLoading));
+			}
 			mvgStatusBar.setVisibility(View.VISIBLE);
 		}
 
 		private void hideStatusBar() {
 			mvgStatusBar.setVisibility(View.GONE);
 		}
-	}
-
-	private final class Configuration {
-		private boolean mProcessed;
-
-		private String[] mPageUrls;
-		private HashMap<Integer, Page> mPages;
-		private int mPageIndexMax;
-		private int mPageIndexCurrent;
-		private int mPageIndexLoading;
-
-		private CharSequence mtvDebugText;
-		private int msvScrollerVisibility;
-
-		private Bitmap mPageViewImage;
-
-		private int mvgTitleBarVisibility;
 	}
 
 	public enum ChangePageMode {
@@ -545,13 +571,19 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+
+		// Crash Handler
+		Thread.setDefaultUncaughtExceptionHandler(new CrashExceptionHandler());
+
 		super.onCreate(savedInstanceState);
 		AppUtils.logV(this, "onCreate()");
 
 		mChapter = IntentHandler.getChapter(this);
 		mManga = IntentHandler.getManga(this);
+		mPageUrls = IntentHandler.getPageUrls(this);
 		if (mChapter == null || mManga == null) {
 			finish();
+			return;
 		}
 		mManga.lastReadChapterId = mChapter.chapterId;
 		mChapter.manga = mManga;
@@ -579,8 +611,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		msvScroller = (ScrollView) findViewById(R.id.msvScroller);
 		msvScroller.setVisibility(View.GONE);
 		// Buttons
-		((Button) findViewById(R.id.mbtnNext)).setOnClickListener(this);
-		((Button) findViewById(R.id.mbtnPrev)).setOnClickListener(this);
+		findViewById(R.id.mbtnNext).setOnClickListener(this);
+		findViewById(R.id.mbtnPrev).setOnClickListener(this);
 		// Title bar
 		mvgTitleBar = (LinearLayout) findViewById(R.id.mvgTitleBar);
 		mvgTitleBar.setVisibility(View.GONE);
@@ -629,6 +661,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		if (!mProcessed) {
 			loadChapter();
+		} else if ((mPageUrls = IntentHandler.getPageUrls(this)) != null) {
+			mProcessed = true;
+			processPageUrls();
 		} else {
 			mPageUrls = conf.mPageUrls;
 			mPages = new HashMap<Integer, Page>();
@@ -714,6 +749,15 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				}
 			}
 		}
+
+		App.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+		findViewById(R.id.mbtnNext).setOnClickListener(null);
+		findViewById(R.id.mbtnPrev).setOnClickListener(null);
+		mHideScrollerHandler.removeCallbacks(mHideScrollerRunnable);
+		mHideTitleBarHandler.removeCallbacks(mHideTitleBarRunnable);
+		mPageView.setOnTouchListener(null);
+		mtvDebug.setOnClickListener(null);
+		mtvTitle.setOnClickListener(null);
 	}
 
 	@Override
@@ -911,8 +955,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private String getCustomTitle() {
 		String title = String.format("%s - %s", mManga.displayname, mChapter.displayname);
 		if (mChapter.pageIndexLastRead > 0) {
-			title = String.format("%s - " + getString(R.string.ui_page), title,
-					mChapter.pageIndexLastRead);
+			title += String.format(" - " + getString(R.string.ui_pages_format),
+					mChapter.pageIndexLastRead, mChapter.pageIndexMax);
 		}
 		return title;
 	}
@@ -973,17 +1017,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 		// Direct/Redirect image URL
 		else {
-			mPages = new HashMap<Integer, Page>();
-			for (int i = 0; i < mPageUrls.length; i++) {
-				Page page = new Page(i + 1, mPageUrls[i], mManga.usingImgRedirect());
-				mPages.put(i + 1, page);
-			}
-
-			mChapter.pageIndexMax = mPages.size();
-			mProcessed = true;
-
-			initalPage();
-			return;
+			processPageUrls();
 		}
 	}
 
@@ -1011,8 +1045,16 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		printDebug(imgServer, "Get DynamicImgServer");
 
 		for (int i = 0; i < mPageUrls.length; i++) {
-			String url = (imgServer + mPageUrls[i]).replaceAll("(?<!http:)//", "/");
-			Page page = new Page(i + 1, url);
+			mPageUrls[i] = HttpUtils.joinUrl(imgServer, mPageUrls[i]);
+		}
+
+		processPageUrls();
+	}
+
+	private void processPageUrls() {
+		mPages = new HashMap<Integer, Page>();
+		for (int i = 0; i < mPageUrls.length; i++) {
+			Page page = new Page(i + 1, mPageUrls[i], mManga.usingImgRedirect());
 			mPages.put(i + 1, page);
 		}
 
@@ -1106,12 +1148,24 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		// Current page
 		if (page.mPageIndex == mPageIndexLoading) {
-			Bitmap bitmap = page.getBitmap();
+			// Get image
+			final Bitmap bitmap;
+			try {
+				bitmap = page.getBitmap();
+			} catch (OutOfMemoryError e) {
+				AppUtils.logE(this, "Out of Memory: " + e.getMessage());
+				AppUtils.popupMessage(App.CONTEXT, R.string.popup_out_of_memory);
+				finish();
+				return;
+			}
+
 			if (bitmap != null) {
 				mChapter.pageIndexLastRead = mPageIndexLoading;
 				setImage(bitmap);
 				mtvTitle.setText(getCustomTitle());
 				showTitleBar();
+
+				System.gc();
 
 				// TODO Update database
 				if (mChapter.isFavorite) {

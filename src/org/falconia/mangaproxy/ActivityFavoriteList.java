@@ -548,8 +548,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 				.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int id) {
-						finish();
 						mExit = true;
+						finish();
 					}
 				}).setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
 					@Override

@@ -14,6 +14,9 @@
 显示信息：单击屏幕
 
 
+Version 1.2.1 (Beta)
+====================
+- Warning when Out of Memory (try to fix later).
 Version 1.2 (Beta)
 ==================
 - Fix URL with Chinese character.

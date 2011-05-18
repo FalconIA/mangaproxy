@@ -61,8 +61,8 @@
 	<string name="ui_fail_to_process">Fail to process Page %d</string>
 	<string name="ui_pages">Page - / -</string>
 	<string name="ui_pages_format">Page %1$d / %2$d</string>
-	<string name="ui_page">Page %d</string>
 	<string name="ui_downloading_page">Downloading Page %d ...</string>
+	<string name="ui_downloading_page_retry">Retry to download Page %1$d (%2$d times) ...</string>
 	<string name="ui_preference">Preferences</string>
 	<string name="ui_has_new_version_format">There is a new version of %1$s %2$s.</string>
 	<string name="ui_btn_update_app">Download new version from Google Code</string>
@@ -70,4 +70,7 @@
 	<string name="popup_cache_save_allmanga">Cached the source of all manga.</string>
 	<string name="popup_cache_load_allmanga">Loaded the source of all manga from cache.</string>
 	<string name="popup_fail_to_cache_page">Fail to cache Page %d.</string>
+	<string name="popup_fail_to_download_page">Fail to download Page %1$d %2$d times.\nPlease try again later.</string>
+	<string name="popup_out_of_memory">Out of Memory. Please restart the application.</string>
+	<string name="popup_write_crash_log">Write crash log to SDCard.</string>
 </resources>

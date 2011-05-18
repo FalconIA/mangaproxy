@@ -64,6 +64,12 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 
 	}
 
+	private final static class Configuration {
+		private MangaList mMangaList;
+		private int mPageMax;
+		private int mPageLoaded;
+	}
+
 	private final class NextPageDownloader implements OnDownloadListener, OnSourceProcessListener {
 
 		public static final int MODE_DEFAULT = 0;
@@ -325,12 +331,6 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 			super.notifyDataSetChanged();
 		}
 
-	}
-
-	private final class Configuration {
-		private MangaList mMangaList;
-		private int mPageMax;
-		private int mPageLoaded;
 	}
 
 	private Genre mGenre;

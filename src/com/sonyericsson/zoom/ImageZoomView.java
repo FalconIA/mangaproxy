@@ -77,6 +77,9 @@ public class ImageZoomView extends View implements Observer {
 	 *            The bitmap to view and zoom into
 	 */
 	public void setImage(Bitmap bitmap) {
+		if (mBitmap != null) {
+			mBitmap.recycle();
+		}
 		mBitmap = bitmap;
 
 		mAspectQuotient.updateAspectQuotient(getWidth(), getHeight(), mBitmap.getWidth(),
