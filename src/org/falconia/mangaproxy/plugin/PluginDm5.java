@@ -136,6 +136,11 @@ public class PluginDm5 extends PluginBase {
 		return calendar;
 	}
 
+	protected String parseAuthorName(String string) {
+		string = string.replaceAll("(?si)</?a[^<>]*>", "");
+		return parseName(string);
+	}
+
 	protected String parseChapterName(String string, String manga) {
 		if (string.startsWith(manga)) {
 			string = string.substring(manga.length());
@@ -268,7 +273,7 @@ public class PluginDm5 extends PluginBase {
 					manga.details = "HIT: " + match.get(3);
 					manga.chapterDisplayname = parseChapterName(match.get(4), manga.displayname);
 					manga.latestChapterDisplayname = manga.chapterDisplayname;
-					manga.author = parseName(match.get(5));
+					manga.author = parseAuthorName(match.get(5));
 					manga.setDetailsTemplate("%author%\n%chapterDisplayname%, %details%");
 					list.add(manga, true);
 					// logV(manga.toLongString());
