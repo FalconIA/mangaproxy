@@ -702,9 +702,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				public void onGlobalLayout() {
 					AppUtils.logV(ActivityChapter.this, "onGlobalLayout()");
 					mPageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-					mZoomControl.getZoomState().setDefaultZoom(
-							computeDefaultZoom(mZoomMode, mPageView));
-					mZoomControl.getZoomState().notifyObservers();
+					setImage(mBitmap);
 				}
 			});
 
