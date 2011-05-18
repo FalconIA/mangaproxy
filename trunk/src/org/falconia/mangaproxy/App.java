@@ -150,5 +150,7 @@ public final class App extends Application {
 		UI_AUTHOR = getString(R.string.ui_author);
 		UI_LAST_UPDATE = getString(R.string.ui_last_update);
 
+		// Crash Handler
+		Thread.setDefaultUncaughtExceptionHandler(new CrashExceptionHandler());
 	}
 }

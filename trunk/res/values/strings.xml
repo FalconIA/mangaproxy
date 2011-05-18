@@ -45,6 +45,7 @@
 	<string name="ui_error_on_imgsvr_url">Cannot get URL for Image Servers.\nPlease try again later,\nor update the app if necessary.</string>
 	<string name="ui_error_on_imgsvr_download">Cannot download Image Servers.\nPlease try again later.</string>
 	<string name="ui_error_on_imgsvr_process">Cannot process Image Servers.\nPlease try again later,\nor update the app if necessary.</string>
+	<string name="ui_error_out_of_memory">Out of Memory.\nPlease restart the application.</string>
 	<string name="ui_chapter_count">章节: %s</string>
 	<string name="ui_author">作者: %s</string>
 	<string name="ui_last_update">更新: %tF</string>
@@ -70,7 +71,7 @@
 	<string name="popup_cache_save_allmanga">Cached the source of all manga.</string>
 	<string name="popup_cache_load_allmanga">Loaded the source of all manga from cache.</string>
 	<string name="popup_fail_to_cache_page">Fail to cache Page %d.</string>
-	<string name="popup_fail_to_download_page">Fail to download Page %1$d %2$d times.\nPlease try again later.</string>
-	<string name="popup_out_of_memory">Out of Memory. Please restart the application.</string>
+	<string name="popup_fail_to_download_page">Fail to download Page %1$d (%2$d times).\nPlease try again later.</string>
+	<string name="popup_out_of_memory">@string/ui_error_out_of_memory</string>
 	<string name="popup_write_crash_log">Write crash log to SDCard.</string>
 </resources>

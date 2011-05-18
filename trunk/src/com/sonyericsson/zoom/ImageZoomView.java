@@ -77,14 +77,16 @@ public class ImageZoomView extends View implements Observer {
 	 *            The bitmap to view and zoom into
 	 */
 	public void setImage(Bitmap bitmap) {
-		if (mBitmap != null) {
+		if (mBitmap != null && mBitmap != bitmap) {
 			mBitmap.recycle();
 		}
 		mBitmap = bitmap;
 
-		mAspectQuotient.updateAspectQuotient(getWidth(), getHeight(), mBitmap.getWidth(),
-				mBitmap.getHeight());
-		mAspectQuotient.notifyObservers();
+		if (mBitmap != null) {
+			mAspectQuotient.updateAspectQuotient(getWidth(), getHeight(), mBitmap.getWidth(),
+					mBitmap.getHeight());
+			mAspectQuotient.notifyObservers();
+		}
 
 		invalidate();
 	}
@@ -205,6 +207,16 @@ public class ImageZoomView extends View implements Observer {
 			mAspectQuotient.updateAspectQuotient(right - left, bottom - top, mBitmap.getWidth(),
 					mBitmap.getHeight());
 			mAspectQuotient.notifyObservers();
+		}
+	}
+
+	@Override
+	protected void onDetachedFromWindow() {
+		super.onDetachedFromWindow();
+
+		if (mBitmap != null) {
+			mBitmap.recycle();
+			mBitmap = null;
 		}
 	}
 
