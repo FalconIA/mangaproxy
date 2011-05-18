@@ -1178,8 +1178,12 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void refreshPage() {
-		Page page = mPages.get(mPageIndexLoading);
-		page.download(true);
+		if (mPages == null || mPages.size() == 0) {
+			loadChapter();
+		} else {
+			Page page = mPages.get(mPageIndexLoading);
+			page.download(true);
+		}
 	}
 
 	private void notifyPageDownloaded(Page page) {

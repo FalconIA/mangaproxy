@@ -49,7 +49,10 @@ public final class ActivityInit extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		AppUtils.logV(this, "onCreate()");
 
+		checkExternalStorageMounted();
+	}
 
+	private void initalOnCreate() {
 		if (App.DEBUG == -2) {
 			startActivity(new Intent(this, ActivityChangelog.class));
 			return;
@@ -91,9 +94,6 @@ public final class ActivityInit extends Activity implements OnClickListener {
 		mbtn2.setOnClickListener(this);
 		mbtn3.setOnClickListener(this);
 		mbtn4.setOnClickListener(this);
-
-
-		checkExternalStorageMounted();
 	}
 
 	private void checkExternalStorageMounted() {
@@ -106,6 +106,8 @@ public final class ActivityInit extends Activity implements OnClickListener {
 					|| !App.APP_EXTERNAL_CACHE_DIR.canWrite()
 					|| !App.APP_EXTERNAL_FILES_DIR.canWrite()) {
 				showDialog(DIALOG_UNMOUNTED_ID);
+			} else {
+				initalOnCreate();
 			}
 		}
 	}
@@ -231,8 +233,8 @@ public final class ActivityInit extends Activity implements OnClickListener {
 								public void onClick(DialogInterface paramDialogInterface,
 										int paramInt) {
 									dismissDialog(DIALOG_UNMOUNTED_ID);
-									finish();
 									mExit = true;
+									finish();
 								}
 							});
 			dialog = builder.create();
@@ -251,8 +253,8 @@ public final class ActivityInit extends Activity implements OnClickListener {
 
 	@Override
 	public void onBackPressed() {
-		super.onBackPressed();
 		mExit = true;
+		super.onBackPressed();
 	}
 
 	@Override
