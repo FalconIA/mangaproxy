@@ -88,7 +88,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		public static void startActivityChapter(Context context, Manga manga, Chapter chapter) {
 			context.startActivity(getIntent(context, manga, chapter, null));
-			AppCache.wipeCacheForImage(TYPE);
+			AppCache.wipeCacheForImages(TYPE);
 		}
 
 	}
@@ -303,8 +303,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					download();
 				} else {
 					AppUtils.popupMessage(ActivityChapter.this, String.format(
-							getString(R.string.popup_fail_to_download_page), mPageIndex,
-							App.MAX_RETRY_DOWNLOAD_IMG));
+							getString(R.string.popup_fail_to_download_page), mPageIndex));
 					mRetriedTimes = 0;
 					mPageIndexLoading = mChapter.pageIndexLastRead;
 					mDownloader = null;
@@ -374,7 +373,11 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 
 		public void download(boolean refresh) {
-			if (!refresh) {
+			if (refresh) {
+				AppUtils.logI(this, String.format("Force refresh image: %s", mUrl));
+				cancelDownload();
+				AppCache.wipeCacheForImage(mUrl, TYPE);
+			} else {
 				if (mIsDownloading) {
 					if (mPageIndex == mPageIndexLoading) {
 						showStatusBar();
@@ -388,9 +391,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					notifyPageDownloaded(this);
 					return;
 				}
-			} else {
-				AppUtils.logI(this, String.format("Force refresh image: %s", mUrl));
-				cancelDownload();
 			}
 
 			if (mIsRedirect) {
@@ -1180,6 +1180,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private void refreshPage() {
 		if (mPages == null || mPages.size() == 0) {
 			loadChapter();
+		} else if (mPageIndexLoading == 0) {
+			changePage(1);
 		} else {
 			Page page = mPages.get(mPageIndexLoading);
 			page.download(true);

@@ -71,7 +71,7 @@
 	<string name="popup_cache_save_allmanga">Cached the source of all manga.</string>
 	<string name="popup_cache_load_allmanga">Loaded the source of all manga from cache.</string>
 	<string name="popup_fail_to_cache_page">Fail to cache Page %d.</string>
-	<string name="popup_fail_to_download_page">Fail to download Page %1$d (%2$d times).\nPlease try again later.</string>
+	<string name="popup_fail_to_download_page">Fail to download Page %d.\nPlease try again later.</string>
 	<string name="popup_out_of_memory">@string/ui_error_out_of_memory</string>
 	<string name="popup_write_crash_log">Write crash log to SDCard.</string>
 </resources>

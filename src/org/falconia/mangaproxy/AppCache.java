@@ -54,7 +54,7 @@ public final class AppCache {
 		return checkCacheForImage(url, type, 0);
 	}
 
-	public static int wipeCacheForImage(String type) {
+	public static int wipeCacheForImages(String type) {
 		final File file;
 		try {
 			file = getExternalCacheImageFile(type, null);
@@ -74,6 +74,23 @@ public final class AppCache {
 			}
 		}
 		return count;
+	}
+
+	public static boolean wipeCacheForImage(String url, String type) {
+		AppUtils.logD(TAG, String.format("Wipe cache for: %s", url));
+		final String key = hashKey(url);
+		final File file;
+		try {
+			file = getExternalCacheImageFile(key, type);
+		} catch (IOException e) {
+			return false;
+		}
+		if (file.delete()) {
+			AppUtils.logD(TAG, String.format("Wiped file: %s", file.getPath()));
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public static boolean writeCacheForData(String data, String url) {

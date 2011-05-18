@@ -453,12 +453,12 @@ public class Plugin99770 extends PluginBase {
 			String pattern;
 			ArrayList<String> groups;
 
-			pattern = "(?is)<script .*?>.*?var\\s+PicListUrl\\s*=\\s*\"([^\"]+)\";.*?</script>.*?<script\\s+src=\"?([^\\s\"]*?)\"?></script>";
+			pattern = "(?is)<script .*?>.*?var\\s+PicListUrl\\s*=\\s*\"/?([^\"]+)\";.*?</script>.*?<script\\s+src=\"?([^\\s\"]*?)\"?></script>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
 			// Section 1
-			pageUrls = groups.get(1).split("\\|");
+			pageUrls = groups.get(1).split("\\|/?");
 			logV(Catched_count_in_section, pageUrls.length, "PageUrls");
 
 			// Section 2

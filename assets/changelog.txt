@@ -14,6 +14,15 @@
 显示信息：单击屏幕
 
 
+Version 1.2.3 (Beta)
+====================
+- Fix connot retry to download if cache exists.
+- Fix error when URL contains port.
+- [Plugin 99770] Fix URL of image.
+- Fix UI error when cancelled downloading next page of MangaList.
+- Fix crash on retrying download Chapter data of Page 0.
+- Reactive SDCard check.
+- [Plugin DM5] Remove HTML tag in author of Manga in MangaList.
 Version 1.2.2 (Beta)
 ====================
 - Reduce leak of memory.
