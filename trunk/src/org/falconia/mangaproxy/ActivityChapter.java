@@ -299,12 +299,14 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				// TODO Retry to downlaod
 				if (mRetriedTimes < App.MAX_RETRY_DOWNLOAD_IMG) {
 					mRetriedTimes++;
+					AppUtils.logI(this, String.format("Retry %d times to download image: %s",
+							mRetriedTimes, mUrl));
 					mIsDownloading = false;
 					download();
 				} else {
+					mRetriedTimes = 0;
 					AppUtils.popupMessage(ActivityChapter.this, String.format(
 							getString(R.string.popup_fail_to_download_page), mPageIndex));
-					mRetriedTimes = 0;
 					mPageIndexLoading = mChapter.pageIndexLastRead;
 					mDownloader = null;
 					mIsDownloading = false;
@@ -469,6 +471,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		private void showStatusBar() {
 			mpbDownload.setProgress(0);
+			mtvDownloaded.setText("");
 			if (mRetriedTimes > 0) {
 				mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page_retry),
 						mPageIndexLoading, mRetriedTimes));
@@ -1195,8 +1198,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			if (mBitmap != null) {
 				mBitmap.recycle();
 				mBitmap = null;
-
-				System.gc();
 			}
 			// Get image
 			try {
@@ -1238,6 +1239,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					}
 					db.close();
 				}
+
+				// System.gc();
 			} else {
 				AppUtils.logE(this, "Invalid bitmap.");
 			}

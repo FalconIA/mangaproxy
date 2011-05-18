@@ -1,7 +1,6 @@
-更新：
-增加新站点
-增加用户收藏功能
-增加收藏更新
+Manga Proxy - by FalconIA
+http://code.google.com/p/manga-proxy/
+
 
 浏览页操作方式：
 下一页：　图片处在左边缘时向右滑动
@@ -13,6 +12,19 @@
 初始缩放：菜单中选择
 显示信息：单击屏幕
 
+加入收藏：点击漫画列表漫画右侧的五角星
+
+加入收藏后：
+收藏列表漫画有更新时章节为绿色
+章节列表自动指向上次浏览的章节
+章节页面自动跳转到上次浏览的页面
+
+
+Version 1.2.4 (Beta)
+====================
+- Fix the delay before changing page in page view.
+- Modified to update max page to database when change page.
+- Fix page view connot touch after resume.
 
 Version 1.2.3 (Beta)
 ====================
@@ -23,15 +35,19 @@ Version 1.2.3 (Beta)
 - Fix crash on retrying download Chapter data of Page 0.
 - Reactive SDCard check.
 - [Plugin DM5] Remove HTML tag in author of Manga in MangaList.
+
 Version 1.2.2 (Beta)
 ====================
 - Reduce leak of memory.
+
 Version 1.2.1 (Beta)
 ====================
 - Warning when Out of Memory (try to fix later).
+
 Version 1.2 (Beta)
 ==================
 - Fix URL with Chinese character.
+
 Version 1.1 (Beta)
 ==================
 - Auto update favorite when start if set.
