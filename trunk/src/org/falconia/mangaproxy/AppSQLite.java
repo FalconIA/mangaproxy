@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.Manga;
+import org.falconia.mangaproxy.utils.TimeUtils;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -254,7 +255,7 @@ public final class AppSQLite {
 		values.put(KEY_HAS_NEW_CHAPTER, manga.hasNewChapter);
 		values.put(KEY_LATEST_CHAPTER_DISPLAYNAME, manga.latestChapterDisplayname);
 		if (manga.updatedAt != null) {
-			values.put(KEY_UPDATED_AT, manga.updatedAt.getTimeInMillis());
+			values.put(KEY_UPDATED_AT, TimeUtils.getTimeInMillisUTC(manga.updatedAt));
 			values.put(KEY_UPDATED_AT_TIMEZONE, manga.updatedAt.getTimeZone().getID());
 		}
 		return db.insertOrThrow(DATABASE_TABLE_MANGA, null, values);
@@ -270,7 +271,7 @@ public final class AppSQLite {
 		values.put(KEY_HAS_NEW_CHAPTER, manga.hasNewChapter);
 		values.put(KEY_LATEST_CHAPTER_DISPLAYNAME, manga.latestChapterDisplayname);
 		if (manga.updatedAt != null) {
-			values.put(KEY_UPDATED_AT, manga.updatedAt.getTimeInMillis());
+			values.put(KEY_UPDATED_AT, TimeUtils.getTimeInMillisUTC(manga.updatedAt));
 			values.put(KEY_UPDATED_AT_TIMEZONE, manga.updatedAt.getTimeZone().getID());
 		}
 		return db.update(DATABASE_TABLE_MANGA, values, selection, null);

@@ -1,7 +1,6 @@
 package org.falconia.mangaproxy.utils;
 
 import java.io.UnsupportedEncodingException;
-import java.security.InvalidParameterException;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -61,13 +60,6 @@ public final class FormatUtils {
 		return String.format("%.3fKB", size / 1024d);
 	}
 
-	public static int year2to4(int year) {
-		if (year > 100) {
-			throw new InvalidParameterException("Invalid year digits.");
-		}
-		return year < 50 ? year + 2000 : year + 1900;
-	}
-
 	public static String getCountDownDateTime(Calendar time) {
 		String format = "";
 
@@ -79,9 +71,9 @@ public final class FormatUtils {
 
 		Calendar now = Calendar.getInstance();
 		long offset = now.getTimeInMillis() - time.getTimeInMillis();
-		long offsetYear = getCalendarOffset(time, now, Calendar.YEAR);
-		long offsetMonth = getCalendarOffset(time, now, Calendar.MONTH);
-		long offsetDay = getCalendarOffset(time, now, Calendar.DAY_OF_MONTH);
+		long offsetYear = TimeUtils.getCalendarOffset(time, now, Calendar.YEAR);
+		long offsetMonth = TimeUtils.getCalendarOffset(time, now, Calendar.MONTH);
+		long offsetDay = TimeUtils.getCalendarOffset(time, now, Calendar.DAY_OF_MONTH);
 
 		if (offset < MILLISECOND_OF_MINUTE) {
 			format = App.CONTEXT.getString(R.string.datetime_countdown_seconts);
@@ -102,10 +94,6 @@ public final class FormatUtils {
 			format = String.format("%tF", time);
 		}
 		return format;
-	}
-
-	public static int getCalendarOffset(Calendar time1, Calendar time2, int field) {
-		return time2.get(field) - time1.get(field);
 	}
 
 }
