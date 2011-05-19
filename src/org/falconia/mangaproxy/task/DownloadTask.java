@@ -56,7 +56,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	@Override
 	protected void onPostExecute(byte[] result) {
 		logD("Download done.");
-		if (mListener != null) {
+		if (!mCancelled && mListener != null) {
 			mListener.onPostDownload(result);
 		}
 	}
@@ -69,7 +69,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 
 	@Override
 	protected void onProgressUpdate(Integer... values) {
-		if (mListener != null) {
+		if (!mCancelled && mListener != null) {
 			mListener.onDownloadProgressUpdate(values[0], mFileSize);
 		}
 	}

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="hello">Hello World, MangaProxy!</string>
 	<string name="app_name">Manga Proxy</string>
 	<string name="genre">分类</string>
 	<string name="genre_all">全部漫画</string>
@@ -45,6 +44,7 @@
 	<string name="ui_error_on_imgsvr_url">Cannot get URL for Image Servers.\nPlease try again later,\nor update the app if necessary.</string>
 	<string name="ui_error_on_imgsvr_download">Cannot download Image Servers.\nPlease try again later.</string>
 	<string name="ui_error_on_imgsvr_process">Cannot process Image Servers.\nPlease try again later,\nor update the app if necessary.</string>
+	<string name="ui_error_on_page_download">Cannot download Page %1$d from %2$s.\nPlease try again later.</string>
 	<string name="ui_error_out_of_memory">Out of Memory.\nPlease restart the application.</string>
 	<string name="ui_error_invalid_image">Connot decode image.</string>
 	<string name="ui_chapter_count">章节: %s</string>
@@ -73,7 +73,7 @@
 	<string name="popup_cache_save_allmanga">Cached the source of all manga.</string>
 	<string name="popup_cache_load_allmanga">Loaded the source of all manga from cache.</string>
 	<string name="popup_fail_to_cache_page">Fail to cache Page %d.</string>
-	<string name="popup_fail_to_download_page">Fail to download Page %d.\nPlease try again later.</string>
+	<string name="popup_fail_to_download_page">Fail to download Page %d.</string>
 	<string name="popup_out_of_memory">@string/ui_error_out_of_memory</string>
 	<string name="popup_write_crash_log">Write crash log to SDCard.</string>
 	<string name="datetime_countdown_seconts">1分钟内</string>
