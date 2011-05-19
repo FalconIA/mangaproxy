@@ -50,6 +50,7 @@
 	<string name="ui_chapter_count">章节: %s</string>
 	<string name="ui_author">作者: %s</string>
 	<string name="ui_last_update">更新: %tF</string>
+	<string name="ui_last_update_countdown">更新: %s</string>
 	<string name="ui_search_hint">Search</string>
 	<string name="ui_load_next_page">Load next Page</string>
 	<string name="ui_download_data">Download Data</string>
@@ -75,4 +76,10 @@
 	<string name="popup_fail_to_download_page">Fail to download Page %d.\nPlease try again later.</string>
 	<string name="popup_out_of_memory">@string/ui_error_out_of_memory</string>
 	<string name="popup_write_crash_log">Write crash log to SDCard.</string>
+	<string name="datetime_countdown_seconts">1分钟内</string>
+	<string name="datetime_countdown_minutes">%d分钟前</string>
+	<string name="datetime_countdown_hours">%d小时前</string>
+	<string name="datetime_countdown_1day">昨天</string>
+	<string name="datetime_countdown_2day">前天</string>
+	<string name="datetime_countdown_days">%1$d月%2$d日</string>
 </resources>

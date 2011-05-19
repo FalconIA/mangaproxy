@@ -60,6 +60,9 @@ public final class App extends Application {
 
 	public static boolean FIRST_START = true;
 
+	// Favorite
+	public static String UI_LAST_UPDATE_COUNTDOWN = "Update: %s";
+
 	// Genre
 	public static String UI_GENRE_ALL_TEXT = "All";
 
@@ -141,6 +144,9 @@ public final class App extends Application {
 		APP_EXTERNAL_CACHE_DIR = CONTEXT.getExternalCacheDir();
 
 		DATABASE = new AppSQLite(CONTEXT);
+
+		// Favorite
+		UI_LAST_UPDATE_COUNTDOWN = getString(R.string.ui_last_update_countdown);
 
 		// Genre
 		UI_GENRE_ALL_TEXT = getString(R.string.genre_all);
