@@ -20,6 +20,8 @@ public final class CrashExceptionHandler implements UncaughtExceptionHandler {
 
 	@Override
 	public void uncaughtException(Thread thread, Throwable ex) {
+		AppUtils.logE(this, "Uncaught Exception: " + ex.getMessage());
+
 		// Date date = Calendar.getInstance().getTime();
 		// String timestamp = new
 		// SimpleDateFormat("yyyy-MM-dd HH:mmZ").format(date);
@@ -50,6 +52,7 @@ public final class CrashExceptionHandler implements UncaughtExceptionHandler {
 		try {
 			Intent i = new Intent(App.CONTEXT, CrashActivity.class);
 			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			App.CONTEXT.startActivity(i);
 			App.CONTEXT.startActivity(i);
 		} catch (Exception e) {
 			e.printStackTrace();

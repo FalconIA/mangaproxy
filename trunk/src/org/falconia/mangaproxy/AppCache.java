@@ -1,9 +1,13 @@
 package org.falconia.mangaproxy;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -17,6 +21,7 @@ public final class AppCache {
 
 	public static final String TAG = "AppCache";
 	public static final String NEW_LINE;
+	public static final byte[] END_OF_IMAGE = new byte[] { (byte) 0xFF, (byte) 0xD9 };
 
 	static {
 		NEW_LINE = System.getProperty("line.separator");
@@ -190,12 +195,51 @@ public final class AppCache {
 				return null;
 			}
 			AppUtils.logD(TAG, String.format("Read file: %s", file.getPath()));
-			return BitmapFactory.decodeFile(file.getPath());
+			return decodeFile(file);
 		} catch (Exception e) {
 			e.printStackTrace();
 			AppUtils.logE(TAG, String.format("Cannot read cache: %s", file.getPath()));
 		}
 		return null;
+	}
+
+	public static Bitmap decodeFile(File file) {
+		Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
+
+		// Fix missing End of Image
+		if (bitmap == null && file.length() > 0) {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			try {
+				BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
+				final byte[] soi = new byte[10];
+				in.read(soi);
+				out.write(soi);
+				// Check image type
+				if ((new String(soi, 6, 4)).equals("JFIF")) {
+					final byte[] buffer = new byte[2];
+					int b;
+					while ((b = in.read()) != -1) {
+						out.write(b);
+						buffer[0] = buffer[1];
+						buffer[1] = (byte) b;
+					}
+					if (buffer[0] != END_OF_IMAGE[0] || buffer[1] != END_OF_IMAGE[1]) {
+						AppUtils.logD(TAG, String.format("Append End of Image & decode again."));
+						// Append End of Image
+						out.write(END_OF_IMAGE);
+						// Decode again
+						bitmap = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size());
+					}
+				}
+				in.close();
+				out.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return bitmap;
 	}
 
 	private static String hashKey(String url) {
