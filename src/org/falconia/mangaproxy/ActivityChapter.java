@@ -585,11 +585,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// Crash Handler
-		if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CrashExceptionHandler)) {
-			Thread.setDefaultUncaughtExceptionHandler(new CrashExceptionHandler());
-		}
-
 		super.onCreate(savedInstanceState);
 		AppUtils.logV(this, "onCreate()");
 
@@ -1092,6 +1087,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void processPageUrls() {
+		if (mPageUrls.length == 0) {
+			setMessage(getString(R.string.ui_no_pages));
+		}
+
 		mPages = new HashMap<Integer, Page>();
 		for (int i = 0; i < mPageUrls.length; i++) {
 			Page page = new Page(i + 1, mPageUrls[i], mManga.usingImgRedirect());
@@ -1199,6 +1198,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				mBitmap.recycle();
 				mBitmap = null;
 			}
+
 			// Get image
 			try {
 				mBitmap = page.getBitmap();
@@ -1219,30 +1219,29 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				// finish();
 				return;
 			}
-			// Set image
-			if (mBitmap != null) {
-				mChapter.pageIndexLastRead = mPageIndexLoading;
-				setImage(mBitmap);
-				mtvTitle.setText(getCustomTitle());
-				showTitleBar();
-
-				// TODO Update database
-				if (mChapter.isFavorite) {
-					final AppSQLite db = App.DATABASE.open();
-					AppUtils.logI(this, "Update Chapter in Favorite.");
-					try {
-						if (db.updateChapter(mChapter) == 0) {
-							AppUtils.logE(this, "Fail to update Chapter in Favorite.");
-						}
-					} catch (SQLException e) {
-						AppUtils.logE(this, e.getMessage());
-					}
-					db.close();
-				}
-
-				// System.gc();
-			} else {
+			if (mBitmap == null) {
 				AppUtils.logE(this, "Invalid bitmap.");
+				setMessage(getString(R.string.ui_error_invalid_image));
+			}
+
+			// Set image
+			mChapter.pageIndexLastRead = mPageIndexLoading;
+			setImage(mBitmap);
+			mtvTitle.setText(getCustomTitle());
+			showTitleBar();
+
+			// TODO Update database
+			if (mChapter.isFavorite) {
+				final AppSQLite db = App.DATABASE.open();
+				AppUtils.logI(this, "Update Chapter in Favorite.");
+				try {
+					if (db.updateChapter(mChapter) == 0) {
+						AppUtils.logE(this, "Fail to update Chapter in Favorite.");
+					}
+				} catch (SQLException e) {
+					AppUtils.logE(this, e.getMessage());
+				}
+				db.close();
 			}
 		}
 
@@ -1286,9 +1285,14 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void setImage(Bitmap bitmap) {
-		AppUtils.logD(this, "ZoomView Width: " + mPageView.getWidth());
-		AppUtils.logD(this, "ZoomView Height: " + mPageView.getHeight());
-		AppUtils.logD(this, "AspectQuotient: " + mPageView.getAspectQuotient().get());
+		if (bitmap != null) {
+			setMessage("");
+		}
+
+		// AppUtils.logD(this, "ZoomView Width: " + mPageView.getWidth());
+		// AppUtils.logD(this, "ZoomView Height: " + mPageView.getHeight());
+		// AppUtils.logD(this, "AspectQuotient: " +
+		// mPageView.getAspectQuotient().get());
 
 		mZoomControl.stopFling();
 		mZoomControl.getZoomState().setPanX(0.0f);
