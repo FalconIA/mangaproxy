@@ -12,6 +12,7 @@ import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.task.OnDownloadListener;
 import org.falconia.mangaproxy.task.OnSourceProcessListener;
 import org.falconia.mangaproxy.task.SourceProcessTask;
+import org.falconia.mangaproxy.utils.FormatUtils;
 import org.falconia.mangaproxy.utils.HttpUtils;
 import org.falconia.mangaproxy.utils.Regex;
 
@@ -287,6 +288,9 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			} else {
 				holder.tvDetails.setText(manga.latestChapterDisplayname);
 			}
+			if (manga.updatedAt != null) {
+				holder.tvDetails.append(", " + FormatUtils.getCountDownDateTime(manga.updatedAt));
+			}
 			if (manga.hasNewChapter) {
 				holder.tvDetails.setTextColor(getResources().getColor(R.color.highlight));
 			} else {
@@ -311,6 +315,9 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 				holder.tvDetails.setText("-");
 			} else {
 				holder.tvDetails.setText(manga.latestChapterDisplayname);
+			}
+			if (manga.updatedAt != null) {
+				holder.tvDetails.append(", " + FormatUtils.getCountDownDateTime(manga.updatedAt));
 			}
 			if (manga.hasNewChapter) {
 				holder.tvDetails.setTextColor(getResources().getColor(R.color.highlight));
