@@ -9,10 +9,10 @@ import org.falconia.mangaproxy.ITag;
 import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.Manga;
-import org.falconia.mangaproxy.utils.FormatUtils;
 import org.falconia.mangaproxy.utils.HttpUtils;
 import org.falconia.mangaproxy.utils.MathUtils;
 import org.falconia.mangaproxy.utils.Regex;
+import org.falconia.mangaproxy.utils.TimeUtils;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -145,7 +145,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 				cal.set(Calendar.YEAR, parseInt(groups.get("YY")));
 			}
 			if (groups.containsKey("Y")) {
-				cal.set(Calendar.YEAR, FormatUtils.year2to4(parseInt(groups.get("Y"))));
+				cal.set(Calendar.YEAR, TimeUtils.year2to4(parseInt(groups.get("Y"))));
 			}
 			if (groups.containsKey("M")) {
 				cal.set(Calendar.MONTH, parseInt(Calendar.JANUARY + groups.get("M")) - 1);

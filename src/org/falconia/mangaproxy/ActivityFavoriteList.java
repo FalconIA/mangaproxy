@@ -289,7 +289,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 				holder.tvDetails.setText(manga.latestChapterDisplayname);
 			}
 			if (manga.updatedAt != null) {
-				holder.tvDetails.append(", " + FormatUtils.getCountDownDateTime(manga.updatedAt));
+				holder.tvDetails.append(String.format(", " + App.UI_LAST_UPDATE_COUNTDOWN,
+						FormatUtils.getCountDownDateTime(manga.updatedAt)));
 			}
 			if (manga.hasNewChapter) {
 				holder.tvDetails.setTextColor(getResources().getColor(R.color.highlight));
@@ -317,7 +318,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 				holder.tvDetails.setText(manga.latestChapterDisplayname);
 			}
 			if (manga.updatedAt != null) {
-				holder.tvDetails.append(", " + FormatUtils.getCountDownDateTime(manga.updatedAt));
+				holder.tvDetails.append(String.format(", " + App.UI_LAST_UPDATE_COUNTDOWN,
+						FormatUtils.getCountDownDateTime(manga.updatedAt)));
 			}
 			if (manga.hasNewChapter) {
 				holder.tvDetails.setTextColor(getResources().getColor(R.color.highlight));
