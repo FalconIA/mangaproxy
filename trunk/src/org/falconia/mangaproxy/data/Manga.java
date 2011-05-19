@@ -7,7 +7,6 @@ import java.util.TimeZone;
 import org.falconia.mangaproxy.App;
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugins;
-import org.falconia.mangaproxy.utils.TimeUtils;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;
@@ -29,9 +28,8 @@ public final class Manga implements Serializable {
 		manga.latestChapterDisplayname = latestChapterDisplayname;
 		manga.lastReadChapterId = lastReadChapterId;
 		if (updatedAt > 0 && !TextUtils.isEmpty(updateAtTimeZone)) {
-			manga.updatedAt = new GregorianCalendar(TimeUtils.TIME_ZONE_UTC);
+			manga.updatedAt = new GregorianCalendar(TimeZone.getTimeZone(updateAtTimeZone));
 			manga.updatedAt.setTimeInMillis(updatedAt);
-			manga.updatedAt.setTimeZone(TimeZone.getTimeZone(updateAtTimeZone));
 		}
 		manga.isFavorite = true;
 		return manga;

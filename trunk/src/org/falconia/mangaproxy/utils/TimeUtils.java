@@ -19,14 +19,4 @@ public final class TimeUtils {
 		return calendar2.get(field) - calendar1.get(field);
 	}
 
-	public static Calendar getCalendarUTC(Calendar calendar) {
-		Calendar calendarUTC = (Calendar) calendar.clone();
-		calendarUTC.setTimeZone(TimeUtils.TIME_ZONE_UTC);
-		return calendarUTC;
-	}
-
-	public static long getTimeInMillisUTC(Calendar calendar) {
-		return getCalendarUTC(calendar).getTimeInMillis();
-	}
-
 }
