@@ -252,6 +252,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		private boolean mIsDownloaded;
 		private boolean mIsDownloading;
+		private boolean mIsCancelled;
 
 		private Bitmap mBitmap;
 
@@ -266,6 +267,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 			mIsDownloaded = false;
 			mIsDownloading = false;
+			mIsCancelled = false;
 
 			checkCache();
 		}
@@ -292,9 +294,15 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		public void onPostDownload(byte[] result) {
 			AppUtils.logV(this, "onPostDownload()");
 
+			if (mIsCancelled) {
+				AppUtils.logE(this, "Downloaded cancelled.");
+				return;
+			}
+
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
-				setMessage(String.format(getString(R.string.ui_error_on_download), getSiteName()));
+				// setMessage(String.format(getString(R.string.ui_error_on_download),
+				// getSiteName()));
 
 				// TODO Retry to downlaod
 				if (mRetriedTimes < App.MAX_RETRY_DOWNLOAD_IMG) {
@@ -307,10 +315,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					mRetriedTimes = 0;
 					AppUtils.popupMessage(ActivityChapter.this, String.format(
 							getString(R.string.popup_fail_to_download_page), mPageIndex));
-					mPageIndexLoading = mChapter.pageIndexLastRead;
 					mDownloader = null;
 					mIsDownloading = false;
-					hideStatusBar();
+					notifyPageDownloaded(this);
 				}
 				return;
 			}
@@ -330,10 +337,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mRetriedTimes = 0;
 			mIsDownloaded = true;
 			mIsDownloading = false;
-
-			if (mPageIndex == mPageIndexLoading) {
-				mvgStatusBar.setVisibility(View.GONE);
-			}
 
 			// Debug
 			printDebug(mUrl, "Downloaded");
@@ -395,6 +398,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				}
 			}
 
+			mIsCancelled = false;
+
 			if (mIsRedirect) {
 				if (!mIsDownloaded || TextUtils.isEmpty(mUrlRedirected)) {
 					AppUtils.logI(this, String.format("Download redirect URL: %s", mUrl));
@@ -443,6 +448,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				AppUtils.logD(this, "Cancel DownloadTask.");
 				mDownloader.cancelDownload();
 			}
+			mIsCancelled = true;
 			mDownloader = null;
 			mUrlRedirected = null;
 			mRetriedTimes = 0;
@@ -480,10 +486,6 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 						mPageIndexLoading));
 			}
 			mvgStatusBar.setVisibility(View.VISIBLE);
-		}
-
-		private void hideStatusBar() {
-			mvgStatusBar.setVisibility(View.GONE);
 		}
 	}
 
@@ -1199,29 +1201,34 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				mBitmap = null;
 			}
 
-			// Get image
-			try {
-				mBitmap = page.getBitmap();
-			} catch (OutOfMemoryError e) {
-				AppUtils.logE(this, "Out of Memory: " + e.getMessage());
-				AppUtils.popupMessage(App.CONTEXT, R.string.popup_out_of_memory);
-				setMessage(getString(R.string.ui_error_out_of_memory));
-				mDead = true;
-				if (mBitmap != null) {
-					mBitmap.recycle();
-					mBitmap = null;
+			if (page.isDownloaded()) {
+				// Get image
+				try {
+					mBitmap = page.getBitmap();
+				} catch (OutOfMemoryError e) {
+					AppUtils.logE(this, "Out of Memory: " + e.getMessage());
+					AppUtils.popupMessage(App.CONTEXT, R.string.popup_out_of_memory);
+					setMessage(getString(R.string.ui_error_out_of_memory));
+					mDead = true;
+					if (mBitmap != null) {
+						mBitmap.recycle();
+						mBitmap = null;
+					}
+					setImage(mBitmap);
+					findViewById(R.id.mbtnNext).setClickable(false);
+					findViewById(R.id.mbtnPrev).setClickable(false);
+					mvgTitleBar.setVisibility(View.VISIBLE);
+					mPageView.setOnTouchListener(null);
+					// finish();
+					return;
 				}
-				setImage(mBitmap);
-				findViewById(R.id.mbtnNext).setClickable(false);
-				findViewById(R.id.mbtnPrev).setClickable(false);
-				mvgTitleBar.setVisibility(View.VISIBLE);
-				mPageView.setOnTouchListener(null);
-				// finish();
-				return;
-			}
-			if (mBitmap == null) {
-				AppUtils.logE(this, "Invalid bitmap.");
-				setMessage(getString(R.string.ui_error_invalid_image));
+				if (mBitmap == null) {
+					AppUtils.logE(this, "Invalid bitmap.");
+					setMessage(getString(R.string.ui_error_invalid_image));
+				}
+			} else {
+				setMessage(String.format(getString(R.string.ui_error_on_page_download),
+						mPageIndexLoading, getSiteName()));
 			}
 
 			// Set image
@@ -1229,6 +1236,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			setImage(mBitmap);
 			mtvTitle.setText(getCustomTitle());
 			showTitleBar();
+			hideStatusBar();
 
 			// TODO Update database
 			if (mChapter.isFavorite) {
@@ -1247,7 +1255,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 		// Preload page
 		if (mPreloadPageIndexQueue.isEmpty()) {
-			hideScroller();
+			if (App.DEBUG > 0) {
+				hideScroller();
+			}
 		} else {
 			if (App.DEBUG > 0) {
 				mHideScrollerHandler.removeCallbacks(mHideScrollerRunnable);
@@ -1350,7 +1360,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			}
 
 			if (mode == ZoomMode.FIT_WIDTH_AUTO_SPLIT) {
-				if (1f * bitmap.getWidth() / view.getWidth() > 1.5f
+				if (1f * bitmap.getWidth() / view.getWidth() > App.WIDTH_AUTO_SPLIT_THRESHOLD
 						&& bitmap.getWidth() > bitmap.getHeight()) {
 					zoom *= (2f + App.WIDTH_AUTO_SPLIT_MARGIN) / (1f + App.WIDTH_AUTO_SPLIT_MARGIN);
 				}
@@ -1406,6 +1416,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private void hideTitleBar() {
 		mHideTitleBarHandler.removeCallbacks(mHideTitleBarRunnable);
 		mvgTitleBar.setVisibility(View.GONE);
+	}
+
+	private void hideStatusBar() {
+		mvgStatusBar.setVisibility(View.GONE);
 	}
 
 	// private void printDebug(String msg) {
