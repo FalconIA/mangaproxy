@@ -119,6 +119,9 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		}
 
 		public void queue(ArrayList<Manga> allMangas) {
+			if (allMangas == null) {
+				return;
+			}
 			for (Manga manga : allMangas) {
 				queue(manga);
 			}

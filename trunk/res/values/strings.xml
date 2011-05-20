@@ -8,7 +8,7 @@
 	<string name="menu_item_preferences">Preferences</string>
 	<string name="menu_item_zoom">Zoom</string>
 	<string name="menu_item_zoom_fit_width_or_height">Fit Width or Height</string>
-	<string name="menu_item_zoom_fit_width_auto_split">Fit Wifth (Auto Split)</string>
+	<string name="menu_item_zoom_fit_width_auto_split">Fit Width (Auto Split)</string>
 	<string name="menu_item_zoom_fit_width">Fit Width</string>
 	<string name="menu_item_zoom_fit_height">Fit Height</string>
 	<string name="menu_item_zoom_fit_screen">Fit Screen</string>
