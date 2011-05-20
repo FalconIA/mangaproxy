@@ -303,7 +303,8 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 			final float scrollX = e2.getX() - e1.getX();
 			final float scrollY = e2.getY() - e1.getY();
 
-			if (mFlingable && ((mIsEdgeLeft && scrollX > 0) || (mIsEdgeRight && scrollX < 0))
+			if (mFlingable
+					&& ((mIsEdgeLeft && scrollX > 0) || (mIsEdgeRight && scrollX < 0))
 					&& Math.abs(scrollX) > 1.2f * Math.abs(scrollY)
 					&& Math.abs(scrollX) > 0.5f * Math.min(mZoomView.getWidth(),
 							mZoomView.getHeight())) {
