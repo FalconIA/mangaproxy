@@ -60,6 +60,13 @@ public final class App extends Application {
 
 	public static boolean FIRST_START = true;
 
+	// Google Code
+	public static String URL_GOGLE_CODE_NAME = "mangaproxy";
+	public static String URL_GOGLE_CODE = "http://code.google.com/p/" + URL_GOGLE_CODE_NAME + "/";
+	public static String URL_LATEST_VERSION_CHECK = URL_GOGLE_CODE + "wiki/LatestVersion";
+	public static String URL_LATEST_VERSION_DOWNLOAD = URL_GOGLE_CODE
+			+ "files/org.falconia.mangaproxy-%d.apk";
+
 	// Favorite
 	public static String UI_LAST_UPDATE_COUNTDOWN = "Update: %s";
 

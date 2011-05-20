@@ -237,7 +237,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 
 		public void check() {
 			mDownloader = new DownloadTask(this);
-			mDownloader.execute("http://code.google.com/p/manga-proxy/wiki/LatestVersion");
+			mDownloader.execute(App.URL_LATEST_VERSION_CHECK);
 		}
 
 		public void cancel() {
@@ -627,9 +627,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	}
 
 	private void downloadNewVersion() {
-		String url = String.format(
-				"http://manga-proxy.googlecode.com/files/org.falconia.mangaproxy-%d.apk",
-				mVersionCode);
+		String url = String.format(App.URL_LATEST_VERSION_DOWNLOAD, mVersionCode);
 		Intent i = new Intent(Intent.ACTION_VIEW);
 		i.setData(Uri.parse(url));
 		i = Intent.createChooser(i, null);
