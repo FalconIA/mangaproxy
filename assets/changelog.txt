@@ -20,6 +20,17 @@ http://code.google.com/p/manga-proxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.2.5 (Beta)
+====================
+- Fix the lag before changing page in page view.
+- Fix cannot start animation when page is loading.
+- Modified method when fail to download images.
+- Modified display of update time in Favorite list.
+- Display and format update time in Favorite list.
+- Decode JPEG File without End of Image.
+- Fix crash when load invalid image.
+- Fix to show Crash Log.
+
 Version 1.2.4 (Beta)
 ====================
 - Fix the delay before changing page in page view.
