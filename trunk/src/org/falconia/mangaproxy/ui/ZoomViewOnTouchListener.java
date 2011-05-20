@@ -67,6 +67,9 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 	/** Currently moving pointer */
 	private int mActivePointerId;
 
+	/** Indicates whether the listener reacts to fling events or not. */
+	private boolean mFlingable = true;
+
 	/** Velocity tracker for touch events */
 	private VelocityTracker mVelocityTracker;
 
@@ -211,6 +214,10 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 		mZoomControl = control;
 	}
 
+	public void setFlingable(boolean flingable) {
+		mFlingable = flingable;
+	}
+
 	public boolean onSingleTap() {
 		AppUtils.popupMessage(App.CONTEXT, "Single Tap");
 		return false;
@@ -296,7 +303,7 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 			final float scrollX = e2.getX() - e1.getX();
 			final float scrollY = e2.getY() - e1.getY();
 
-			if (((mIsEdgeLeft && scrollX > 0) || (mIsEdgeRight && scrollX < 0))
+			if (mFlingable && ((mIsEdgeLeft && scrollX > 0) || (mIsEdgeRight && scrollX < 0))
 					&& Math.abs(scrollX) > 1.2f * Math.abs(scrollY)
 					&& Math.abs(scrollX) > 0.5f * Math.min(mZoomView.getWidth(),
 							mZoomView.getHeight())) {
