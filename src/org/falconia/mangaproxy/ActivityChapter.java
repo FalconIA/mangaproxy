@@ -341,7 +341,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			// Debug
 			printDebug(mUrl, "Downloaded");
 
-			System.gc();
+			// System.gc();
 
 			notifyPageDownloaded(this);
 		}
@@ -1133,6 +1133,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		AppUtils.logI(this, String.format("Change to Page %d.", pageIndex));
 
 		mPageIndexLoading = pageIndex;
+		mZoomListener.setFlingable(false);
 		mPreloadPageIndexQueue.clear();
 		for (int i = 1; i <= mPreloadMaxPages; i++) {
 			mPreloadPageIndexQueue.add(mPageIndexLoading + i);
@@ -1232,11 +1233,12 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			}
 
 			// Set image
-			mChapter.pageIndexLastRead = mPageIndexLoading;
 			setImage(mBitmap);
 			mtvTitle.setText(getCustomTitle());
 			showTitleBar();
 			hideStatusBar();
+			mChapter.pageIndexLastRead = mPageIndexLoading;
+			mZoomListener.setFlingable(true);
 
 			// TODO Update database
 			if (mChapter.isFavorite) {
