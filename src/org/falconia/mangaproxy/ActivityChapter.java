@@ -1233,11 +1233,11 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			}
 
 			// Set image
+			mChapter.pageIndexLastRead = mPageIndexLoading;
 			setImage(mBitmap);
 			mtvTitle.setText(getCustomTitle());
 			showTitleBar();
 			hideStatusBar();
-			mChapter.pageIndexLastRead = mPageIndexLoading;
 			mZoomListener.setFlingable(true);
 
 			// TODO Update database
