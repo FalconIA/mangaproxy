@@ -20,6 +20,9 @@ http://code.google.com/p/manga-proxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.2.7 (Beta)
+====================
+- Fix crash when refresh empty favorite list.
 Version 1.2.6 (Beta)
 ====================
 - Fix display wrong page index in page view.
