@@ -114,8 +114,10 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 					AppUtils.logE(this, String.format("Fail to update manga %s.", mUpdatedManga));
 				}
 			}
-			dequeue();
-			update(mQueue.peek());
+			if (mUpdating) {
+				dequeue();
+				update(mQueue.peek());
+			}
 		}
 
 		public void queue(ArrayList<Manga> allMangas) {
@@ -139,8 +141,12 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		}
 
 		public void cancel() {
-			cancelDownload();
 			clear();
+
+			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
+				AppUtils.logD(this, "Cancel DownloadTask.");
+				mDownloader.cancelDownload();
+			}
 		}
 
 		public boolean isUpdating() {
@@ -165,6 +171,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			mUpdatedManga = null;
 			mUpdated = 0;
 			mUpdating = false;
+
+			setProgressBarVisibility(false);
 		}
 
 		private void update(Manga manga) {
@@ -187,13 +195,6 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 
 		private void updateProgress() {
 			setProgress(10000 * mUpdated / size());
-		}
-
-		private void cancelDownload() {
-			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
-				AppUtils.logD(this, "Cancel DownloadTask.");
-				mDownloader.cancelDownload();
-			}
 		}
 	}
 
