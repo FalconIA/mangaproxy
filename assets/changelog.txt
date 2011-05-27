@@ -1,5 +1,5 @@
 Manga Proxy - by FalconIA
-http://code.google.com/p/manga-proxy/
+http://code.google.com/p/mangaproxy/
 
 
 浏览页操作方式：
@@ -20,12 +20,18 @@ http://code.google.com/p/manga-proxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.2.7.1 (Beta)
+======================
+- Fix download URL of latest version.
+
 Version 1.2.7 (Beta)
 ====================
 - Fix crash when refresh empty favorite list.
+
 Version 1.2.6 (Beta)
 ====================
 - Fix display wrong page index in page view.
+
 Version 1.2.5 (Beta)
 ====================
 - Fix the lag before changing page in page view.
