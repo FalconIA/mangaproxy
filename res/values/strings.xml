@@ -51,6 +51,8 @@
 	<string name="ui_author">作者: %s</string>
 	<string name="ui_last_update">更新: %tF</string>
 	<string name="ui_last_update_countdown">更新: %s</string>
+	<string name="ui_recommend">推荐: %s</string>
+	<string name="ui_rating">评分: %s</string>
 	<string name="ui_search_hint">Search</string>
 	<string name="ui_load_next_page">Load next Page</string>
 	<string name="ui_download_data">Download Data</string>

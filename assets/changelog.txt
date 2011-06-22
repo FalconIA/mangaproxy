@@ -20,6 +20,10 @@ http://code.google.com/p/mangaproxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.3.0
+=============
+- Update plugin of 99770.
+
 Version 1.2.7.1 (Beta)
 ======================
 - Fix download URL of latest version.
