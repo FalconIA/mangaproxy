@@ -48,7 +48,6 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected static final String Get_Source_Size_DynamicImgServers = "Get DynamicImgServers data of %s.";
 
 	protected static final String Process_MangaList = "Process MangaList(GenreID:%s).";
-	protected static final String Process_MangaList_New = "Process MangaList(New|GenreID:%s).";
 
 	protected static final String Catched_sections = "Catched %d section(s) of list.";
 	protected static final String Catched_count_in_section = "Catched %d in section '%s'.";
@@ -220,6 +219,10 @@ public abstract class PluginBase implements ITag, IPlugin {
 
 	private void log(int priority, String msg) {
 		Log.println(priority, App.NAME + " Plugin", String.format("[%s] %s", getTag(), msg));
+	}
+
+	protected void logV(String msg) {
+		log(Log.VERBOSE, msg);
 	}
 
 	protected void logV(String format, Object... args) {

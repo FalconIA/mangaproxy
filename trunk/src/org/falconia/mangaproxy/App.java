@@ -76,6 +76,8 @@ public final class App extends Application {
 	public static String UI_CHAPTER_COUNT = "Chapters: %s";
 	public static String UI_AUTHOR = "Author: %s";
 	public static String UI_LAST_UPDATE = "Update: %tF";
+	public static String UI_RECOMMEND = "Recommend: %s";
+	public static String UI_RATING = "Rating: %s";
 
 	// Chapter
 	public static int TIME_AUTO_HIDE = 5000;
@@ -162,6 +164,8 @@ public final class App extends Application {
 		UI_CHAPTER_COUNT = getString(R.string.ui_chapter_count);
 		UI_AUTHOR = getString(R.string.ui_author);
 		UI_LAST_UPDATE = getString(R.string.ui_last_update);
+		UI_RECOMMEND = getString(R.string.ui_recommend);
+		UI_RATING = getString(R.string.ui_rating);
 
 		// Crash Handler
 		Thread.setDefaultUncaughtExceptionHandler(new CrashExceptionHandler());
