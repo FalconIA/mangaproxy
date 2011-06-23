@@ -169,5 +169,9 @@ public final class App extends Application {
 
 		// Crash Handler
 		Thread.setDefaultUncaughtExceptionHandler(new CrashExceptionHandler());
+
+		// System
+		System.setProperty("networkaddress.cache.ttl", "30");
+		System.setProperty("networkaddress.cache.negative.ttl", "0");
 	}
 }

@@ -404,27 +404,37 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				if (!mIsDownloaded || TextUtils.isEmpty(mUrlRedirected)) {
 					AppUtils.logI(this, String.format("Download redirect URL: %s", mUrl));
 
-					mDownloader = new DownloadTask(null, mChapter.getUrl());
+					OnDownloadListener listener = new OnDownloadListener() {
+						@Override
+						public void onPreDownload() {
+						}
+
+						@Override
+						public void onPostDownload(byte[] result) {
+							String source = EncodingUtils.getString(result, mCharset);
+							String url = mChapter.getPageRedirectUrl(source);
+							if (TextUtils.isEmpty(url)) {
+								onPostDownload(result);
+								return;
+							} else {
+								mUrlRedirected = url;
+							}
+
+							AppUtils.logI(this, String.format("Download image: %s", mUrlRedirected));
+
+							mDownloader = new DownloadTask(Page.this, mChapter.getUrl());
+							mDownloader.execute(mUrlRedirected);
+						}
+
+						@Override
+						public void onDownloadProgressUpdate(int value, int total) {
+						}
+					};
+
+					mDownloader = new DownloadTask(listener, mChapter.getUrl());
 					mDownloader.execute(mUrl);
 
-					byte[] result = null;
-					try {
-						result = mDownloader.get();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					if (result == null) {
-						result = new byte[0];
-					}
-
-					String source = EncodingUtils.getString(result, mCharset);
-					String url = mChapter.getPageRedirectUrl(source);
-					if (TextUtils.isEmpty(url)) {
-						onPostDownload(result);
-						return;
-					} else {
-						mUrlRedirected = url;
-					}
+					return;
 				}
 
 				AppUtils.logI(this, String.format("Download image: %s", mUrlRedirected));

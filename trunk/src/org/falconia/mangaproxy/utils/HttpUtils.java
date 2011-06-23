@@ -1,8 +1,10 @@
 package org.falconia.mangaproxy.utils;
 
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +18,17 @@ public final class HttpUtils {
 
 	public static final String CHARSET_GBK = "GBK";
 	public static final String CHARSET_UTF8 = "UTF-8";
+
+	public static String getHost(String url) {
+		String host = null;
+		try {
+			URL link = new URL(url);
+			host = link.getHost();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return host;
+	}
 
 	public static String joinUrl(String base, String spec) {
 		if (TextUtils.isEmpty(base)) {
@@ -56,9 +69,26 @@ public final class HttpUtils {
 			urlNew += url.substring(end, url.length());
 			url = urlNew.replace(" ", "%20");
 			AppUtils.logV(TAG, "New URL: " + urlNew);
+			AppUtils.logV(TAG, "Host IP: " + InetAddress.getByName(getHost(url)).getHostAddress());
 
 		} catch (Exception e) {
 		}
 		return url;
+	}
+
+	public static void flushDns(String url) {
+		try {
+			String ttl = System.getProperty("networkaddress.cache.ttl");
+			String oldIp = InetAddress.getByName(getHost(url)).getHostAddress();
+			System.setProperty("networkaddress.cache.ttl", "0");
+			String newIp = InetAddress.getByName(getHost(url)).getHostAddress();
+			System.setProperty("networkaddress.cache.ttl", ttl);
+
+			if (!oldIp.equals(newIp)) {
+				AppUtils.logD(TAG, "Flush DNS: " + oldIp + " -> " + newIp);
+			}
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
 	}
 }
