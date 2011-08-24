@@ -26,6 +26,7 @@ import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,6 +42,7 @@ import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public final class ActivityFavoriteList extends ActivityBase implements OnClickListener {
@@ -134,7 +136,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 				AppUtils.logD(this, "Update mangas.");
 
 				mUpdating = true;
-				setProgressBarVisibility(true);
+				//setProgressBarVisibility(true);
+				showUpdateBar();
 
 				update(mQueue.peek());
 			}
@@ -172,17 +175,19 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			mUpdated = 0;
 			mUpdating = false;
 
-			setProgressBarVisibility(false);
+			//setProgressBarVisibility(false);
+			hideUpdateBar();
 		}
 
 		private void update(Manga manga) {
-			updateProgress();
-
 			if (manga == null) {
 				AppUtils.logD(this, "Update mangas completed.");
 
-				// setProgressBarVisibility(false);
-				setProgress(10000);
+				//setProgressBarVisibility(false);
+				//setProgress(10000);
+				//hideUpdateBar();
+				mUpdatedManga = null;
+				updateProgress();
 				clear();
 			} else {
 				AppUtils.logD(this, String.format("Update manga %s.", manga));
@@ -190,11 +195,13 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 				mUpdatedManga = manga;
 				mDownloader = new DownloadTask(this);
 				mDownloader.execute(manga.getUrl());
+				updateProgress();
 			}
 		}
 
 		private void updateProgress() {
-			setProgress(10000 * mUpdated / size());
+			//setProgress(10000 * mUpdated / size());
+			setUpdateBarProgress(mUpdatedManga, mUpdated, size());
 		}
 	}
 
@@ -355,11 +362,32 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	private Updater mUpdater;
 	private VersionChecker mChecker;
 
+	private LinearLayout mvgUpdateBar;
+	private TextView mtvUpdating;
+	private TextView mtvUpdated;
+	private ProgressBar mpbUpdate;
+
 	private LinearLayout mNewVersionPanel;
 	private TextView mNewVersion;
 	private int mVersionCode = -1;
 
 	private boolean mExit = false;
+
+	private final Handler mHideUpdateBarHandler;
+	private final Runnable mHideUpdateBarRunnable;
+
+	public ActivityFavoriteList() {
+		mHideUpdateBarHandler = new Handler();
+		mHideUpdateBarRunnable = new Runnable() {
+			@Override
+			public void run() {
+				if (mvgUpdateBar != null) {
+					mvgUpdateBar.setVisibility(View.GONE);
+					mHideUpdateBarHandler.removeCallbacks(this);
+				}
+			}
+		};
+	}
 
 	@Override
 	public int getSiteId() {
@@ -385,6 +413,13 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		setTitle(String.format("%s %s - FalconIA", App.NAME, App.VERSION_NAME));
 		setNoItemsMessage(R.string.ui_no_favorite_items);
 
+		mvgUpdateBar = (LinearLayout) findViewById(R.id.mvgUpdateBar);
+		mvgUpdateBar.setVisibility(View.GONE);
+		mtvUpdating = (TextView) findViewById(R.id.mtvUpdating);
+		mtvUpdated = (TextView) findViewById(R.id.mtvUpdated);
+		mpbUpdate = (ProgressBar) findViewById(R.id.mpbUpdate);
+		mpbUpdate.setProgress(0);
+		
 		mNewVersionPanel = (LinearLayout) findViewById(R.id.mvgNewVersion);
 		mNewVersionPanel.setVisibility(View.GONE);
 		mNewVersion = (TextView) findViewById(R.id.mtvNewVersion);
@@ -607,6 +642,35 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			mUpdater.queue(mDB.getAllMangas());
 			mUpdater.update();
 		}
+	}
+
+	private void showUpdateBar() {
+		mHideUpdateBarHandler.removeCallbacks(mHideUpdateBarRunnable);
+		mtvUpdating.setText(String.format(getString(R.string.ui_updating_manga), ""));
+		mtvUpdated.setText("0 / 0");
+		mpbUpdate.setProgress(0);
+		mvgUpdateBar.setVisibility(View.VISIBLE);
+	}
+
+	private void hideUpdateBar() {
+		hideUpdateBar(false);
+	}
+
+	private void setUpdateBarProgress(Manga manga, int updated, int total) {
+		if (manga != null)
+			mtvUpdating.setText(String.format(getString(R.string.ui_updating_manga), manga.displayname));
+		else
+			mtvUpdating.setText(R.string.ui_update_manga_completed);
+		mtvUpdated.setText(String.format("%d / %d", updated, total));
+		mpbUpdate.setProgress(100 * updated / total);
+	}
+
+	private void hideUpdateBar(boolean now) {
+		mHideUpdateBarHandler.removeCallbacks(mHideUpdateBarRunnable);
+		if (now)
+			mvgUpdateBar.setVisibility(View.GONE);
+		else
+			mHideUpdateBarHandler.postDelayed(mHideUpdateBarRunnable, App.TIME_AUTO_HIDE);
 	}
 
 	private void checkNewVersion() {

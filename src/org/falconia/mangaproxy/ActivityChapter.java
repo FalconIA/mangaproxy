@@ -96,6 +96,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private final static class Configuration {
 		private boolean mProcessed;
 
+		private boolean mIsFavorite;
+
 		private String[] mPageUrls;
 		private HashMap<Integer, Page> mPages;
 		private int mPageIndexMax;
@@ -620,6 +622,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		final Configuration conf = (Configuration) getLastNonConfigurationInstance();
 		if (conf != null) {
 			mProcessed = conf.mProcessed;
+			mChapter.isFavorite = conf.mIsFavorite;
 			mChapter.pageIndexMax = conf.mPageIndexMax;
 			mChapter.pageIndexLastRead = conf.mPageIndexCurrent;
 			mPageIndexLoading = conf.mPageIndexLoading;
@@ -818,6 +821,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		Configuration conf = new Configuration();
 
 		conf.mProcessed = mProcessed;
+
+		conf.mIsFavorite = mChapter.isFavorite;
 
 		conf.mPageUrls = mPageUrls;
 		conf.mPages = mPages;
@@ -1160,10 +1165,20 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 		// Loading
 		if (mPageIndexLoading != mChapter.pageIndexLastRead) {
-			return;
+			//return;
 		}
 
 		int mPageIndexGoto = mChapter.pageIndexLastRead + (nextpage ? 1 : -1);
+		
+		// Loading
+		if (mPageIndexLoading != mChapter.pageIndexLastRead) {
+			mPages.get(mPageIndexLoading).cancelDownload();
+			mChapter.pageIndexLastRead = mPageIndexLoading;
+			mPageIndexGoto = mChapter.pageIndexLastRead + (nextpage ? 1 : -1);
+			mtvTitle.setText(String.format(getString(R.string.ui_goto_pages_format),
+					mPageIndexGoto, mChapter.pageIndexMax));
+			showTitleBar();
+		}
 
 		// Prev chapter
 		if (mPageIndexGoto < 1) {
@@ -1191,6 +1206,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	}
 
 	private void refreshPage() {
+		setMessage("");
+
 		if (mPages == null || mPages.size() == 0) {
 			loadChapter();
 		} else if (mPageIndexLoading == 0) {
