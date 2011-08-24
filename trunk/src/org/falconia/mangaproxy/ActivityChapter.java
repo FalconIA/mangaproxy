@@ -1165,11 +1165,11 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 		// Loading
 		if (mPageIndexLoading != mChapter.pageIndexLastRead) {
-			//return;
+			// return;
 		}
 
 		int mPageIndexGoto = mChapter.pageIndexLastRead + (nextpage ? 1 : -1);
-		
+
 		// Loading
 		if (mPageIndexLoading != mChapter.pageIndexLastRead) {
 			mPages.get(mPageIndexLoading).cancelDownload();
