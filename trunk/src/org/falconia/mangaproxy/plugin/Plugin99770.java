@@ -414,7 +414,7 @@ public class Plugin99770 extends PluginBase {
 			manga.updatedAt = parseDateTime(groups.get(3));
 			logV(Catched_in_section, groups.get(3), 3, section, manga.updatedAt.getTime());
 
-			section = "ul";
+			section = "ChapterList";
 			// logV(groups.get(4));
 			pattern = "(?is)(?:<li>|<div.*?>)<a href=\"?/\\w+/\\d+/(\\d+)\\.htm\\?s=(\\d+)\"? .*?>(?:<.*?>)?(.*?)</a>";
 			matches = Regex.matchAll(pattern, groups.get(4));
@@ -427,6 +427,8 @@ public class Plugin99770 extends PluginBase {
 				list.add(chapter);
 				// logV(chapter.toLongString());
 			}
+			
+			logD(Get_DynamicImgServerId, list.getAt(0).getDynamicImgServerId());
 
 			time = System.currentTimeMillis() - time;
 			logD(Process_Time_ChapterList, time);
@@ -474,7 +476,7 @@ public class Plugin99770 extends PluginBase {
 					chapter.getDynamicImgServersUrl());
 
 			time = System.currentTimeMillis() - time;
-			logD(Process_Time_ChapterList, time);
+			logD(Process_Time_ChapterPages, time);
 
 			// logV(chapter.toString());
 
@@ -522,7 +524,7 @@ public class Plugin99770 extends PluginBase {
 			chapter.setDynamicImgServers(imgServers);
 
 			time = System.currentTimeMillis() - time;
-			logD(Process_Time_ChapterList, time);
+			logD(Process_Time_DynamicImgServers, time);
 
 			return true;
 

@@ -39,6 +39,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected static final String Get_ChapterList = "Get ChapterList(MangaID:%s).";
 	protected static final String Get_Chapter = "Get Chapter(ChapterID:%s).";
 	protected static final String Get_DynamicImgServers = "Get DynamicImgServers.";
+	protected static final String Get_DynamicImgServerId = "Get DynamicImgServerId(ID:%d).";
 
 	protected static final String Get_Source_Size_GenreList = "Get GenreList data of %s.";
 	protected static final String Get_Source_Size_MangaList = "Get MangaList data of %s.";
@@ -58,6 +59,8 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected static final String Process_Time_MangaList = "Process MangaList in %dms.";
 	protected static final String Process_Time_AllMangaList = "Process MangaList(All mangas) in %dms.";
 	protected static final String Process_Time_ChapterList = "Process ChapterList in %dms.";
+	protected static final String Process_Time_ChapterPages = "Process ChapterPages in %dms.";
+	protected static final String Process_Time_DynamicImgServers = "Process DynamicImgServers in %dms.";
 
 	protected static final String Source_is_empty = "Source is empty.";
 

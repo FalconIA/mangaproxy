@@ -40,8 +40,10 @@ public final class HttpUtils {
 				url = new URL(base);
 			} else if (spec.matches("^http://.+")) {
 				url = new URL(spec);
-			} else {
+			} else if (base.endsWith("/")) {
 				url = new URL(new URL(base), spec);
+			} else {
+				url = new URL(new URL(base + "/"), spec);
 			}
 			return url.toString();
 		} catch (MalformedURLException e) {

@@ -409,7 +409,7 @@ public class PluginDm5 extends PluginBase {
 			}
 
 			time = System.currentTimeMillis() - time;
-			logD(Process_Time_ChapterList, time);
+			logD(Process_Time_ChapterPages, time);
 
 			// logV(chapter.toString());
 

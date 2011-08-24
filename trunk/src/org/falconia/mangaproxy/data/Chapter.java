@@ -111,6 +111,10 @@ public final class Chapter implements Serializable {
 		return dynamicImgServersUrl;
 	}
 
+	public int getDynamicImgServerId() {
+		return dynamicImgServerId;
+	}
+
 	public String getDynamicImgServer() {
 		if (!hasDynamicImgServer()) {
 			throw new NullPointerException("Dynamic Img Server is not set.");
