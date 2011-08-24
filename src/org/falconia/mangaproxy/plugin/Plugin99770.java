@@ -278,7 +278,7 @@ public class Plugin99770 extends PluginBase {
 				if (!genre.genreId.equals("top")) {
 					// Section 1 (Genre)
 					String section = "Last Updates";
-					pattern = "(?is)<table .+?>[\\s\\d·]+<a href=\"/\\w+/(\\d+)/\" .+?>\\s*(.+?)\\s*</a>.+?<b>(\\d*)</b><.+?>集\\(卷\\)<.+?>〖(.+?)〗<.+?>\\s*(?:<img [^<>]+>\\s*)?<.+?>([\\d/]+)<.+?</table>";
+					pattern = "(?is)<table .+?>[\\s\\d·]+<a href=\"/\\w+/(\\d+)/\".*?>\\s*(.+?)\\s*</a>.+?<b>(\\d*)</b><.+?>集\\(卷\\)<.+?>〖(.+?)〗<.+?>\\s*(?:<img [^<>]+>\\s*)?<.+?>([\\d/]+)<.+?</table>";
 					matches = Regex.matchAll(pattern, groups.get(1));
 					logD(Catched_count_in_section, matches.size(), section);
 
@@ -295,9 +295,9 @@ public class Plugin99770 extends PluginBase {
 					}
 				} else {
 					// Section 2 (Genre Top)
+					logW("%s", groups.get(1));
 					String section = "Most Hits";
-					pattern = "(?is)<table .+?>[\\s\\d·]+<a href=\"/\\w+/(\\d+)/\" .+?>\\s*(.+?)\\s*</a>.*?<font.*?>(\\d*)</font>集\\(卷\\)<.+?>〖(.+?)〗<.+?>共<font.*?>(\\d+)</font>人推荐，漫友给出<font.*?>[\\d\\.]+</font>分，([\\d/]+)<.+?</table>";
-					pattern = "(?is)<table .+?>[\\s\\d·]+<a href=\"/\\w+/(\\d+)/\" .+?>\\s*(.+?)\\s*</a>.*?<font.*?>(\\d*)</font>集\\(卷\\)〖(.+?)〗<.+?>共<font.*?>(\\d+)</font>人推荐，漫友给出<font.*?>([\\d\\.]+)</font>分，([\\d/]+)<.+?</table>";
+					pattern = "(?is)<table .+?>[\\s\\d·]+<a href=\"/?\\w+/(\\d+)/?\".*?>\\s*(.+?)\\s*</a>.*?<font.*?>(\\d*)</font>集\\(卷\\)〖(.+?)〗\\s*<.+?>共<font.*?>(\\d+)</font>人推荐，漫友给出<font.*?>([\\d\\.]+)</font>分，([\\d/]+)<.+?</table>";
 					matches = Regex.matchAll(pattern, groups.get(1));
 					logD(Catched_count_in_section, matches.size(), section);
 
@@ -427,7 +427,7 @@ public class Plugin99770 extends PluginBase {
 				list.add(chapter);
 				// logV(chapter.toLongString());
 			}
-			
+
 			logD(Get_DynamicImgServerId, list.getAt(0).getDynamicImgServerId());
 
 			time = System.currentTimeMillis() - time;

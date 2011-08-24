@@ -136,7 +136,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 				AppUtils.logD(this, "Update mangas.");
 
 				mUpdating = true;
-				//setProgressBarVisibility(true);
+				// setProgressBarVisibility(true);
 				showUpdateBar();
 
 				update(mQueue.peek());
@@ -175,7 +175,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			mUpdated = 0;
 			mUpdating = false;
 
-			//setProgressBarVisibility(false);
+			// setProgressBarVisibility(false);
 			hideUpdateBar();
 		}
 
@@ -183,9 +183,9 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			if (manga == null) {
 				AppUtils.logD(this, "Update mangas completed.");
 
-				//setProgressBarVisibility(false);
-				//setProgress(10000);
-				//hideUpdateBar();
+				// setProgressBarVisibility(false);
+				// setProgress(10000);
+				// hideUpdateBar();
 				mUpdatedManga = null;
 				updateProgress();
 				clear();
@@ -200,7 +200,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		}
 
 		private void updateProgress() {
-			//setProgress(10000 * mUpdated / size());
+			// setProgress(10000 * mUpdated / size());
 			setUpdateBarProgress(mUpdatedManga, mUpdated, size());
 		}
 	}
@@ -419,7 +419,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		mtvUpdated = (TextView) findViewById(R.id.mtvUpdated);
 		mpbUpdate = (ProgressBar) findViewById(R.id.mpbUpdate);
 		mpbUpdate.setProgress(0);
-		
+
 		mNewVersionPanel = (LinearLayout) findViewById(R.id.mvgNewVersion);
 		mNewVersionPanel.setVisibility(View.GONE);
 		mNewVersion = (TextView) findViewById(R.id.mtvNewVersion);
@@ -658,7 +658,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 
 	private void setUpdateBarProgress(Manga manga, int updated, int total) {
 		if (manga != null)
-			mtvUpdating.setText(String.format(getString(R.string.ui_updating_manga), manga.displayname));
+			mtvUpdating.setText(String.format(getString(R.string.ui_updating_manga),
+					manga.displayname));
 		else
 			mtvUpdating.setText(R.string.ui_update_manga_completed);
 		mtvUpdated.setText(String.format("%d / %d", updated, total));
