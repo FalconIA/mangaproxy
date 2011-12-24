@@ -25,7 +25,9 @@ public final class ZoomViewOnGestureListener extends SimpleOnGestureListener {
 	private boolean isEdgeLeft;
 	private boolean isEdgeRight;
 
+	@SuppressWarnings("unused")
 	private float scrollX;
+	@SuppressWarnings("unused")
 	private float scrollY;
 
 	// private Handler flingHandler;
