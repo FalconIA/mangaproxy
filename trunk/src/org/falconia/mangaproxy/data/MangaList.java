@@ -261,8 +261,7 @@ public final class MangaList implements Serializable, ISiteId, Collection<Manga>
 	@Override
 	public String toString() {
 		if (mMangaKeyList.size() > 24) {
-			return String.format("{ SiteId:%d, Size:%d, MaxPage:%d }", mSiteId, size(),
-					pageIndexMax);
+			return String.format("{ SiteId:%d, Size:%d, MaxPage:%d }", mSiteId, size(), pageIndexMax);
 		}
 
 		ArrayList<String> strings = new ArrayList<String>();

@@ -32,8 +32,7 @@ public final class AppCache {
 		cacheMinutes = (cacheMinutes <= 0 ? Long.MAX_VALUE : cacheMinutes * 1000);
 		try {
 			File file = getExternalCacheFile(key);
-			return file.exists()
-					&& System.currentTimeMillis() - file.lastModified() <= cacheMinutes;
+			return file.exists() && System.currentTimeMillis() - file.lastModified() <= cacheMinutes;
 		} catch (IOException e) {
 		}
 		return false;
@@ -48,8 +47,7 @@ public final class AppCache {
 		cacheMinutes = (cacheMinutes <= 0 ? Long.MAX_VALUE : cacheMinutes * 1000);
 		try {
 			File file = getExternalCacheImageFile(key, type);
-			return file.exists()
-					&& System.currentTimeMillis() - file.lastModified() <= cacheMinutes;
+			return file.exists() && System.currentTimeMillis() - file.lastModified() <= cacheMinutes;
 		} catch (IOException e) {
 		}
 		return false;

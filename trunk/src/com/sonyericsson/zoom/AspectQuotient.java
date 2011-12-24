@@ -64,8 +64,7 @@ public class AspectQuotient extends Observable {
 	 * @param contentHeight
 	 *            Height of content
 	 */
-	public void updateAspectQuotient(float viewWidth, float viewHeight, float contentWidth,
-			float contentHeight) {
+	public void updateAspectQuotient(float viewWidth, float viewHeight, float contentWidth, float contentHeight) {
 		final float aspectQuotient = (contentWidth / contentHeight) / (viewWidth / viewHeight);
 
 		if (aspectQuotient != mAspectQuotient) {

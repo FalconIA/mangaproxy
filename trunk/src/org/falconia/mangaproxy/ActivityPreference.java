@@ -10,8 +10,7 @@ public final class ActivityPreference extends PreferenceActivity {
 		super.onCreate(savedInstanceState);
 
 		addPreferencesFromResource(R.xml.preferences);
-		setTitle(String.format("%s - %s", getString(R.string.app_name),
-				getString(R.string.ui_preference)));
+		setTitle(String.format("%s - %s", getString(R.string.app_name), getString(R.string.ui_preference)));
 	}
 
 }

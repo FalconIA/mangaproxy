@@ -109,8 +109,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 			AppUtils.logV(this, "onPostDownload()");
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
-				setNoItemsMessage(String.format(getString(R.string.ui_error_on_download),
-						getSiteName()));
+				setNoItemsMessage(String.format(getString(R.string.ui_error_on_download), getSiteName()));
 				setMode(MODE_DOWNLOAD_ERROR);
 				return;
 			}
@@ -125,14 +124,13 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		@Override
 		public void onDownloadProgressUpdate(int value, int total) {
 			if (mMode == MODE_DOWNLOAD) {
-				mMessage.setText(String.format(getString(R.string.ui_download_page),
-						(value) / 1024.0f));
+				mMessage.setText(String.format(getString(R.string.ui_download_page), (value) / 1024.0f));
 			}
 		}
 
 		@Override
-		public int onSourceProcess(String source) {
-			MangaList mangaList = mGenre.getMangaList(source);
+		public int onSourceProcess(String source, String url) {
+			MangaList mangaList = mGenre.getMangaList(source, url);
 			int size = mangaList.size();
 			if (size > 0) {
 				mMangaList.addAll(mangaList);
@@ -174,8 +172,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 			switch (mMode) {
 			case MODE_DEFAULT:
 				if (mPageLoaded < mPageMax) {
-					setCustomTitle(String.format("%s (%d/%d)", mGenre.displayname, mPageLoaded,
-							mPageMax));
+					setCustomTitle(String.format("%s (%d/%d)", mGenre.displayname, mPageLoaded, mPageMax));
 				}
 				setProgressBarIndeterminateVisibility(false);
 				mProgress.setVisibility(View.GONE);
@@ -310,8 +307,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		}
 
 		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-				int totalItemCount) {
+		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 			// TODO Auto-generated method stub
 
 		}
@@ -483,8 +479,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		if (mNextPageDownloader != null && view == mNextPageDownloader.getFooter()) {
 			mNextPageDownloader.click();
 		} else {
-			ActivityChapterList.IntentHandler.startActivityMangaList(this,
-					mMangaList.getAt(position));
+			ActivityChapterList.IntentHandler.startActivityMangaList(this, mMangaList.getAt(position));
 		}
 	}
 
@@ -520,9 +515,9 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 	}
 
 	@Override
-	public int onSourceProcess(String source) {
-		super.onSourceProcess(source);
-		mMangaList = mGenre.getMangaList(source);
+	public int onSourceProcess(String source, String url) {
+		super.onSourceProcess(source, url);
+		mMangaList = mGenre.getMangaList(source, url);
 		if (mPageMax == 0) {
 			mPageMax = mMangaList.pageIndexMax;
 		}
@@ -545,16 +540,16 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 	}
 
 	@Override
-	protected void startProcessSource(String source) {
-		startProcessSource(source, true);
+	protected void startProcessSource(String source, String url) {
+		startProcessSource(source, url, true);
 	}
 
-	private void startProcessSource(String source, boolean writeCache) {
+	private void startProcessSource(String source, String url, boolean writeCache) {
 		if (writeCache && mGenre.isGenreAll() && source.length() > 200000) {
 			AppCache.writeCacheForData(source, mUrl);
 			AppUtils.popupMessage(this, R.string.popup_cache_save_allmanga);
 		}
-		super.startProcessSource(source);
+		super.startProcessSource(source, url);
 	}
 
 	@Override
@@ -571,7 +566,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		if (mGenre.isGenreAll() && AppCache.checkCacheForData(mUrl, 3600)) {
 			String source = AppCache.readCacheForData(mUrl);
 			AppUtils.popupMessage(ActivityMangaList.this, R.string.popup_cache_load_allmanga);
-			startProcessSource(source, false);
+			startProcessSource(source, mUrl, false);
 		} else {
 			mSourceDownloader = new SourceDownloader();
 			mSourceDownloader.download(mUrl);

@@ -78,8 +78,8 @@ public final class FormatUtils {
 		if (offset < MILLISECOND_OF_MINUTE) {
 			format = App.CONTEXT.getString(R.string.datetime_countdown_seconts);
 		} else if (offset < MILLISECOND_OF_HOUR) {
-			format = String.format(App.CONTEXT.getString(R.string.datetime_countdown_minutes),
-					offset / MILLISECOND_OF_MINUTE);
+			format = String.format(App.CONTEXT.getString(R.string.datetime_countdown_minutes), offset
+					/ MILLISECOND_OF_MINUTE);
 		} else if (offset < MILLISECOND_OF_DAY) {
 			format = String.format(App.CONTEXT.getString(R.string.datetime_countdown_hours), offset
 					/ MILLISECOND_OF_HOUR);

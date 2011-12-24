@@ -12,7 +12,7 @@ public class SourceProcessTask extends AsyncTask<String, Void, Integer> {
 
 	@Override
 	protected Integer doInBackground(String... params) {
-		return mListener.onSourceProcess(params[0]);
+		return mListener.onSourceProcess(params[0], params[1]);
 	}
 
 	@Override

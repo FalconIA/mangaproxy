@@ -25,8 +25,7 @@ public final class Regex {
 		return groups;
 	}
 
-	public static HashMap<String, String> matchGroup(String pattern, String[] groupnames,
-			String subject) {
+	public static HashMap<String, String> matchGroup(String pattern, String[] groupnames, String subject) {
 		HashMap<String, String> groups = new HashMap<String, String>();
 
 		Pattern p = Pattern.compile(pattern);
@@ -82,8 +81,7 @@ public final class Regex {
 		return matches;
 	}
 
-	public static ArrayList<ArrayList<String>> matchAll(String pattern, String pattern2,
-			String subject) {
+	public static ArrayList<ArrayList<String>> matchAll(String pattern, String pattern2, String subject) {
 		ArrayList<String> groups = match(pattern, subject);
 		if (groups.size() == 0 || (groups.size() > 1 && TextUtils.isEmpty(groups.get(1)))) {
 			return new ArrayList<ArrayList<String>>();

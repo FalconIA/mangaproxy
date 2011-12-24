@@ -36,16 +36,14 @@ import java.util.Observable;
 public class ZoomState extends Observable {
 
 	/**
-	 * @author FalconIA
-	 *         Methods of horizontal alignment.
+	 * @author FalconIA Methods of horizontal alignment.
 	 */
 	public enum AlignX {
 		Left, Center, Right
 	}
 
 	/**
-	 * @author FalconIA
-	 *         Methods of vertical alignment.
+	 * @author FalconIA Methods of vertical alignment.
 	 */
 	public enum AlignY {
 		Top, Center, Bottom

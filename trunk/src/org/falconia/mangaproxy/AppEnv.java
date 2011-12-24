@@ -15,10 +15,8 @@ public final class AppEnv {
 	}
 
 	public static boolean isNetworkAvailable(Context context) {
-		ConnectivityManager manager = (ConnectivityManager) context
-				.getSystemService("connectivity");
-		return manager.getActiveNetworkInfo() != null
-				&& manager.getActiveNetworkInfo().isAvailable();
+		ConnectivityManager manager = (ConnectivityManager) context.getSystemService("connectivity");
+		return manager.getActiveNetworkInfo() != null && manager.getActiveNetworkInfo().isAvailable();
 	}
 
 	public static File getExternalFilesDir() throws IOException {
@@ -31,8 +29,7 @@ public final class AppEnv {
 		if (TextUtils.isEmpty(App.PACKAGE)) {
 			throw new IOException("Invalid package name.");
 		}
-		return new File(Environment.getExternalStorageDirectory(), String.format("Android/data/%s",
-				App.PACKAGE));
+		return new File(Environment.getExternalStorageDirectory(), String.format("Android/data/%s", App.PACKAGE));
 	}
 
 	public static File getExternalCacheDir() throws IOException {

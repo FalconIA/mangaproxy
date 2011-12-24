@@ -92,8 +92,7 @@ public final class ActivityGenreList extends ActivityBase {
 		}
 
 		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-				int totalItemCount) {
+		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 			// TODO Auto-generated method stub
 
 		}
@@ -212,8 +211,8 @@ public final class ActivityGenreList extends ActivityBase {
 	}
 
 	@Override
-	public int onSourceProcess(String source) {
-		mGenreList = mSite.getGenreList(source);
+	public int onSourceProcess(String source, String url) {
+		mGenreList = mSite.getGenreList(source, url);
 		return mGenreList.size();
 	}
 

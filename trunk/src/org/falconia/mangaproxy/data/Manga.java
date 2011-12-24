@@ -15,10 +15,9 @@ public final class Manga implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static Manga getFavoriteManga(int _id, int siteId, String mangaId, String displayname,
-			boolean isCompleted, int chapterCount, boolean hasNewChapter, String latestChapterId,
-			String latestChapterDisplayname, String lastReadChapterId, long updatedAt,
-			String updateAtTimeZone) {
+	public static Manga getFavoriteManga(int _id, int siteId, String mangaId, String displayname, boolean isCompleted,
+			int chapterCount, boolean hasNewChapter, String latestChapterId, String latestChapterDisplayname,
+			String lastReadChapterId, long updatedAt, String updateAtTimeZone) {
 		Manga manga = new Manga(mangaId, displayname, null, siteId);
 		manga._id = _id;
 		manga.isCompleted = isCompleted;
@@ -147,8 +146,8 @@ public final class Manga implements Serializable {
 		}
 	}
 
-	public ChapterList getChapterList(String source) {
-		return getPlugin().getChapterList(source, this);
+	public ChapterList getChapterList(String source, String url) {
+		return getPlugin().getChapterList(source, url, this);
 	}
 
 	@Override
@@ -159,8 +158,8 @@ public final class Manga implements Serializable {
 	public String toLongString() {
 		return String
 				.format("{ SiteID:%d, MangaID:'%s', Name:'%s', Section:'%s', UpdatedAt:'%tF', Chapter:'%s', ChapterCount:%d, Author:%s, IsCompleted:%b, HasNewChapter:%b }",
-						siteId, mangaId, displayname, section, updatedAt, chapterDisplayname,
-						chapterCount, author, isCompleted, hasNewChapter);
+						siteId, mangaId, displayname, section, updatedAt, chapterDisplayname, chapterCount, author,
+						isCompleted, hasNewChapter);
 	}
 
 }

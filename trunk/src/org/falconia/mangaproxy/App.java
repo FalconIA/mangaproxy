@@ -114,8 +114,7 @@ public final class App extends Application {
 	}
 
 	public static ZoomMode getPageZoomMode() {
-		return ZoomMode.fromValue(Integer.parseInt(getSharedPreferences().getString(
-				"iPageZoomMode", "0")));
+		return ZoomMode.fromValue(Integer.parseInt(getSharedPreferences().getString("iPageZoomMode", "0")));
 	}
 
 	public static void setPageZoomMode(ZoomMode mode) {

@@ -23,8 +23,7 @@ public class CrashActivity extends Activity implements OnClickListener {
 		setTitle(String.format("%s - Crash Log", App.NAME));
 
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(
-					getExternalFilesDir("crash.txt")));
+			BufferedReader reader = new BufferedReader(new FileReader(getExternalFilesDir("crash.txt")));
 			StringBuilder builder = new StringBuilder();
 			String text;
 			while ((text = reader.readLine()) != null) {

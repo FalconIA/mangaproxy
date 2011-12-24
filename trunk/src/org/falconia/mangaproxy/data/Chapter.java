@@ -13,8 +13,8 @@ public final class Chapter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static Chapter getFavoriteChapter(int _id, Manga manga, String chapterId,
-			String displayname, int pageIndexMax, int pageIndexLastRead) {
+	public static Chapter getFavoriteChapter(int _id, Manga manga, String chapterId, String displayname,
+			int pageIndexMax, int pageIndexLastRead) {
 		Chapter chapter = new Chapter(chapterId, displayname, manga);
 		chapter._id = _id;
 		chapter.pageIndexMax = pageIndexMax;
@@ -122,16 +122,16 @@ public final class Chapter implements Serializable {
 		return dynamicImgServers[dynamicImgServerId];
 	}
 
-	public String[] getPageUrls(String source) {
-		return getPlugin().getChapterPages(source, this);
+	public String[] getPageUrls(String source, String url) {
+		return getPlugin().getChapterPages(source, url, this);
 	}
 
-	public String getPageRedirectUrl(String source) {
-		return getPlugin().getPageRedirectUrl(source);
+	public String getPageRedirectUrl(String source, String url) {
+		return getPlugin().getPageRedirectUrl(source, url);
 	}
 
-	public boolean setDynamicImgServers(String source) {
-		return getPlugin().setDynamicImgServers(source, this);
+	public boolean setDynamicImgServers(String source, String url) {
+		return getPlugin().setDynamicImgServers(source, url, this);
 	}
 
 	@Override
@@ -140,10 +140,10 @@ public final class Chapter implements Serializable {
 	}
 
 	public String toLongString() {
-		return String
-				.format("{ SiteID:%d, MangaID:'%s', ChapterId:'%s', Name:'%s', TypeId:%d, ImgServerId:%d, ImgServers:%d }",
-						siteId, manga.mangaId, chapterId, displayname, typeId, dynamicImgServerId,
-						(dynamicImgServers == null ? 0 : dynamicImgServers.length));
+		return String.format(
+				"{ SiteID:%d, MangaID:'%s', ChapterId:'%s', Name:'%s', TypeId:%d, ImgServerId:%d, ImgServers:%d }",
+				siteId, manga.mangaId, chapterId, displayname, typeId, dynamicImgServerId,
+				(dynamicImgServers == null ? 0 : dynamicImgServers.length));
 	}
 
 }

@@ -270,9 +270,8 @@ public final class ChapterList implements Serializable, ISiteId, Collection<Chap
 
 	@Override
 	public String toString() {
-		return String.format(
-				"{ SiteId:%d, MangaId:'%s', Size:%d, Volume:%d, Chapter:%d, Unknow:%d }",
-				mManga.siteId, mManga.mangaId, size(), mSizeVolume, mSizeChapter, mSizeUnknow);
+		return String.format("{ SiteId:%d, MangaId:'%s', Size:%d, Volume:%d, Chapter:%d, Unknow:%d }", mManga.siteId,
+				mManga.mangaId, size(), mSizeVolume, mSizeChapter, mSizeUnknow);
 	}
 
 }

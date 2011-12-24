@@ -130,8 +130,7 @@ public final class ActivityChapterList extends ActivityBase {
 				if (chapter.typeId == Chapter.TYPE_ID_VOLUME) {
 					holder.tvDisplayname.setTextColor(getResources().getColor(R.color.highlight));
 				} else {
-					holder.tvDisplayname.setTextColor(getResources().getColor(
-							android.R.color.primary_text_dark));
+					holder.tvDisplayname.setTextColor(getResources().getColor(android.R.color.primary_text_dark));
 				}
 			}
 
@@ -139,8 +138,7 @@ public final class ActivityChapterList extends ActivityBase {
 		}
 
 		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-				int totalItemCount) {
+		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 			// TODO Auto-generated method stub
 
 		}
@@ -271,13 +269,12 @@ public final class ActivityChapterList extends ActivityBase {
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		ActivityChapter.IntentHandler.startActivityChapter(this, mManga,
-				mChapterList.getAt(position));
+		ActivityChapter.IntentHandler.startActivityChapter(this, mManga, mChapterList.getAt(position));
 	}
 
 	@Override
-	public int onSourceProcess(String source) {
-		mChapterList = mManga.getChapterList(source);
+	public int onSourceProcess(String source, String url) {
+		mChapterList = mManga.getChapterList(source, url);
 		mManga.chapterList = mChapterList;
 		return mChapterList.size();
 	}
@@ -305,7 +302,7 @@ public final class ActivityChapterList extends ActivityBase {
 		getListView().requestFocus();
 
 		if (mManga.isFavorite && result > 0 && mManga.lastReadChapterId != null) {
-			getListView().setSelection(mChapterList.indexOfChapterId(mManga.lastReadChapterId));
+			getListView().setSelection(mChapterList.indexOfChapterId(mManga.lastReadChapterId) - 1);
 		}
 
 		super.onPostSourceProcess(result);

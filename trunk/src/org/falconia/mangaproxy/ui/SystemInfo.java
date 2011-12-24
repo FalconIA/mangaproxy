@@ -33,8 +33,8 @@ import android.widget.TextView;
 /**
  * Like AnalogClock, but digital. Shows seconds.
  * 
- * FIXME: implement separate views for hours/minutes/seconds, so
- * proportional fonts don't shake rendering
+ * FIXME: implement separate views for hours/minutes/seconds, so proportional
+ * fonts don't shake rendering
  */
 
 public class SystemInfo extends TextView {
@@ -71,8 +71,8 @@ public class SystemInfo extends TextView {
 		}
 
 		mFormatChangeObserver = new FormatChangeObserver();
-		getContext().getContentResolver().registerContentObserver(Settings.System.CONTENT_URI,
-				true, mFormatChangeObserver);
+		getContext().getContentResolver().registerContentObserver(Settings.System.CONTENT_URI, false,
+				mFormatChangeObserver);
 
 		setFormat();
 
@@ -115,14 +115,15 @@ public class SystemInfo extends TextView {
 				invalidate();
 			}
 		};
-		getContext().registerReceiver(mBatInfoReceiver,
-				new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+		getContext().registerReceiver(mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}
 
 	@Override
 	protected void onDetachedFromWindow() {
-		super.onDetachedFromWindow();
 		mTickerStopped = true;
+		getContext().unregisterReceiver(mBatInfoReceiver);
+		getContext().getContentResolver().unregisterContentObserver(mFormatChangeObserver);
+		super.onDetachedFromWindow();
 	}
 
 	private void updateText() {
@@ -133,7 +134,7 @@ public class SystemInfo extends TextView {
 	 * Pulls 12/24 mode from system settings
 	 */
 	private boolean get24HourMode() {
-		return android.text.format.DateFormat.is24HourFormat(getContext());
+		return DateFormat.is24HourFormat(getContext());
 	}
 
 	private void setFormat() {

@@ -32,13 +32,14 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public abstract class ActivityBase extends ListActivity implements OnFocusChangeListener,
-		OnTouchListener, OnItemClickListener, OnItemLongClickListener, OnSourceProcessListener {
+public abstract class ActivityBase extends ListActivity implements OnFocusChangeListener, OnTouchListener,
+		OnItemClickListener, OnItemLongClickListener, OnSourceProcessListener {
 
 	protected final class SourceDownloader implements OnDownloadListener, OnCancelListener {
 
 		private final String mCharset;
 
+		private String mUrl;
 		private DownloadTask mDownloader;
 		private ProgressDialog mDownloadDialog;
 		private String mMessage;
@@ -69,21 +70,19 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
-				setNoItemsMessage(String.format(getString(R.string.ui_error_on_download),
-						getSiteName()));
+				setNoItemsMessage(String.format(getString(R.string.ui_error_on_download), getSiteName()));
 				return;
 			}
 
 			String source = EncodingUtils.getString(result, mCharset);
 			// AppUtils.logV(this, source);
 
-			startProcessSource(source);
+			startProcessSource(source, mUrl);
 		}
 
 		@Override
 		public void onDownloadProgressUpdate(int value, int total) {
-			mDownloadDialog
-					.setMessage(String.format(mMessage, FormatUtils.getFileSizeBtoKB(value)));
+			mDownloadDialog.setMessage(String.format(mMessage, FormatUtils.getFileSizeBtoKB(value)));
 		}
 
 		@Override
@@ -102,11 +101,9 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 				message = getString(R.string.dialog_download_message);
 			} else {
 				title = getString(R.string.dialog_download_title);
-				message = String.format(getString(R.string.dialog_download_message_format), what,
-						"0.000KB");
+				message = String.format(getString(R.string.dialog_download_message_format), what, "0.000KB");
 			}
-			mMessage = String
-					.format(getString(R.string.dialog_download_message_format), what, "%s");
+			mMessage = String.format(getString(R.string.dialog_download_message_format), what, "%s");
 			ProgressDialog dialog = createProgressDialog(title, message, true);
 			dialog.setOnCancelListener(this);
 			mDownloadDialog = dialog;
@@ -118,6 +115,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 		}
 
 		public void download(String url) {
+			mUrl = url;
 			mDownloader = new DownloadTask(this);
 			mDownloader.execute(url);
 		}
@@ -267,7 +265,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 	}
 
 	@Override
-	public int onSourceProcess(String source) {
+	public int onSourceProcess(String source, String url) {
 		AppUtils.logV(this, "onSourceProcess()");
 		return 0;
 	}
@@ -308,9 +306,9 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 		mProcessed = true;
 	}
 
-	protected void startProcessSource(String source) {
+	protected void startProcessSource(String source, String url) {
 		mSourceProcessTask = new SourceProcessTask(ActivityBase.this);
-		mSourceProcessTask.execute(source);
+		mSourceProcessTask.execute(source, url);
 	}
 
 	protected void stopTask() {
@@ -381,8 +379,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 		// list.setSaveEnabled(false);
 	}
 
-	protected ProgressDialog createProgressDialog(CharSequence title, CharSequence message,
-			boolean cancelable) {
+	protected ProgressDialog createProgressDialog(CharSequence title, CharSequence message, boolean cancelable) {
 		ProgressDialog dialog = new ProgressDialog(this);
 		dialog.setTitle(title);
 		dialog.setMessage(message);
