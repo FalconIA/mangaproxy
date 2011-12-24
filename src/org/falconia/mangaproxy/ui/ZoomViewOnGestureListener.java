@@ -108,8 +108,9 @@ public final class ZoomViewOnGestureListener extends SimpleOnGestureListener {
 
 	@Override
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-		Log.v(GESTURE_TAG, String.format("onScroll() - wait:%dms - point:%d",
-				(System.currentTimeMillis() - time), e2.getPointerCount()));
+		Log.v(GESTURE_TAG,
+				String.format("onScroll() - wait:%dms - point:%d", (System.currentTimeMillis() - time),
+						e2.getPointerCount()));
 		time = System.currentTimeMillis();
 
 		// flingHandler.removeCallbacks(flingRunnable);
@@ -135,10 +136,8 @@ public final class ZoomViewOnGestureListener extends SimpleOnGestureListener {
 
 	private void startFling(float vx, float vy, float dx, float dy) {
 		Log.d(GESTURE_TAG, String.format("vx:%f, vy:%f, dx:%f, dy:%f", vx, vy, dx, dy));
-		if (((isEdgeLeft && dx > 0) || (isEdgeRight && dx < 0))
-				&& Math.abs(dx) > Math.abs(dy) * 1.2f
-				&& Math.abs(dx) > Math.min(0.5f * mZoomView.getWidth(),
-						0.5f * mZoomView.getHeight())) {
+		if (((isEdgeLeft && dx > 0) || (isEdgeRight && dx < 0)) && Math.abs(dx) > Math.abs(dy) * 1.2f
+				&& Math.abs(dx) > Math.min(0.5f * mZoomView.getWidth(), 0.5f * mZoomView.getHeight())) {
 			if (dx > 0) {
 				Log.i(GESTURE_TAG, "Next Page");
 				AppUtils.popupMessage(App.CONTEXT, "Next Page");

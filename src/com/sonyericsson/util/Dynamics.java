@@ -93,11 +93,10 @@ public abstract class Dynamics {
 	 * needed.
 	 * 
 	 * @param velocityTolerance
-	 *            Velocity is regarded as 0 if less than
-	 *            velocityTolerance
+	 *            Velocity is regarded as 0 if less than velocityTolerance
 	 * @param positionTolerance
-	 *            Position is regarded as inside the limits even
-	 *            if positionTolerance above or below
+	 *            Position is regarded as inside the limits even if
+	 *            positionTolerance above or below
 	 * 
 	 * @return true if list is at rest, false otherwise
 	 */
@@ -149,9 +148,8 @@ public abstract class Dynamics {
 	 * Gets the distance to the closest limit (max and min position).
 	 * 
 	 * @return If position is more than max position: distance to max position.
-	 *         If
-	 *         position is less than min position: distance to min position. If
-	 *         within limits: 0
+	 *         If position is less than min position: distance to min position.
+	 *         If within limits: 0
 	 */
 	protected float getDistanceToLimit() {
 		float distanceToLimit = 0;

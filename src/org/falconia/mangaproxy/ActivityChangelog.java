@@ -23,8 +23,7 @@ public final class ActivityChangelog extends Activity implements OnClickListener
 		setTitle(String.format("%s - Changelog", App.NAME));
 
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(
-					"changelog.txt")));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open("changelog.txt")));
 			StringBuilder builder = new StringBuilder();
 			String text;
 			while ((text = reader.readLine()) != null) {

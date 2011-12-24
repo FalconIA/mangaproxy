@@ -90,8 +90,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		}
 
 		@Override
-		public int onSourceProcess(String source) {
-			ChapterList list = mUpdatedManga.getChapterList(source);
+		public int onSourceProcess(String source, String url) {
+			ChapterList list = mUpdatedManga.getChapterList(source, url);
 			if (list.size() > 0) {
 				mUpdatedManga.latestChapterId = list.getChapterId(0);
 				mUpdatedManga.latestChapterDisplayname = list.getDisplayname(0);
@@ -224,8 +224,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 
 			try {
 				String source = EncodingUtils.getString(result, HttpUtils.CHARSET_UTF8);
-				ArrayList<String> groups = Regex
-						.match("Version (.+?) / VersionCode (\\d+)", source);
+				ArrayList<String> groups = Regex.match("Version (.+?) / VersionCode (\\d+)", source);
 				String versionName = groups.get(1).trim();
 				int versionCode = Integer.parseInt(groups.get(2));
 				if (versionCode > App.VERSION_CODE) {
@@ -306,8 +305,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			if (manga.hasNewChapter) {
 				holder.tvDetails.setTextColor(getResources().getColor(R.color.highlight));
 			} else {
-				holder.tvDetails.setTextColor(getResources().getColor(
-						android.R.color.primary_text_dark));
+				holder.tvDetails.setTextColor(getResources().getColor(android.R.color.primary_text_dark));
 			}
 			holder.tvCompleted.setVisibility(manga.isCompleted ? View.VISIBLE : View.GONE);
 			holder.tvSiteName.setText(manga.getSiteName());
@@ -335,8 +333,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			if (manga.hasNewChapter) {
 				holder.tvDetails.setTextColor(getResources().getColor(R.color.highlight));
 			} else {
-				holder.tvDetails.setTextColor(getResources().getColor(
-						android.R.color.primary_text_dark));
+				holder.tvDetails.setTextColor(getResources().getColor(android.R.color.primary_text_dark));
 			}
 			holder.tvCompleted.setVisibility(manga.isCompleted ? View.VISIBLE : View.GONE);
 			holder.tvSiteName.setText(manga.getSiteName());
@@ -518,8 +515,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		MenuItem menuSource = menu.findItem(R.id.mmiSource);
 		SubMenu submenuSource = menuSource.getSubMenu();
 		for (int pluginId : Plugins.getPluginIds()) {
-			submenuSource.add(R.id.mmgSourceGroup, pluginId, pluginId - 1000,
-					Plugins.getPlugin(pluginId).getDisplayname());
+			submenuSource.add(R.id.mmgSourceGroup, pluginId, pluginId - 1000, Plugins.getPlugin(pluginId)
+					.getDisplayname());
 		}
 		return true;
 	}
@@ -624,8 +621,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 				if ((deleted = mDB.deleteManga(manga)) == 0) {
 					AppUtils.logE(this, "Remove none.");
 				} else {
-					AppUtils.logW(this, "Remove " + (deleted / 1000) + " mangas "
-							+ (deleted % 1000) + " chapters.");
+					AppUtils.logW(this, "Remove " + (deleted / 1000) + " mangas " + (deleted % 1000) + " chapters.");
 				}
 			} catch (SQLException e) {
 				AppUtils.logE(this, e.getMessage());
@@ -657,21 +653,22 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	}
 
 	private void setUpdateBarProgress(Manga manga, int updated, int total) {
-		if (manga != null)
-			mtvUpdating.setText(String.format(getString(R.string.ui_updating_manga),
-					manga.displayname));
-		else
+		if (manga != null) {
+			mtvUpdating.setText(String.format(getString(R.string.ui_updating_manga), manga.displayname));
+		} else {
 			mtvUpdating.setText(R.string.ui_update_manga_completed);
+		}
 		mtvUpdated.setText(String.format("%d / %d", updated, total));
 		mpbUpdate.setProgress(100 * updated / total);
 	}
 
 	private void hideUpdateBar(boolean now) {
 		mHideUpdateBarHandler.removeCallbacks(mHideUpdateBarRunnable);
-		if (now)
+		if (now) {
 			mvgUpdateBar.setVisibility(View.GONE);
-		else
+		} else {
 			mHideUpdateBarHandler.postDelayed(mHideUpdateBarRunnable, App.TIME_AUTO_HIDE);
+		}
 	}
 
 	private void checkNewVersion() {
@@ -686,8 +683,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		if (TextUtils.isEmpty(newVersion)) {
 			mNewVersionPanel.setVisibility(View.GONE);
 		} else {
-			mNewVersion.setText(String.format(getString(R.string.ui_has_new_version_format),
-					App.NAME, newVersion));
+			mNewVersion.setText(String.format(getString(R.string.ui_has_new_version_format), App.NAME, newVersion));
 			mNewVersionPanel.setVisibility(View.VISIBLE);
 		}
 	}

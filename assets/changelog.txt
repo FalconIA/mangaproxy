@@ -20,6 +20,14 @@ http://code.google.com/p/mangaproxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.4.2
+=============
+- [Plugin 99770] Fix AllMangaList / ChapterList / ChapterPages.
+- [Plugin DM5] Fix GenreList / ChapterPages.
+- Improve chapter list to jump to newer one of last read chapter.
+- Fix error of changing page to page 0 in page view.
+- Remove crash window.
+
 Version 1.4.1
 =============
 - [Plugin 99770] Fix Genre of 'Most Hits'.

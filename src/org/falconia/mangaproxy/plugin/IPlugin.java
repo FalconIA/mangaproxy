@@ -51,18 +51,18 @@ public interface IPlugin {
 
 	Genre getGenreAll();
 
-	GenreList getGenreList(String source);
+	GenreList getGenreList(String source, String url);
 
-	MangaList getMangaList(String source, Genre genre);
+	MangaList getMangaList(String source, String url, Genre genre);
 
-	MangaList getAllMangaList(String source);
+	MangaList getAllMangaList(String source, String url);
 
-	ChapterList getChapterList(String source, Manga manga);
+	ChapterList getChapterList(String source, String url, Manga manga);
 
-	String[] getChapterPages(String source, Chapter chapter);
+	String[] getChapterPages(String source, String url, Chapter chapter);
 
-	String getPageRedirectUrl(String source);
+	String getPageRedirectUrl(String source, String url);
 
-	boolean setDynamicImgServers(String source, Chapter chapter);
+	boolean setDynamicImgServers(String source, String url, Chapter chapter);
 
 }

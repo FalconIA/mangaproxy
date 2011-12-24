@@ -21,6 +21,8 @@ public class Plugin99770 extends PluginBase {
 	protected static final String GENRE_URL_PREFIX_2 = "comicabc/";
 	protected static final String GENRE_ALL_URL = "sitemap/";
 
+	protected static final String URL_BASE_3G = "http://3gmanhua.com/";
+
 	protected static final String MANGA_URL_PREFIX = "comic/";
 
 	public Plugin99770(int siteId) {
@@ -106,6 +108,12 @@ public class Plugin99770 extends PluginBase {
 		return url;
 	}
 
+	/*
+	 * @Override public String getMangaUrl(Manga manga) { String url =
+	 * URL_BASE_3G + getMangaUrlPrefix() + manga.mangaId + getMangaUrlPostfix();
+	 * logI(Get_URL_of_ChapterList, manga.mangaId, url); return url; }
+	 */
+
 	@Override
 	public String getMangaUrlPrefix() {
 		return MANGA_URL_PREFIX;
@@ -118,8 +126,7 @@ public class Plugin99770 extends PluginBase {
 
 	@Override
 	public String getChapterUrl(Chapter chapter, Manga manga) {
-		String url = getUrlBase()
-				+ String.format("manhua/%s/%s.htm", manga.mangaId, chapter.chapterId);
+		String url = URL_BASE_3G + String.format("m/%s/%s.htm", manga.mangaId, chapter.chapterId);
 		logI(Get_URL_of_Chapter, chapter.chapterId, url);
 		return url;
 	}
@@ -132,8 +139,7 @@ public class Plugin99770 extends PluginBase {
 
 	protected GregorianCalendar parseDateTime(String string) {
 		GregorianCalendar calendar = null;
-		calendar = parseDateTime(string,
-				"(\\d+)/(\\d+)/(\\d+) (\\d+)\\:(\\d+)\\:(\\d+){'YY','M','D','h','m','s'}");
+		calendar = parseDateTime(string, "(\\d+)/(\\d+)/(\\d+) (\\d+)\\:(\\d+)\\:(\\d+){'YY','M','D','h','m','s'}");
 		return calendar;
 	}
 
@@ -164,7 +170,7 @@ public class Plugin99770 extends PluginBase {
 	}
 
 	@Override
-	public GenreList getGenreList(String source) {
+	public GenreList getGenreList(String source, String url) {
 		GenreList list = new GenreList(getSiteId());
 
 		logI(Get_GenreList);
@@ -215,14 +221,14 @@ public class Plugin99770 extends PluginBase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "GenreList");
+			logE(Fail_to_process, "GenreList", url);
 		}
 
 		return list;
 	}
 
 	@Override
-	public MangaList getMangaList(String source, Genre genre) {
+	public MangaList getMangaList(String source, String url, Genre genre) {
 		MangaList list = new MangaList(getSiteId());
 
 		logI(Get_MangaList, genre.genreId);
@@ -284,8 +290,7 @@ public class Plugin99770 extends PluginBase {
 
 					for (ArrayList<String> match : matches) {
 						// logV(match.get(0));
-						Manga manga = new Manga(parseId(match.get(1)), match.get(2), section,
-								getSiteId());
+						Manga manga = new Manga(parseId(match.get(1)), match.get(2), section, getSiteId());
 						manga.chapterCount = parseInt(match.get(3));
 						manga.isCompleted = parseIsCompleted(match.get(4));
 						manga.updatedAt = parseDate(match.get(5));
@@ -295,7 +300,7 @@ public class Plugin99770 extends PluginBase {
 					}
 				} else {
 					// Section 2 (Genre Top)
-					logW("%s", groups.get(1));
+					// logV("%s", groups.get(1));
 					String section = "Most Hits";
 					pattern = "(?is)<table .+?>[\\s\\d·]+<a href=\"/?\\w+/(\\d+)/?\".*?>\\s*(.+?)\\s*</a>.*?<font.*?>(\\d*)</font>集\\(卷\\)〖(.+?)〗\\s*<.+?>共<font.*?>(\\d+)</font>人推荐，漫友给出<font.*?>([\\d\\.]+)</font>分，([\\d/]+)<.+?</table>";
 					matches = Regex.matchAll(pattern, groups.get(1));
@@ -303,13 +308,12 @@ public class Plugin99770 extends PluginBase {
 
 					for (ArrayList<String> match : matches) {
 						// logV(match.get(0));
-						Manga manga = new Manga(parseId(match.get(1)), match.get(2), section,
-								getSiteId());
+						Manga manga = new Manga(parseId(match.get(1)), match.get(2), section, getSiteId());
 						manga.chapterCount = parseInt(match.get(3));
 						manga.isCompleted = parseIsCompleted(match.get(4));
 						manga.updatedAt = parseDate(match.get(7));
-						manga.details = String.format(App.UI_RECOMMEND, parseInt(match.get(5)))
-								+ ", " + String.format(App.UI_RATING, match.get(6));
+						manga.details = String.format(App.UI_RECOMMEND, parseInt(match.get(5))) + ", "
+								+ String.format(App.UI_RATING, match.get(6));
 						manga.setDetailsTemplate("%chapterCount%, %details%\n%updatedAt%");
 						list.add(manga);
 						// logV(manga.toLongString());
@@ -324,14 +328,14 @@ public class Plugin99770 extends PluginBase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "MangaList");
+			logE(Fail_to_process, "MangaList", url);
 		}
 
 		return list;
 	}
 
 	@Override
-	public MangaList getAllMangaList(String source) {
+	public MangaList getAllMangaList(String source, String url) {
 		MangaList list = new MangaList(getSiteId());
 
 		logI(Get_AllMangaList);
@@ -355,7 +359,7 @@ public class Plugin99770 extends PluginBase {
 			for (ArrayList<String> groups : matches) {
 				source2 = groups.get(1);
 				String sGenre = parseGenreName(groups.get(2));
-				pattern = "(?is)<a href=\"/" + getMangaUrlPrefix() + "(\\d+)\">(.*?)</a>";
+				pattern = "(?is)<a href=\"/?" + getMangaUrlPrefix() + "(\\d+)/?\">(.*?)</a>";
 				ArrayList<ArrayList<String>> matches2 = Regex.matchAll(pattern, source2);
 				// logV(Catched_count_in_section, matches2.size(), sGenre);
 
@@ -371,14 +375,14 @@ public class Plugin99770 extends PluginBase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "AllMangaList");
+			logE(Fail_to_process, "AllMangaList", url);
 		}
 
 		return list;
 	}
 
 	@Override
-	public ChapterList getChapterList(String source, Manga manga) {
+	public ChapterList getChapterList(String source, String url, Manga manga) {
 		ChapterList list = new ChapterList(manga);
 
 		logI(Get_ChapterList, manga.mangaId);
@@ -398,7 +402,7 @@ public class Plugin99770 extends PluginBase {
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)集数：(?:\\s*<[^<>]+>)?(\\d*?)(?:<[^<>]+>\\s*)?集\\(卷\\)\\s+\\|\\s+状态：〖(?:\\s*<[^<>]+>)?(.+?)(?:<[^<>]+>\\s*)?〗.+?>更新时间：([ \\d/:]+)<.+?<div [^<>]*?class=\"c?vol\"[^<>]*?>\\s*<ul.*?>(.+?)</ul>";
+			pattern = "(?is)集数：(?:\\s*<[^<>]+>)?(\\d*?)(?:<[^<>]+>\\s*)?集\\(卷\\)\\s+\\|\\s+状态：[〖\\[](?:\\s*<[^<>]+>)?(.+?)(?:<[^<>]+>\\s*)?[〗\\]].+?>更新时间：([ \\d/:]+)<.+?<div [^<>]*?class=\"c?vol\"[^<>]*?>\\s*<ul.*?>(.+?)</ul>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
@@ -437,14 +441,14 @@ public class Plugin99770 extends PluginBase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "ChapterList");
+			logE(Fail_to_process, "ChapterList", url);
 		}
 
 		return list;
 	}
 
 	@Override
-	public String[] getChapterPages(String source, Chapter chapter) {
+	public String[] getChapterPages(String source, String url, Chapter chapter) {
 		String[] pageUrls = null;
 
 		logI(Get_Chapter, chapter.chapterId);
@@ -472,8 +476,7 @@ public class Plugin99770 extends PluginBase {
 			// Section 2
 			String imgserversurl = groups.get(2);
 			chapter.setDynamicImgServersUrl(imgserversurl);
-			logV(Catched_in_section, imgserversurl, 2, "ImgServersUrl",
-					chapter.getDynamicImgServersUrl());
+			logV(Catched_in_section, imgserversurl, 2, "ImgServersUrl", chapter.getDynamicImgServersUrl());
 
 			time = System.currentTimeMillis() - time;
 			logD(Process_Time_ChapterPages, time);
@@ -482,14 +485,14 @@ public class Plugin99770 extends PluginBase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "ChapterPages");
+			logE(Fail_to_process, "ChapterPages", url);
 		}
 
 		return pageUrls;
 	}
 
 	@Override
-	public boolean setDynamicImgServers(String source, Chapter chapter) {
+	public boolean setDynamicImgServers(String source, String url, Chapter chapter) {
 		logI(Get_DynamicImgServers);
 		logD(Get_Source_Size_DynamicImgServers, FormatUtils.getFileSize(source, getCharset()));
 
@@ -505,8 +508,7 @@ public class Plugin99770 extends PluginBase {
 			ArrayList<ArrayList<String>> matches;
 
 			// Section Count
-			String count = Regex.match("var\\s+ServerList\\s*=\\s*new\\s+Array\\((\\d+)\\)\\s*;",
-					source).get(1);
+			String count = Regex.match("var\\s+ServerList\\s*=\\s*new\\s+Array\\((\\d+)\\)\\s*;", source).get(1);
 			logV(Catched_in_section, count, 0, "Count", parseInt(count));
 
 			// Section ImgServers
@@ -530,7 +532,7 @@ public class Plugin99770 extends PluginBase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "DynamicImgServers");
+			logE(Fail_to_process, "DynamicImgServers", url);
 		}
 
 		return false;

@@ -100,8 +100,8 @@ public class HttpHelper_old {
 		// (default we *do* always send accept encoding gzip header in request)
 		HttpHelper_old.client.addResponseInterceptor(new HttpResponseInterceptor() {
 			@Override
-			public void process(final HttpResponse response, final HttpContext context)
-					throws HttpException, IOException {
+			public void process(final HttpResponse response, final HttpContext context) throws HttpException,
+					IOException {
 				HttpEntity entity = response.getEntity();
 				Header contentEncodingHeader = entity.getContentEncoding();
 				if (contentEncodingHeader != null) {
@@ -134,12 +134,10 @@ public class HttpHelper_old {
 	public HttpHelper_old(final String encoding) {
 		responseHandler = new ResponseHandler<String>() {
 			@Override
-			public String handleResponse(final HttpResponse response) throws HttpResponseException,
-					IOException {
+			public String handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
 				StatusLine statusLine = response.getStatusLine();
 				if (statusLine.getStatusCode() >= 300) {
-					throw new HttpResponseException(statusLine.getStatusCode(),
-							statusLine.getReasonPhrase());
+					throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
 				}
 
 				HttpEntity entity = response.getEntity();
@@ -162,8 +160,7 @@ public class HttpHelper_old {
 	 */
 	public String performGet(final String url, final String user, final String pass,
 			final Map<String, String> additionalHeaders) {
-		return performRequest(null, url, user, pass, additionalHeaders, null,
-				HttpHelper_old.GET_TYPE);
+		return performRequest(null, url, user, pass, additionalHeaders, null, HttpHelper_old.GET_TYPE);
 	}
 
 	/**
@@ -171,8 +168,7 @@ public class HttpHelper_old {
 	 * 
 	 */
 	public String performPost(final String url, final Map<String, String> params) {
-		return performRequest(HttpHelper_old.MIME_FORM_ENCODED, url, null, null, null, params,
-				HttpHelper_old.POST_TYPE);
+		return performRequest(HttpHelper_old.MIME_FORM_ENCODED, url, null, null, null, params, HttpHelper_old.POST_TYPE);
 	}
 
 	/**
@@ -183,8 +179,8 @@ public class HttpHelper_old {
 	 */
 	public String performPost(final String url, final String user, final String pass,
 			final Map<String, String> additionalHeaders, final Map<String, String> params) {
-		return performRequest(HttpHelper_old.MIME_FORM_ENCODED, url, user, pass, additionalHeaders,
-				params, HttpHelper_old.POST_TYPE);
+		return performRequest(HttpHelper_old.MIME_FORM_ENCODED, url, user, pass, additionalHeaders, params,
+				HttpHelper_old.POST_TYPE);
 	}
 
 	/**
@@ -192,19 +188,16 @@ public class HttpHelper_old {
 	 * complicated/flexible version of the method).
 	 * 
 	 */
-	public String performPost(final String contentType, final String url, final String user,
-			final String pass, final Map<String, String> additionalHeaders,
-			final Map<String, String> params) {
-		return performRequest(contentType, url, user, pass, additionalHeaders, params,
-				HttpHelper_old.POST_TYPE);
+	public String performPost(final String contentType, final String url, final String user, final String pass,
+			final Map<String, String> additionalHeaders, final Map<String, String> params) {
+		return performRequest(contentType, url, user, pass, additionalHeaders, params, HttpHelper_old.POST_TYPE);
 	}
 
 	//
 	// private methods
 	//
-	private String performRequest(final String contentType, final String url, final String user,
-			final String pass, final Map<String, String> headers, final Map<String, String> params,
-			final int requestType) {
+	private String performRequest(final String contentType, final String url, final String user, final String pass,
+			final Map<String, String> headers, final Map<String, String> params, final int requestType) {
 
 		// add user and pass to client credentials if present
 		if ((user != null) && (pass != null)) {
@@ -227,8 +220,8 @@ public class HttpHelper_old {
 		if (sendHeaders.size() > 0) {
 			HttpHelper_old.client.addRequestInterceptor(new HttpRequestInterceptor() {
 				@Override
-				public void process(final HttpRequest request, final HttpContext context)
-						throws HttpException, IOException {
+				public void process(final HttpRequest request, final HttpContext context) throws HttpException,
+						IOException {
 					for (String key : sendHeaders.keySet()) {
 						if (!request.containsHeader(key)) {
 							request.addHeader(key, sendHeaders.get(key));
@@ -273,12 +266,10 @@ public class HttpHelper_old {
 		try {
 			response = HttpHelper_old.client.execute(method, responseHandler);
 		} catch (ClientProtocolException e) {
-			response = HttpHelper_old.HTTP_RESPONSE_ERROR + " - " + e.getClass().getSimpleName()
-					+ " " + e.getMessage();
+			response = HttpHelper_old.HTTP_RESPONSE_ERROR + " - " + e.getClass().getSimpleName() + " " + e.getMessage();
 			// e.printStackTrace();
 		} catch (IOException e) {
-			response = HttpHelper_old.HTTP_RESPONSE_ERROR + " - " + e.getClass().getSimpleName()
-					+ " " + e.getMessage();
+			response = HttpHelper_old.HTTP_RESPONSE_ERROR + " - " + e.getClass().getSimpleName() + " " + e.getMessage();
 			// e.printStackTrace();
 		}
 		return response;

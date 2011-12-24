@@ -6,10 +6,9 @@ public final class Plugins {
 	private static HashMap<Integer, IPlugin> Plugins;
 
 	static {
-		int i = 1000;
 		Plugins = new HashMap<Integer, IPlugin>();
-		Plugins.put(i, new Plugin99770(i++));
-		Plugins.put(i, new PluginDm5(i++));
+		Plugins.put(1000, new Plugin99770(1000));
+		Plugins.put(1001, new PluginDm5(1001));
 	}
 
 	public static Integer[] getPluginIds() {

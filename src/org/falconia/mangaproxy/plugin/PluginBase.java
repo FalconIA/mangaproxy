@@ -21,8 +21,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 
 	public static final String SOURCE_SEPERATOR_STRING = "\n##########SOURCE_SEPERATOR_STRING##########\n";
 
-
-	protected static final String Fail_to_process = "Fail to process %s.";
+	protected static final String Fail_to_process = "Fail to process %s: '%s'.";
 	protected static final String Fail_to_process_data = "Fail to process data.";
 	protected static final String Fail_to_parse_Int = "Fail to parse int: '%s'.";
 	protected static final String Fail_to_parse_DateTime = "Fail to parse Date/Time: '%s'.";
@@ -64,13 +63,11 @@ public abstract class PluginBase implements ITag, IPlugin {
 
 	protected static final String Source_is_empty = "Source is empty.";
 
-
 	protected static final String CHARSET_GBK = HttpUtils.CHARSET_GBK;
 	protected static final String CHARSET_UTF8 = HttpUtils.CHARSET_UTF8;
 
 	protected static final String DEFAULT_MANGA_URL_PREFIX = "comic/";
 	protected static final String DEFAULT_MANGA_URL_POSTFIX = "/";
-
 
 	protected int miSiteId;
 
@@ -106,7 +103,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 	}
 
 	@Override
-	public String getPageRedirectUrl(String source) {
+	public String getPageRedirectUrl(String source, String url) {
 		if (usingImgRedirect()) {
 			throw new RuntimeException("The method should to be overrode.");
 		} else {
@@ -115,7 +112,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 	}
 
 	@Override
-	public boolean setDynamicImgServers(String source, Chapter chapter) {
+	public boolean setDynamicImgServers(String source, String url, Chapter chapter) {
 		if (usingDynamicImgServer()) {
 			throw new RuntimeException("The method should to be overrode.");
 		} else {

@@ -8,8 +8,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.Thread.UncaughtExceptionHandler;
 
-import android.content.Intent;
-
 public final class CrashExceptionHandler implements UncaughtExceptionHandler {
 
 	private UncaughtExceptionHandler defaultUEH;
@@ -34,6 +32,8 @@ public final class CrashExceptionHandler implements UncaughtExceptionHandler {
 		writeToFile(stacktrace);
 
 		defaultUEH.uncaughtException(thread, ex);
+
+		// thread.getThreadGroup().destroy();
 	}
 
 	private void writeToFile(String stacktrace) {
@@ -49,15 +49,16 @@ public final class CrashExceptionHandler implements UncaughtExceptionHandler {
 			e.printStackTrace();
 			AppUtils.logE(this, "Fail to write crash file.");
 		}
-		try {
-			Intent i = new Intent(App.CONTEXT, CrashActivity.class);
-			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			App.CONTEXT.startActivity(i);
-			App.CONTEXT.startActivity(i);
-		} catch (Exception e) {
-			e.printStackTrace();
-			AppUtils.logE(this, "Fail to start CrashActivity: " + e.getMessage());
-		}
+		// try {
+		// Intent i = new Intent(App.CONTEXT, CrashActivity.class);
+		// i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		// App.CONTEXT.startActivity(i);
+		// App.CONTEXT.startActivity(i);
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// AppUtils.logE(this, "Fail to start CrashActivity: " +
+		// e.getMessage());
+		// }
 	}
 
 }

@@ -95,8 +95,7 @@ public class LongPressZoomListener implements View.OnTouchListener {
 	public LongPressZoomListener(Context context) {
 		mLongPressTimeout = ViewConfiguration.getLongPressTimeout();
 		mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-		mScaledMaximumFlingVelocity = ViewConfiguration.get(context)
-				.getScaledMaximumFlingVelocity();
+		mScaledMaximumFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
 		mVibrator = (Vibrator) context.getSystemService("vibrator");
 	}
 
@@ -148,8 +147,7 @@ public class LongPressZoomListener implements View.OnTouchListener {
 			final float dy = (y - mY) / v.getHeight();
 
 			if (mMode == Mode.ZOOM) {
-				mZoomControl.zoom((float) Math.pow(20, -dy), mDownX / v.getWidth(),
-						mDownY / v.getHeight());
+				mZoomControl.zoom((float) Math.pow(20, -dy), mDownX / v.getWidth(), mDownY / v.getHeight());
 			} else if (mMode == Mode.PAN) {
 				mZoomControl.pan(-dx, -dy);
 			} else {

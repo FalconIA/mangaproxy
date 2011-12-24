@@ -62,8 +62,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		private static final String BUNDLE_KEY_CHAPTER_DATA = "BUNDLE_KEY_CHAPTER_DATA";
 		private static final String BUNDLE_KEY_PAGE_URLS_DATA = "BUNDLE_KEY_PAGE_URLS_DATA";
 
-		private static Intent getIntent(Context context, Manga manga, Chapter chapter,
-				String[] pageUrls) {
+		private static Intent getIntent(Context context, Manga manga, Chapter chapter, String[] pageUrls) {
 			Bundle bundle = new Bundle();
 			bundle.putSerializable(BUNDLE_KEY_MANGA_DATA, manga);
 			bundle.putSerializable(BUNDLE_KEY_CHAPTER_DATA, chapter);
@@ -78,8 +77,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 
 		protected static Chapter getChapter(ActivityChapter activity) {
-			return (Chapter) activity.getIntent().getExtras()
-					.getSerializable(BUNDLE_KEY_CHAPTER_DATA);
+			return (Chapter) activity.getIntent().getExtras().getSerializable(BUNDLE_KEY_CHAPTER_DATA);
 		}
 
 		protected static String[] getPageUrls(ActivityChapter activity) {
@@ -163,8 +161,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			case MODE_CHAPTER:
 				break;
 			case MODE_IMG_SERVERS:
-				mLoadingDialog.setMessage(String.format(
-						getString(R.string.dialog_loading_imgsvrs_message_format), "0.000KB"));
+				mLoadingDialog.setMessage(String.format(getString(R.string.dialog_loading_imgsvrs_message_format),
+						"0.000KB"));
 				break;
 			}
 
@@ -191,14 +189,14 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 			switch (mMode) {
 			case MODE_CHAPTER:
-				processChapterSource(source);
+				processChapterSource(source, mUrl);
 				break;
 			case MODE_IMG_SERVERS:
 				// Debug
 				printDebug(mUrl, "Caching");
 
 				AppCache.writeCacheForData(source, mUrl);
-				processImgServersSource(source);
+				processImgServersSource(source, mUrl);
 				break;
 			}
 		}
@@ -211,12 +209,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 				switch (mMode) {
 				case MODE_CHAPTER:
-					message = String.format(
-							getString(R.string.dialog_loading_chapter_message_format), filesize);
+					message = String.format(getString(R.string.dialog_loading_chapter_message_format), filesize);
 					break;
 				case MODE_IMG_SERVERS:
-					message = String.format(
-							getString(R.string.dialog_loading_imgsvrs_message_format), filesize);
+					message = String.format(getString(R.string.dialog_loading_imgsvrs_message_format), filesize);
 					break;
 				}
 
@@ -309,14 +305,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 				// TODO Retry to downlaod
 				if (mRetriedTimes < App.MAX_RETRY_DOWNLOAD_IMG) {
 					mRetriedTimes++;
-					AppUtils.logI(this, String.format("Retry %d times to download image: %s",
-							mRetriedTimes, mUrl));
+					AppUtils.logI(this, String.format("Retry %d times to download image: %s", mRetriedTimes, mUrl));
 					mIsDownloading = false;
 					download();
 				} else {
 					mRetriedTimes = 0;
-					AppUtils.popupMessage(ActivityChapter.this, String.format(
-							getString(R.string.popup_fail_to_download_page), mPageIndex));
+					AppUtils.popupMessage(ActivityChapter.this,
+							String.format(getString(R.string.popup_fail_to_download_page), mPageIndex));
 					mDownloader = null;
 					mIsDownloading = false;
 					notifyPageDownloaded(this);
@@ -413,10 +408,18 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 
 						@Override
 						public void onPostDownload(byte[] result) {
+
+							if (result == null || result.length == 0) {
+								AppUtils.logE("Page.OnDownloadListener", "Downloaded empty source for PageRedirectUrl.");
+								Page.this.onPostDownload(result);
+								return;
+							}
+
 							String source = EncodingUtils.getString(result, mCharset);
-							String url = mChapter.getPageRedirectUrl(source);
+							String url = mChapter.getPageRedirectUrl(source, mUrl);
 							if (TextUtils.isEmpty(url)) {
-								onPostDownload(result);
+								AppUtils.logE("Page.OnDownloadListener", "Fail to get PageRedirectUrl.");
+								Page.this.onPostDownload(result);
 								return;
 							} else {
 								mUrlRedirected = url;
@@ -491,11 +494,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mpbDownload.setProgress(0);
 			mtvDownloaded.setText("");
 			if (mRetriedTimes > 0) {
-				mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page_retry),
-						mPageIndexLoading, mRetriedTimes));
+				mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page_retry), mPageIndexLoading,
+						mRetriedTimes));
 			} else {
-				mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page),
-						mPageIndexLoading));
+				mtvDownloading.setText(String.format(getString(R.string.ui_downloading_page), mPageIndexLoading));
 			}
 			mvgStatusBar.setVisibility(View.VISIBLE);
 		}
@@ -1007,8 +1009,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private String getCustomTitle() {
 		String title = String.format("%s - %s", mManga.displayname, mChapter.displayname);
 		if (mChapter.pageIndexLastRead > 0) {
-			title += String.format(" - " + getString(R.string.ui_pages_format),
-					mChapter.pageIndexLastRead, mChapter.pageIndexMax);
+			title += String.format(" - " + getString(R.string.ui_pages_format), mChapter.pageIndexLastRead,
+					mChapter.pageIndexMax);
 		}
 		return title;
 	}
@@ -1020,8 +1022,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 	private ProgressDialog createLoadingDialog() {
 		ProgressDialog dialog = new ProgressDialog(this);
 		dialog.setTitle(mChapter.displayname);
-		dialog.setMessage(String.format(getString(R.string.dialog_loading_chapter_message_format),
-				"0.000KB"));
+		dialog.setMessage(String.format(getString(R.string.dialog_loading_chapter_message_format), "0.000KB"));
 		dialog.setCancelable(true);
 		dialog.setOnCancelListener(this);
 		return dialog;
@@ -1036,8 +1037,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		printDebug(url, "Downloading");
 	}
 
-	private void processChapterSource(String source) {
-		mPageUrls = mChapter.getPageUrls(source);
+	private void processChapterSource(String source, String url) {
+		mPageUrls = mChapter.getPageUrls(source, url);
 
 		if (mPageUrls == null) {
 			setMessage(String.format(getString(R.string.ui_error_on_process), getSiteName()));
@@ -1056,7 +1057,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					printDebug(urlImgServers, "Loading");
 
 					source = AppCache.readCacheForData(urlImgServers);
-					processImgServersSource(source);
+					processImgServersSource(source, url);
 				} else {
 					// Debug
 					printDebug(urlImgServers, "Downloading");
@@ -1073,14 +1074,13 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 	}
 
-	private void processImgServersSource(String source) {
+	private void processImgServersSource(String source, String url) {
 		if (TextUtils.isEmpty(source)) {
-			setMessage(String
-					.format(getString(R.string.ui_error_on_imgsvr_download), getSiteName()));
+			setMessage(String.format(getString(R.string.ui_error_on_imgsvr_download), getSiteName()));
 			return;
 		}
 
-		if (!mChapter.setDynamicImgServers(source)) {
+		if (!mChapter.setDynamicImgServers(source, url)) {
 			setMessage(String.format(getString(R.string.ui_error_on_imgsvr_process), getSiteName()));
 			return;
 		}
@@ -1165,7 +1165,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 		// Loading
 		if (mPageIndexLoading != mChapter.pageIndexLastRead) {
-			// return;
+			if (mPageIndexLoading <= 1 || mPageIndexLoading >= mChapter.pageIndexMax) {
+				return;
+			}
 		}
 
 		int mPageIndexGoto = mChapter.pageIndexLastRead + (nextpage ? 1 : -1);
@@ -1175,8 +1177,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mPages.get(mPageIndexLoading).cancelDownload();
 			mChapter.pageIndexLastRead = mPageIndexLoading;
 			mPageIndexGoto = mChapter.pageIndexLastRead + (nextpage ? 1 : -1);
-			mtvTitle.setText(String.format(getString(R.string.ui_goto_pages_format),
-					mPageIndexGoto, mChapter.pageIndexMax));
+			mtvTitle.setText(String.format(getString(R.string.ui_goto_pages_format), mPageIndexGoto,
+					mChapter.pageIndexMax));
+			hideStatusBar();
 			showTitleBar();
 		}
 
@@ -1255,8 +1258,8 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 					setMessage(getString(R.string.ui_error_invalid_image));
 				}
 			} else {
-				setMessage(String.format(getString(R.string.ui_error_on_page_download),
-						mPageIndexLoading, getSiteName()));
+				setMessage(String.format(getString(R.string.ui_error_on_page_download), mPageIndexLoading,
+						getSiteName()));
 			}
 
 			// Set image

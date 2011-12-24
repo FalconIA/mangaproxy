@@ -61,8 +61,7 @@ public final class MangaListAdapter extends BaseHeadersAdapter {
 	}
 
 	@Override
-	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-			int totalItemCount) {
+	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 		// TODO Auto-generated method stub
 
 	}

@@ -23,7 +23,6 @@ import android.view.ViewConfiguration;
 import com.sonyericsson.zoom.DynamicZoomControl;
 import com.sonyericsson.zoom.ZoomState;
 
-
 public class ZoomViewOnTouchListener implements OnTouchListener {
 
 	/** TAG */
@@ -89,8 +88,7 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 		mGestureDetector = new GestureDetector(context, new GestureListener());
 		mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
 		mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-		mScaledMaximumFlingVelocity = ViewConfiguration.get(context)
-				.getScaledMaximumFlingVelocity();
+		mScaledMaximumFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
 	}
 
 	@Override
@@ -303,11 +301,9 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 			final float scrollX = e2.getX() - e1.getX();
 			final float scrollY = e2.getY() - e1.getY();
 
-			if (mFlingable
-					&& ((mIsEdgeLeft && scrollX > 0) || (mIsEdgeRight && scrollX < 0))
+			if (mFlingable && ((mIsEdgeLeft && scrollX > 0) || (mIsEdgeRight && scrollX < 0))
 					&& Math.abs(scrollX) > 1.2f * Math.abs(scrollY)
-					&& Math.abs(scrollX) > 0.5f * Math.min(mZoomView.getWidth(),
-							mZoomView.getHeight())) {
+					&& Math.abs(scrollX) > 0.5f * Math.min(mZoomView.getWidth(), mZoomView.getHeight())) {
 				if (scrollX > 0) {
 					Log.i(GESTURE_TAG, "Next Page");
 					onNextPage();

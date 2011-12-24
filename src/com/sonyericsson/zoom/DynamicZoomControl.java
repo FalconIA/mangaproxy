@@ -236,8 +236,7 @@ public class DynamicZoomControl implements Observer {
 			final long startTime = SystemClock.uptimeMillis();
 			mPanDynamicsX.update(startTime);
 			mPanDynamicsY.update(startTime);
-			final boolean isAtRest = mPanDynamicsX.isAtRest(REST_VELOCITY_TOLERANCE,
-					REST_POSITION_TOLERANCE)
+			final boolean isAtRest = mPanDynamicsX.isAtRest(REST_VELOCITY_TOLERANCE, REST_POSITION_TOLERANCE)
 					&& mPanDynamicsY.isAtRest(REST_VELOCITY_TOLERANCE, REST_POSITION_TOLERANCE);
 			mState.setPanX(mPanDynamicsX.getPosition());
 			mState.setPanY(mPanDynamicsY.getPosition());

@@ -58,10 +58,8 @@ public final class AppSQLite {
 	public static final String DATABASE_TABLE_MANGA_CREATE = ""
 			+ String.format("CREATE TABLE %s (", DATABASE_TABLE_MANGA)
 			+ String.format("%s INTEGER PRIMARY KEY AUTOINCREMENT, ", KEY_ROW_ID)
-			+ String.format("%s INT NOT NULL, ", KEY_SITE_ID)
-			+ String.format("%s TEXT NOT NULL, ", KEY_MANGA_ID)
-			+ String.format("%s TEXT, ", KEY_DISPLAYNAME)
-			+ String.format("%s INT1 DEFAULT 0, ", KEY_IS_COMPLETED)
+			+ String.format("%s INT NOT NULL, ", KEY_SITE_ID) + String.format("%s TEXT NOT NULL, ", KEY_MANGA_ID)
+			+ String.format("%s TEXT, ", KEY_DISPLAYNAME) + String.format("%s INT1 DEFAULT 0, ", KEY_IS_COMPLETED)
 			+ String.format("%s NUM DEFAULT 0, ", KEY_CHAPTER_COUNT)
 			+ String.format("%s INT1 DEFAULT 0, ", KEY_HAS_NEW_CHAPTER)
 			+ String.format("%s TEXT, ", KEY_LATEST_CHAPTER_ID)
@@ -73,8 +71,7 @@ public final class AppSQLite {
 			+ String.format("CREATE TABLE %s (", DATABASE_TABLE_CHAPTER)
 			+ String.format("%s INTEGER PRIMARY KEY AUTOINCREMENT, ", KEY_ROW_ID)
 			+ String.format("%s INT NOT NULL, ", KEY_MANGA_REF_ID)
-			+ String.format("%s TEXT NOT NULL, ", KEY_CHAPTER_ID)
-			+ String.format("%s TEXT, ", KEY_DISPLAYNAME)
+			+ String.format("%s TEXT NOT NULL, ", KEY_CHAPTER_ID) + String.format("%s TEXT, ", KEY_DISPLAYNAME)
 			+ String.format("%s NUM DEFAULT 0, ", KEY_PAGE_MAX)
 			+ String.format("%s NUM DEFAULT 0)", KEY_PAGE_LAST_READ);
 
@@ -133,8 +130,7 @@ public final class AppSQLite {
 
 	public Cursor getMangasCursor(String selection, String orderBy) throws SQLException {
 		String[] columns = new String[] { KEY_ROW_ID };
-		Cursor cursor = db.query(true, DATABASE_TABLE_MANGA, columns, selection, null, null, null,
-				orderBy, null);
+		Cursor cursor = db.query(true, DATABASE_TABLE_MANGA, columns, selection, null, null, null, orderBy, null);
 
 		if (cursor != null) {
 			cursor.moveToFirst();
@@ -143,8 +139,8 @@ public final class AppSQLite {
 	}
 
 	public Cursor getAllMangasCursor() throws SQLException {
-		return getMangasCursor(null, String.format("%s DESC, %s DESC, %s", KEY_HAS_NEW_CHAPTER,
-				KEY_UPDATED_AT, KEY_DISPLAYNAME));
+		return getMangasCursor(null,
+				String.format("%s DESC, %s DESC, %s", KEY_HAS_NEW_CHAPTER, KEY_UPDATED_AT, KEY_DISPLAYNAME));
 	}
 
 	public ArrayList<Manga> getAllMangas(String orderBy) throws SQLException {
@@ -196,8 +192,7 @@ public final class AppSQLite {
 
 	public Manga getManga(long id) throws SQLException {
 		String selection = String.format("%s=%d", KEY_ROW_ID, id);
-		Cursor cursor = db.query(true, DATABASE_TABLE_MANGA, null, selection, null, null, null,
-				null, null);
+		Cursor cursor = db.query(true, DATABASE_TABLE_MANGA, null, selection, null, null, null, null, null);
 
 		if (cursor != null) {
 			cursor.moveToFirst();
@@ -214,19 +209,17 @@ public final class AppSQLite {
 			return null;
 		}
 
-		Manga manga = Manga.getFavoriteManga(cursor.getInt(0), cursor.getInt(1),
-				cursor.getString(2), cursor.getString(3), cursor.getInt(4) != 0, cursor.getInt(5),
-				cursor.getInt(6) != 0, cursor.getString(7), cursor.getString(8),
-				cursor.getString(9), cursor.getLong(10), cursor.getString(11));
+		Manga manga = Manga
+				.getFavoriteManga(cursor.getInt(0), cursor.getInt(1), cursor.getString(2), cursor.getString(3),
+						cursor.getInt(4) != 0, cursor.getInt(5), cursor.getInt(6) != 0, cursor.getString(7),
+						cursor.getString(8), cursor.getString(9), cursor.getLong(10), cursor.getString(11));
 		return manga;
 	}
 
 	public long containsManga(Manga manga) throws SQLException {
 		String[] columns = new String[] { KEY_ROW_ID };
-		String selection = String.format("%s=%d AND %s='%s'", KEY_SITE_ID, manga.siteId,
-				KEY_MANGA_ID, manga.mangaId);
-		Cursor cursor = db.query(true, DATABASE_TABLE_MANGA, columns, selection, null, null, null,
-				null, null);
+		String selection = String.format("%s=%d AND %s='%s'", KEY_SITE_ID, manga.siteId, KEY_MANGA_ID, manga.mangaId);
+		Cursor cursor = db.query(true, DATABASE_TABLE_MANGA, columns, selection, null, null, null, null, null);
 
 		if (cursor == null || cursor.getCount() == 0) {
 			return -1;
@@ -265,8 +258,7 @@ public final class AppSQLite {
 		ContentValues values = new ContentValues();
 		values.put(KEY_IS_COMPLETED, manga.isCompleted);
 		values.put(KEY_CHAPTER_COUNT, manga.chapterCount);
-		manga.hasNewChapter = manga.lastReadChapterId == null
-				|| !manga.lastReadChapterId.equals(manga.latestChapterId);
+		manga.hasNewChapter = manga.lastReadChapterId == null || !manga.lastReadChapterId.equals(manga.latestChapterId);
 		values.put(KEY_HAS_NEW_CHAPTER, manga.hasNewChapter);
 		values.put(KEY_LATEST_CHAPTER_DISPLAYNAME, manga.latestChapterDisplayname);
 		if (manga.updatedAt != null) {
@@ -279,8 +271,7 @@ public final class AppSQLite {
 	public int updateMangaLastReadChapter(Manga manga, String chapterId) throws SQLException {
 		String selection = String.format("%s=%d", KEY_ROW_ID, manga._id);
 		ContentValues values = new ContentValues();
-		manga.hasNewChapter = manga.lastReadChapterId == null
-				|| !manga.lastReadChapterId.equals(manga.latestChapterId);
+		manga.hasNewChapter = manga.lastReadChapterId == null || !manga.lastReadChapterId.equals(manga.latestChapterId);
 		values.put(KEY_HAS_NEW_CHAPTER, manga.hasNewChapter);
 		values.put(KEY_LAST_READ_CHAPTER_ID, chapterId);
 		return db.update(DATABASE_TABLE_MANGA, values, selection, null);
@@ -290,8 +281,7 @@ public final class AppSQLite {
 		String selection = String.format("%s=%d", KEY_MANGA_REF_ID, manga._id);
 		int delChapters = db.delete(DATABASE_TABLE_CHAPTER, selection, null);
 
-		selection = String.format("%s=%d AND %s='%s'", KEY_SITE_ID, manga.siteId, KEY_MANGA_ID,
-				manga.mangaId);
+		selection = String.format("%s=%d AND %s='%s'", KEY_SITE_ID, manga.siteId, KEY_MANGA_ID, manga.mangaId);
 		int delMangas = db.delete(DATABASE_TABLE_MANGA, selection, null);
 
 		return delMangas * 1000 + delChapters;
@@ -301,9 +291,7 @@ public final class AppSQLite {
 
 	public HashMap<String, Chapter> getChaptersByManga(Manga manga) throws SQLException {
 		String selection = String.format("%s=%d", KEY_MANGA_REF_ID, manga._id);
-		Cursor cursor = db.query(true, DATABASE_TABLE_CHAPTER, null, selection, null, null, null,
-				null, null);
-
+		Cursor cursor = db.query(true, DATABASE_TABLE_CHAPTER, null, selection, null, null, null, null, null);
 
 		if (cursor == null || cursor.getCount() == 0) {
 			return null;
@@ -331,8 +319,8 @@ public final class AppSQLite {
 			manga = getManga(cursor.getInt(1));
 		}
 
-		Chapter chapter = Chapter.getFavoriteChapter(cursor.getInt(0), manga, cursor.getString(2),
-				cursor.getString(3), cursor.getInt(4), cursor.getInt(5));
+		Chapter chapter = Chapter.getFavoriteChapter(cursor.getInt(0), manga, cursor.getString(2), cursor.getString(3),
+				cursor.getInt(4), cursor.getInt(5));
 		return chapter;
 	}
 
@@ -342,10 +330,9 @@ public final class AppSQLite {
 
 	public long containsChapter(Chapter chapter) throws SQLException {
 		String[] columns = new String[] { KEY_ROW_ID };
-		String selection = String.format("%s=%d AND %s='%s'", KEY_MANGA_REF_ID, chapter.manga._id,
-				KEY_CHAPTER_ID, chapter.chapterId);
-		Cursor cursor = db.query(true, DATABASE_TABLE_CHAPTER, columns, selection, null, null,
-				null, null, null);
+		String selection = String.format("%s=%d AND %s='%s'", KEY_MANGA_REF_ID, chapter.manga._id, KEY_CHAPTER_ID,
+				chapter.chapterId);
+		Cursor cursor = db.query(true, DATABASE_TABLE_CHAPTER, columns, selection, null, null, null, null, null);
 
 		if (cursor == null || cursor.getCount() == 0) {
 			return -1;

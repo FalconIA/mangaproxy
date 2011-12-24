@@ -134,8 +134,7 @@ public final class DebugActivity extends Activity implements OnTouchListener {
 			mmiZoomFitWidth.setChecked(mZoomMode == ZoomMode.FIT_WIDTH);
 			mmiZoomFitHeight.setChecked(mZoomMode == ZoomMode.FIT_HEIGHT);
 			mmiZoomFitScreen.setChecked(mZoomMode == ZoomMode.FIT_SCREEN);
-			mZoomControl.getZoomState().setDefaultZoom(
-					computeDefaultZoom(mZoomMode, mZoomView, mBitmap));
+			mZoomControl.getZoomState().setDefaultZoom(computeDefaultZoom(mZoomMode, mZoomView, mBitmap));
 			mZoomControl.getZoomState().notifyObservers();
 			mZoomControl.startFling(0, 0);
 			return true;
@@ -160,8 +159,7 @@ public final class DebugActivity extends Activity implements OnTouchListener {
 		mZoomControl.getZoomState().setPanX(0.0f);
 		mZoomControl.getZoomState().setPanY(0.0f);
 		// mZoomControl.getZoomState().setZoom(2f);
-		mZoomControl.getZoomState().setDefaultZoom(
-				computeDefaultZoom(mZoomMode, mZoomView, mBitmap));
+		mZoomControl.getZoomState().setDefaultZoom(computeDefaultZoom(mZoomMode, mZoomView, mBitmap));
 		mZoomControl.getZoomState().notifyObservers();
 	}
 
@@ -193,8 +191,7 @@ public final class DebugActivity extends Activity implements OnTouchListener {
 			}
 
 			if (mode == ZoomMode.FIT_WIDTH_AUTO_SPLIT) {
-				if (1f * bitmap.getWidth() / view.getWidth() > 1.5f
-						&& bitmap.getWidth() > bitmap.getHeight()) {
+				if (1f * bitmap.getWidth() / view.getWidth() > 1.5f && bitmap.getWidth() > bitmap.getHeight()) {
 					zoom *= (2f + App.WIDTH_AUTO_SPLIT_MARGIN) / (1f + App.WIDTH_AUTO_SPLIT_MARGIN);
 				}
 			}

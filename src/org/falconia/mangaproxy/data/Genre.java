@@ -55,11 +55,11 @@ public final class Genre implements Serializable {
 		return genreId.equals(GENRE_ALL_ID);
 	}
 
-	public MangaList getMangaList(String source) {
+	public MangaList getMangaList(String source, String url) {
 		if (isGenreAll()) {
-			return getPlugin().getAllMangaList(source);
+			return getPlugin().getAllMangaList(source, url);
 		} else {
-			return getPlugin().getMangaList(source, this);
+			return getPlugin().getMangaList(source, url, this);
 		}
 	}
 

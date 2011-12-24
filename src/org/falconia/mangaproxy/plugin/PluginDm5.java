@@ -21,7 +21,7 @@ public class PluginDm5 extends PluginBase {
 
 	protected static final String MANGA_URL_PREFIX = "manhua-";
 
-	protected static final String PAGE_REDIRECT_URL_PREFIX = "showimage.ashx";
+	protected static final String PAGE_REDIRECT_URL_PREFIX = "showimagefun.ashx";
 
 	public PluginDm5(int siteId) {
 		super(siteId);
@@ -131,8 +131,7 @@ public class PluginDm5 extends PluginBase {
 
 	protected GregorianCalendar parseDateTime(String string) {
 		GregorianCalendar calendar = null;
-		calendar = parseDateTime(string,
-				"(\\d+)-(\\d+)-(\\d+)\\s+(\\d+)\\:(\\d+)\\:(\\d+){'YY','M','D','h','m','s'}");
+		calendar = parseDateTime(string, "(\\d+)-(\\d+)-(\\d+)\\s+(\\d+)\\:(\\d+)\\:(\\d+){'YY','M','D','h','m','s'}");
 		return calendar;
 	}
 
@@ -161,12 +160,11 @@ public class PluginDm5 extends PluginBase {
 
 	@Override
 	public Genre getGenreAll() {
-		return new Genre(Genre.GENRE_ALL_ID, String.format("%s (今日漫画)", App.UI_GENRE_ALL_TEXT),
-				getSiteId());
+		return new Genre(Genre.GENRE_ALL_ID, String.format("%s (今日漫画)", App.UI_GENRE_ALL_TEXT), getSiteId());
 	}
 
 	@Override
-	public GenreList getGenreList(String source) {
+	public GenreList getGenreList(String source, String url) {
 		GenreList list = new GenreList(getSiteId());
 
 		logI(Get_GenreList);
@@ -185,7 +183,7 @@ public class PluginDm5 extends PluginBase {
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)<ul class=\"dm_nav\">(.+?)</ul>.+?<div id=\"nav_fl2\">(.+?</div>).+?<div class=\"nav_zm[^<>]+>(.+?)</div>";
+			pattern = "(?is)<ul class=\"dm_nav\".*?>(.+?)</ul>.+?<div id=\"nav_fl2\">(.+?</div>).+?<div class=\"nav_zm[^<>]+>(.+?)</div>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
@@ -220,29 +218,29 @@ public class PluginDm5 extends PluginBase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "GenreList");
+			logE(Fail_to_process, "GenreList", url);
 		}
 
 		return list;
 	}
 
 	@Override
-	public MangaList getMangaList(String source, Genre genre) {
+	public MangaList getMangaList(String source, String url, Genre genre) {
 		logI(Get_MangaList, genre.genreId);
 		logD(Get_Source_Size_MangaList, FormatUtils.getFileSize(source, getCharset()));
 
-		return getMangaListBase(source, genre);
+		return getMangaListBase(source, url, genre);
 	}
 
 	@Override
-	public MangaList getAllMangaList(String source) {
+	public MangaList getAllMangaList(String source, String url) {
 		logI(Get_AllMangaList);
 		logD(Get_Source_Size_AllMangaList, FormatUtils.getFileSize(source, getCharset()));
 
-		return getMangaListBase(source, getGenreAll());
+		return getMangaListBase(source, url, getGenreAll());
 	}
 
-	private MangaList getMangaListBase(String source, Genre genre) {
+	private MangaList getMangaListBase(String source, String url, Genre genre) {
 		MangaList list = new MangaList(getSiteId());
 
 		if (TextUtils.isEmpty(source)) {
@@ -268,8 +266,7 @@ public class PluginDm5 extends PluginBase {
 				logD(Catched_count_in_section, matches.size(), "Mangas");
 
 				for (ArrayList<String> match : matches) {
-					Manga manga = new Manga(parseId(match.get(1)), parseName(match.get(2)), null,
-							getSiteId());
+					Manga manga = new Manga(parseId(match.get(1)), parseName(match.get(2)), null, getSiteId());
 					manga.details = "HIT: " + match.get(3);
 					manga.chapterDisplayname = parseChapterName(match.get(4), manga.displayname);
 					manga.latestChapterDisplayname = manga.chapterDisplayname;
@@ -284,8 +281,7 @@ public class PluginDm5 extends PluginBase {
 				logD(Catched_count_in_section, matches.size(), "Mangas");
 
 				for (ArrayList<String> match : matches) {
-					Manga manga = new Manga(parseId(match.get(1)), parseName(match.get(2)), null,
-							getSiteId());
+					Manga manga = new Manga(parseId(match.get(1)), parseName(match.get(2)), null, getSiteId());
 					manga.author = parseName(match.get(3));
 					manga.updatedAt = parseDate(match.get(4));
 					manga.chapterDisplayname = parseName(match.get(5));
@@ -306,14 +302,14 @@ public class PluginDm5 extends PluginBase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "MangaList");
+			logE(Fail_to_process, "MangaList", url);
 		}
 
 		return list;
 	}
 
 	@Override
-	public ChapterList getChapterList(String source, Manga manga) {
+	public ChapterList getChapterList(String source, String url, Manga manga) {
 		ChapterList list = new ChapterList(manga);
 
 		logI(Get_ChapterList, manga.mangaId);
@@ -352,8 +348,8 @@ public class PluginDm5 extends PluginBase {
 			logD(Catched_count_in_section, matches.size(), section);
 
 			for (ArrayList<String> groups2 : matches) {
-				Chapter chapter = new Chapter(parseId(groups2.get(1)), parseChapterName(
-						groups2.get(2), manga.displayname), manga);
+				Chapter chapter = new Chapter(parseId(groups2.get(1)), parseChapterName(groups2.get(2),
+						manga.displayname), manga);
 				chapter.typeId = parseChapterType(chapter.displayname);
 				list.add(chapter);
 				// logV(chapter.toLongString());
@@ -366,14 +362,14 @@ public class PluginDm5 extends PluginBase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "ChapterList");
+			logE(Fail_to_process, "ChapterList", url);
 		}
 
 		return list;
 	}
 
 	@Override
-	public String[] getChapterPages(String source, Chapter chapter) {
+	public String[] getChapterPages(String source, String url, Chapter chapter) {
 		String[] pageUrls = null;
 
 		logI(Get_Chapter, chapter.chapterId);
@@ -390,7 +386,7 @@ public class PluginDm5 extends PluginBase {
 			String pattern;
 			ArrayList<String> groups;
 
-			pattern = "(?is)var DM5_CID=(\\d+);\\s+var DM5_IMAGE_COUNT=(\\d+);";
+			pattern = "(?is)var DM5_CID=(\\d+);\\s+var DM5_IMAGE_COUNT=(\\d+);.+?id=\"dm5_key\" value=\"(.*?)\"";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
@@ -402,10 +398,14 @@ public class PluginDm5 extends PluginBase {
 			int count = parseInt(groups.get(2));
 			logV(Catched_in_section, groups.get(2), 1, "DM5_IMAGE_COUNT", count);
 
+			// Section 3
+			String key = groups.get(3);
+			logV(Catched_in_section, groups.get(3), 1, "DM5_KEY", key);
+
 			pageUrls = new String[count];
 			for (int i = 0; i < count; i++) {
-				pageUrls[i] = String.format("%s%s?cid=%d&page=%d", getUrlBase(),
-						PAGE_REDIRECT_URL_PREFIX, cid, i + 1);
+				pageUrls[i] = String.format("%s%s?cid=%d&page=%d&key=%s", getUrlBase(), PAGE_REDIRECT_URL_PREFIX, cid,
+						i + 1, key);
 			}
 
 			time = System.currentTimeMillis() - time;
@@ -415,22 +415,29 @@ public class PluginDm5 extends PluginBase {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "ChapterPages");
+			logE(Fail_to_process, "ChapterPages", url);
 		}
 
 		return pageUrls;
 	}
 
 	@Override
-	public String getPageRedirectUrl(String source) {
-		String url = null;
+	public String getPageRedirectUrl(String source, String url) {
+		String newUrl = null;
 		try {
-			url = source.split(",")[0];
+			if (source.matches("(?is)function .+")) {
+				ArrayList<ArrayList<String>> matches = Regex.matchAll("(?is)\"([^\"]+)\"", source);
+				newUrl = "http://" + matches.get(0).get(1) + matches.get(1).get(1);
+			} else if (source.matches("(?is)^http://.+,http://.+")) {
+				newUrl = source.split(",")[0];
+			} else if (source.matches("(?is)^http://.+")) {
+				newUrl = source;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			logE(Fail_to_process, "RedirectPageUrl");
+			logE(Fail_to_process, "RedirectPageUrl", url);
 		}
-		return url;
+		return newUrl;
 	}
 
 }

@@ -61,13 +61,11 @@ public final class ActivityInit extends Activity implements OnClickListener {
 			return;
 		}
 
-
 		setContentView(R.layout.main);
 		setTitle(String.format("%s (Alpha, Test only)", App.NAME));
 
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open(
-					"alpha.txt")));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open("alpha.txt")));
 			StringBuilder builder = new StringBuilder();
 			String text;
 			while ((text = reader.readLine()) != null) {
@@ -103,8 +101,7 @@ public final class ActivityInit extends Activity implements OnClickListener {
 			App.APP_EXTERNAL_FILES_DIR = App.CONTEXT.getExternalFilesDir(null);
 			App.APP_EXTERNAL_CACHE_DIR = App.CONTEXT.getExternalCacheDir();
 			if (App.APP_EXTERNAL_CACHE_DIR == null || App.APP_EXTERNAL_FILES_DIR == null
-					|| !App.APP_EXTERNAL_CACHE_DIR.canWrite()
-					|| !App.APP_EXTERNAL_FILES_DIR.canWrite()) {
+					|| !App.APP_EXTERNAL_CACHE_DIR.canWrite() || !App.APP_EXTERNAL_FILES_DIR.canWrite()) {
 				showDialog(DIALOG_UNMOUNTED_ID);
 			} else {
 				initalOnCreate();
@@ -129,7 +126,7 @@ public final class ActivityInit extends Activity implements OnClickListener {
 			ActivityMangaList.IntentHandler.startActivityMangaList(this, genre);
 			break;
 		}
-			// start ActivityChapter
+		// start ActivityChapter
 		case 2: {
 			Site site = new Site(Plugins.getPlugin(1000));
 			Manga manga = new Manga("174", "魔法先生", null, site.getSiteId());
@@ -143,7 +140,7 @@ public final class ActivityInit extends Activity implements OnClickListener {
 			ActivityChapter.IntentHandler.startActivityChapter(this, manga, chapter);
 			break;
 		}
-			// start DebugActivity
+		// start DebugActivity
 		case 3:
 			startActivity(new Intent(this, DebugActivity.class));
 			break;
@@ -191,7 +188,6 @@ public final class ActivityInit extends Activity implements OnClickListener {
 		super.onDestroy();
 		AppUtils.logV(this, "onDestroy()");
 
-
 		if (mExit) {
 			System.exit(0);
 		}
@@ -216,27 +212,21 @@ public final class ActivityInit extends Activity implements OnClickListener {
 		switch (id) {
 		case DIALOG_UNMOUNTED_ID:
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(R.string.dialog_unmounted_title)
-					.setMessage(R.string.dialog_unmounted_message)
+			builder.setTitle(R.string.dialog_unmounted_title).setMessage(R.string.dialog_unmounted_message)
 					.setCancelable(false)
-					.setPositiveButton(R.string.dialog_unmounted_try_again,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface paramDialogInterface,
-										int paramInt) {
-									checkExternalStorageMounted();
-								}
-							})
-					.setNegativeButton(R.string.dialog_unmounted_exit,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface paramDialogInterface,
-										int paramInt) {
-									dismissDialog(DIALOG_UNMOUNTED_ID);
-									mExit = true;
-									finish();
-								}
-							});
+					.setPositiveButton(R.string.dialog_unmounted_try_again, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+							checkExternalStorageMounted();
+						}
+					}).setNegativeButton(R.string.dialog_unmounted_exit, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+							dismissDialog(DIALOG_UNMOUNTED_ID);
+							mExit = true;
+							finish();
+						}
+					});
 			dialog = builder.create();
 			dialog.setOnDismissListener(new OnDismissListener() {
 				@Override
