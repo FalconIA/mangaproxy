@@ -20,6 +20,11 @@ http://code.google.com/p/mangaproxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.4.3
+=============
+- Fix crash when update favorite manga list.
+- Fix crash when cancel source processing.
+
 Version 1.4.2
 =============
 - [Plugin 99770] Fix AllMangaList / ChapterList / ChapterPages.

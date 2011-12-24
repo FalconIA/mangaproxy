@@ -50,6 +50,9 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 		logD("Download start.");
 		if (mListener != null) {
 			mListener.onPreDownload();
+		} else {
+			logD("onPreExecute()");
+			logW("Cancelled or null listener.");
 		}
 	}
 
@@ -58,6 +61,9 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 		logD("Download done.");
 		if (!mCancelled && mListener != null) {
 			mListener.onPostDownload(result);
+		} else {
+			logD("onPostExecute()");
+			logW("Cancelled or null listener.");
 		}
 	}
 
@@ -71,6 +77,9 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	protected void onProgressUpdate(Integer... values) {
 		if (!mCancelled && mListener != null) {
 			mListener.onDownloadProgressUpdate(values[0], mFileSize);
+		} else {
+			logD("onProgressUpdate()");
+			logW("Cancelled or null listener.");
 		}
 	}
 
@@ -170,8 +179,11 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 		log(Log.DEBUG, msg);
 	}
 
+	private void logW(String msg) {
+		log(Log.WARN, msg);
+	}
+
 	private void logE(String msg) {
 		log(Log.ERROR, msg);
 	}
-
 }

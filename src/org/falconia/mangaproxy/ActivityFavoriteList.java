@@ -76,12 +76,15 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 			if (result == null || result.length == 0) {
 				AppUtils.logE(this, "Downloaded empty source.");
 				dequeue();
+				if (mUpdating) {
+					update(mQueue.peek());
+				}
 				return;
 			}
 
 			String source = EncodingUtils.getString(result, mUpdatedManga.getSiteCharset());
 			mProcessTask = new SourceProcessTask(this);
-			mProcessTask.execute(source);
+			mProcessTask.execute(source, mUpdatedManga.getUrl());
 		}
 
 		@Override
@@ -116,8 +119,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 					AppUtils.logE(this, String.format("Fail to update manga %s.", mUpdatedManga));
 				}
 			}
+			dequeue();
 			if (mUpdating) {
-				dequeue();
 				update(mQueue.peek());
 			}
 		}
@@ -144,12 +147,12 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		}
 
 		public void cancel() {
-			clear();
-
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
 				mDownloader.cancelDownload();
 			}
+
+			clear();
 		}
 
 		public boolean isUpdating() {
@@ -171,7 +174,7 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 
 		private void clear() {
 			mQueue.clear();
-			mUpdatedManga = null;
+			// mUpdatedManga = null;
 			mUpdated = 0;
 			mUpdating = false;
 
@@ -470,8 +473,6 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 		if (mChecker != null) {
 			mChecker.cancel();
 		}
-
-		mDB.close();
 	}
 
 	@Override
@@ -486,6 +487,8 @@ public final class ActivityFavoriteList extends ActivityBase implements OnClickL
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+
+		mDB.close();
 
 		if (mExit) {
 			System.exit(0);
