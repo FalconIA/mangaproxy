@@ -83,7 +83,7 @@ public final class App extends Application {
 	public static int TIME_AUTO_HIDE = 5000;
 
 	// Settings
-	// public static int IMG_PRELOAD_MAX = 2;
+	public static int MAX_CACHE_IMGS = 400;
 	public static float WIDTH_AUTO_SPLIT_THRESHOLD = 1.0f;
 	public static float WIDTH_AUTO_SPLIT_MARGIN = .2f;
 	public static int MAX_RETRY_DOWNLOAD_IMG = 3;

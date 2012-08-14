@@ -1349,8 +1349,10 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		case PREV:
 			mZoomControl.pan(-0.5f, 0f);
 			break;
+		default:
+			mZoomControl.startFling(0, 0);
+			break;
 		}
-		mZoomControl.startFling(0, 0);
 	}
 
 	private float computeDefaultZoom(ZoomMode mode, ImageZoomView view) {

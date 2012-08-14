@@ -67,7 +67,7 @@ public final class AppCache {
 		int count = 0;
 		if (file.exists() && file.isDirectory()) {
 			File[] files = file.listFiles();
-			if (files.length > 30) {
+			if (files.length > App.MAX_CACHE_IMGS) {
 				for (File child : files) {
 					if (child.delete()) {
 						count++;
