@@ -63,6 +63,8 @@ public abstract class PluginBase implements ITag, IPlugin {
 
 	protected static final String Source_is_empty = "Source is empty.";
 
+	protected static final String BASE36_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz";
+
 	protected static final String CHARSET_GBK = HttpUtils.CHARSET_GBK;
 	protected static final String CHARSET_UTF8 = HttpUtils.CHARSET_UTF8;
 
@@ -210,6 +212,10 @@ public abstract class PluginBase implements ITag, IPlugin {
 			i /= 256;
 		}
 		return new String(bits);
+	}
+
+	protected String intToBase36(int i) {
+		return BASE36_CHARS.substring(i, i + 1);
 	}
 
 	@Override

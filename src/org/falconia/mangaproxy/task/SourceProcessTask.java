@@ -17,6 +17,10 @@ public class SourceProcessTask extends AsyncTask<String, Void, Integer> {
 	@Override
 	protected Integer doInBackground(String... params) {
 		mCancelled = false;
+		if (params.length != 2) {
+			AppUtils.logE(this, "Invalid number of arguments.");
+			return 0;
+		}
 		int result = mListener.onSourceProcess(params[0], params[1]);
 		if (!mCancelled && mListener != null) {
 			return result;

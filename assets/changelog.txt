@@ -20,6 +20,12 @@ http://code.google.com/p/mangaproxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.4.4
+=============
+- [Plugin DM5] Fix ChapterList / ChapterPages.
+- Fix crash when press next page in genre manga list.
+- Change max cached images to 400.
+
 Version 1.4.3
 =============
 - Fix crash when update favorite manga list.

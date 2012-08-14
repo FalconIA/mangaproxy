@@ -21,7 +21,7 @@ public class PluginDm5 extends PluginBase {
 
 	protected static final String MANGA_URL_PREFIX = "manhua-";
 
-	protected static final String PAGE_REDIRECT_URL_PREFIX = "showimagefun.ashx";
+	protected static final String PAGE_REDIRECT_URL_PREFIX = "chapterimagefun.ashx";
 
 	public PluginDm5(int siteId) {
 		super(siteId);
@@ -141,7 +141,10 @@ public class PluginDm5 extends PluginBase {
 	}
 
 	protected String parseChapterName(String string, String manga) {
-		if (string.startsWith(manga)) {
+		if (string.startsWith(manga + "漫画")) {
+			string = string.substring(manga.length() + 2);
+		}
+		else if (string.startsWith(manga)) {
 			string = string.substring(manga.length());
 		}
 		return parseName(string);
@@ -343,7 +346,7 @@ public class PluginDm5 extends PluginBase {
 
 			section = "ul";
 			// logV(groups.get(3));
-			pattern = "(?is)<li><a [^<>]*href=\"/m(\\d+)/\"[^<>]*>(.+?)</a>.+?</li>";
+			pattern = "(?is)<li[^<>]*><a [^<>]*href=\"/m(\\d+)/\"[^<>]*>(.+?)</a>.+?</li>";
 			matches = Regex.matchAll(pattern, groups.get(3));
 			logD(Catched_count_in_section, matches.size(), section);
 
@@ -386,7 +389,7 @@ public class PluginDm5 extends PluginBase {
 			String pattern;
 			ArrayList<String> groups;
 
-			pattern = "(?is)var DM5_CID=(\\d+);\\s+var DM5_IMAGE_COUNT=(\\d+);.+?id=\"dm5_key\" value=\"(.*?)\"";
+			pattern = "(?is)var DM5_CID=(\\d+);\\s+var DM5_IMAGE_COUNT=(\\d+);.+?id=\"dm5_key\" value=\"(.*?)\"(?:.+?eval\\(function\\(p,a,c,k,e,d\\)\\{.+?return p;\\}\\('(.+?)(?<!\\\\)',\\d+,\\d+,'([^']+?)')?";//
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
@@ -401,6 +404,19 @@ public class PluginDm5 extends PluginBase {
 			// Section 3
 			String key = groups.get(3);
 			logV(Catched_in_section, groups.get(3), 1, "DM5_KEY", key);
+
+			// Section 4
+			if (groups.get(4) != null) {
+				String _p = groups.get(4).replace("\\'", "'");
+				String[] _d = groups.get(5).split("\\|");
+				for (int i = 0; i < _d.length; i++) {
+					if (_d[i].length() == 0)
+						continue;
+					_p = _p.replaceAll("\\b" + intToBase36(i) + "\\b", _d[i]);
+				}
+				_p = Regex.match(";.+?=(.+?);", _p).get(1);
+				key = _p.replaceAll("(^'|'$|'\\+')", "");
+			}
 
 			pageUrls = new String[count];
 			for (int i = 0; i < count; i++) {
@@ -426,8 +442,11 @@ public class PluginDm5 extends PluginBase {
 		String newUrl = null;
 		try {
 			if (source.matches("(?is)function .+")) {
-				ArrayList<ArrayList<String>> matches = Regex.matchAll("(?is)\"([^\"]+)\"", source);
+				ArrayList<ArrayList<String>> matches = Regex.matchAll("(?is)\"(?:http://)?([^\"]+)\"", source);
 				newUrl = "http://" + matches.get(0).get(1) + matches.get(1).get(1);
+			} else if (source.matches("(?is)^http://.+http://.+,http://.+http://.+")) {
+				ArrayList<ArrayList<String>> matches = Regex.matchAll("(?is)(http://.+?\\.(?:png|jpg|gif|bmp|tga))", source.split(",")[0]);
+				newUrl = matches.get(0).get(1);
 			} else if (source.matches("(?is)^http://.+,http://.+")) {
 				newUrl = source.split(",")[0];
 			} else if (source.matches("(?is)^http://.+")) {

@@ -118,7 +118,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 
 			setMode(MODE_PROCESS);
 			ActivityMangaList.this.mSourceProcessTask = new SourceProcessTask(this);
-			ActivityMangaList.this.mSourceProcessTask.execute(source);
+			ActivityMangaList.this.mSourceProcessTask.execute(source, mGenre.getUrl(mPageLoaded + 1));
 		}
 
 		@Override
