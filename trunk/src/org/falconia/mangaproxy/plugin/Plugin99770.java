@@ -15,6 +15,7 @@ import org.falconia.mangaproxy.utils.FormatUtils;
 import org.falconia.mangaproxy.utils.Regex;
 
 import android.text.TextUtils;
+import android.util.SparseArray;
 
 public class Plugin99770 extends PluginBase {
 	protected static final String GENRE_URL_PREFIX_1 = "comiclist/";
@@ -51,7 +52,7 @@ public class Plugin99770 extends PluginBase {
 
 	@Override
 	public String getUrlBase() {
-		return "http://mh.99770.cc/";
+		return "http://www.99770.cc/";
 	}
 
 	@Override
@@ -516,14 +517,17 @@ public class Plugin99770 extends PluginBase {
 			matches = Regex.matchAll(pattern, source);
 			logD(Catched_count_in_section, matches.size(), "ImgServers");
 
-			String[] imgServers = new String[parseInt(count)];
+			SparseArray<String> imgServers = new SparseArray<String>();
 			for (ArrayList<String> groups : matches) {
 				if (groups.get(1) == null) {
-					imgServers[parseInt(groups.get(2))] = groups.get(3);
+					imgServers.put(parseInt(groups.get(2)), groups.get(3));
 				}
 			}
+			String[] imgServersArray = new String[imgServers.size()];
+			for (int i = 0; i < imgServers.size(); i++)
+				imgServersArray[i] = imgServers.get(i, "");
 
-			chapter.setDynamicImgServers(imgServers);
+			chapter.setDynamicImgServers(imgServersArray);
 
 			time = System.currentTimeMillis() - time;
 			logD(Process_Time_DynamicImgServers, time);

@@ -7,9 +7,9 @@
 		<item>E4DDB658</item>
 	</string-array>
 	<string-array name="orientations">
-		<item>Use Motion Sensor</item>
-		<item>Portrait</item>
-		<item>Landscape</item>
+		<item>@string/menu_item_orientation_user</item>
+		<item>@string/menu_item_orientation_portrait</item>
+		<item>@string/menu_item_orientation_landscape</item>
 	</string-array>
 	<string-array name="orientations_values">
 		<item>2</item>
@@ -31,12 +31,12 @@
 		<item>4</item>
 	</string-array>
 	<string-array name="preload">
-		<item>1 page</item>
-		<item>2 pages (default)</item>
-		<item>3 pages</item>
-		<item>4 pages</item>
-		<item>5 pages</item>
-		<item>6 pages</item>
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+		<item>4</item>
+		<item>5</item>
+		<item>6</item>
 	</string-array>
 	<string-array name="preload_values">
 		<item>1</item>
