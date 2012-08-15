@@ -299,12 +299,12 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 			Log.v(GESTURE_TAG, "Fling");
 
 			final float scrollX = e2.getX() - e1.getX();
-			final float scrollY = e2.getY() - e1.getY();
 
 			if (mFlingable && ((mIsEdgeLeft && scrollX > 0) || (mIsEdgeRight && scrollX < 0))
-					&& Math.abs(scrollX) > 1.2f * Math.abs(scrollY)
-					&& Math.abs(scrollX) > 0.5f * Math.min(mZoomView.getWidth(), mZoomView.getHeight())) {
-				if (scrollX > 0) {
+					&& Math.abs(velocityX) > App.SWIPE_THRESHOLD_VELOCITY
+					&& Math.abs(velocityY) < Math.abs(velocityX) / 2
+					&& Math.abs(scrollX) > App.SWIPE_MIN_DISTANCE) {
+				if (velocityX > 0) {
 					Log.i(GESTURE_TAG, "Next Page");
 					onNextPage();
 				} else {

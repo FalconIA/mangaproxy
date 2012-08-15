@@ -81,12 +81,15 @@ public final class App extends Application {
 
 	// Chapter
 	public static int TIME_AUTO_HIDE = 5000;
+	public static final int SWIPE_MIN_DISTANCE = 120;   
+	public static final int SWIPE_MAX_OFF_PATH = 250;   
+	public static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
 	// Settings
-	public static int MAX_CACHE_IMGS = 400;
 	public static float WIDTH_AUTO_SPLIT_THRESHOLD = 1.0f;
 	public static float WIDTH_AUTO_SPLIT_MARGIN = .2f;
 	public static int MAX_RETRY_DOWNLOAD_IMG = 3;
+	public static int MAX_CACHE_IMGS = 400;
 
 	static {
 

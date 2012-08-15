@@ -22,7 +22,7 @@
 			android:layout_weight="1.0" android:id="@+id/mtvDetails"
 			android:layout_width="match_parent" android:text="-" />
 		<TextView android:layout_height="wrap_content" android:id="@+id/mtvCompleted"
-			android:text="Completed" android:layout_width="wrap_content"
+			android:text="@string/ui_completed" android:layout_width="wrap_content"
 			android:textColor="@color/highlight" android:layout_marginLeft="10.0dip" />
 		<TextView android:layout_height="wrap_content" android:id="@+id/mtvSiteName"
 			android:text="-" android:layout_width="wrap_content"
