@@ -1269,6 +1269,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			showTitleBar();
 			hideStatusBar();
 			mZoomListener.setFlingable(true);
+			//mZoomListener.onTouch(v, event);
 
 			// TODO Update database
 			if (mChapter.isFavorite) {
@@ -1350,9 +1351,9 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			mZoomControl.pan(-0.5f, 0f);
 			break;
 		default:
-			mZoomControl.startFling(0, 0);
 			break;
 		}
+		mZoomControl.startFling(0, 0);
 	}
 
 	private float computeDefaultZoom(ZoomMode mode, ImageZoomView view) {

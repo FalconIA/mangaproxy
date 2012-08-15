@@ -20,6 +20,10 @@ http://code.google.com/p/mangaproxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.4.4.1
+===============
+- Fix mistaken removal of changing page effect.
+
 Version 1.4.4
 =============
 - [Plugin DM5] Fix ChapterList / ChapterPages.
