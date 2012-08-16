@@ -39,6 +39,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 
 		private final String mCharset;
 
+		private boolean mFinishOnCancel;
 		private String mUrl;
 		private DownloadTask mDownloader;
 		private ProgressDialog mDownloadDialog;
@@ -89,7 +90,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 		public void onCancel(DialogInterface dialog) {
 			AppUtils.logD(this, "onCancel() @DownloadDialog");
 			cancelDownload();
-			if (!mProcessed) {
+			if (mFinishOnCancel && !mProcessed) {
 				finish();
 			}
 		}
@@ -115,6 +116,11 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 		}
 
 		public void download(String url) {
+			download(url, true);
+		}
+
+		public void download(String url, boolean finishOnCancel) {
+			mFinishOnCancel = finishOnCancel;
 			mUrl = url;
 			mDownloader = new DownloadTask(this);
 			mDownloader.execute(url);

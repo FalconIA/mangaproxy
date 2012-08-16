@@ -9,6 +9,7 @@ import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.ChapterList;
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.GenreList;
+import org.falconia.mangaproxy.data.GenreSearch;
 import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.data.MangaList;
 import org.falconia.mangaproxy.utils.FormatUtils;
@@ -19,8 +20,8 @@ import android.text.TextUtils;
 public class PluginDm5 extends PluginBase {
 	protected static final String GENRE_ALL_ID = "new";
 
+	protected static final String SEARCH_URL_FORMAT = "search?title=%s&page=%d";
 	protected static final String MANGA_URL_PREFIX = "manhua-";
-
 	protected static final String PAGE_REDIRECT_URL_PREFIX = "chapterimagefun.ashx";
 
 	public PluginDm5(int siteId) {
@@ -54,7 +55,7 @@ public class PluginDm5 extends PluginBase {
 
 	@Override
 	public boolean hasSearchEngine() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -107,6 +108,13 @@ public class PluginDm5 extends PluginBase {
 	}
 
 	@Override
+	public String getSearchUrl(GenreSearch genreSearch, int page) {
+		String url = getUrlBase() + String.format(SEARCH_URL_FORMAT, genreSearch.search, page);
+		logI(Get_URL_of_SearchMangaList, url);
+		return url;
+	}
+
+	@Override
 	public String getMangaUrlPrefix() {
 		return MANGA_URL_PREFIX;
 	}
@@ -143,8 +151,7 @@ public class PluginDm5 extends PluginBase {
 	protected String parseChapterName(String string, String manga) {
 		if (string.startsWith(manga + "漫画")) {
 			string = string.substring(manga.length() + 2);
-		}
-		else if (string.startsWith(manga)) {
+		} else if (string.startsWith(manga)) {
 			string = string.substring(manga.length());
 		}
 		return parseName(string);
@@ -296,7 +303,7 @@ public class PluginDm5 extends PluginBase {
 
 			// Section 2
 			list.pageIndexMax = parseInt(groups.get(2));
-			logV(Catched_in_section, groups.get(2), 0, "PageIndexMax", list.pageIndexMax);
+			logV(Catched_in_section, groups.get(2), 2, "PageIndexMax", list.pageIndexMax);
 
 			time = System.currentTimeMillis() - time;
 			logD(Process_Time_MangaList, time);
@@ -306,6 +313,64 @@ public class PluginDm5 extends PluginBase {
 		} catch (Exception e) {
 			e.printStackTrace();
 			logE(Fail_to_process, "MangaList", url);
+		}
+
+		return list;
+	}
+
+	@Override
+	public MangaList getSearchMangaList(String source, String url) {
+		MangaList list = new MangaList(getSiteId());
+
+		logI(Get_SearchMangaList);
+		logD(Get_Source_Size_SearchMangaList, FormatUtils.getFileSize(source, getCharset()));
+
+		if (TextUtils.isEmpty(source)) {
+			logE(Source_is_empty);
+			return list;
+		}
+
+		try {
+			long time = System.currentTimeMillis();
+
+			String pattern;
+			ArrayList<String> groups;
+			ArrayList<ArrayList<String>> matches;
+
+			pattern = "(?is)<div[^<>]*?\\s+id=\"search_nrl\"[^<>]*?>(.+)</div>\\s*<div[^<>]*?\\s+id=\"search_nrr\"[^<>]*?>.+?<a[^<>]*?>(\\d+)</a>\\s*<a[^<>]*?>下一页</a>";
+			groups = Regex.match(pattern, source);
+			logD(Catched_sections, groups.size() - 1);
+
+			// Section 1
+			pattern = "(?is)<div[^<>]*>.*?<dl[^<>]*>\\s*<a href=\"/manhua-([^\"]+)/\" title=\"([^\"]+?)\"[^<>]*>.*?</dl>.*?<dt[^<>]*>.*?漫画作者：.*?<a [^<>]+>(.+?)</a>.*?漫画人气：.*?(\\d+)次点击.*?漫画类型：(.*?)收藏人气：.*?(\\d+)次收藏.*?最后更新于 ([-0-9]+).*?（([^（）]+)）.*?最新章节.*?：.*?<a [^<>]+>(.+?)</a>.*?</dt>";
+			matches = Regex.matchAll(pattern, groups.get(1));
+			logD(Catched_count_in_section, matches.size(), "Mangas");
+
+			for (ArrayList<String> match : matches) {
+				Manga manga = new Manga(parseId(match.get(1)), parseName(match.get(2)), null, getSiteId());
+				manga.author = parseAuthorName(match.get(3).replaceAll("(?is)<[^<>]+>", ""));
+				manga.details = "HIT: " + match.get(4);
+				manga.details = "类型: " + parseName(match.get(5).replaceAll("(?is)<[^<>]+>", "")) + ", " + manga.details;
+				manga.updatedAt = parseDate(match.get(7));
+				manga.isCompleted = parseIsCompleted(match.get(8));
+				manga.chapterDisplayname = parseName(match.get(9));
+				manga.setDetailsTemplate("%author%\n%details%\n%updatedAt%, %chapterDisplayname%");
+				list.add(manga, true);
+				// logV(manga.toLongString());
+			}
+
+			// Section 2
+			list.pageIndexMax = parseInt(groups.get(2));
+			logV(Catched_in_section, groups.get(2), 2, "PageIndexMax", list.pageIndexMax);
+
+			time = System.currentTimeMillis() - time;
+			logD(Process_Time_MangaList, time);
+
+			logV(list.toString());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logE(Fail_to_process, "SearchMangaList", url);
 		}
 
 		return list;
@@ -445,7 +510,8 @@ public class PluginDm5 extends PluginBase {
 				ArrayList<ArrayList<String>> matches = Regex.matchAll("(?is)\"(?:http://)?([^\"]+)\"", source);
 				newUrl = "http://" + matches.get(0).get(1) + matches.get(1).get(1);
 			} else if (source.matches("(?is)^http://.+http://.+,http://.+http://.+")) {
-				ArrayList<ArrayList<String>> matches = Regex.matchAll("(?is)(http://.+?\\.(?:png|jpg|gif|bmp|tga))", source.split(",")[0]);
+				ArrayList<ArrayList<String>> matches = Regex.matchAll("(?is)(http://.+?\\.(?:png|jpg|gif|bmp|tga))",
+						source.split(",")[0]);
 				newUrl = matches.get(0).get(1);
 			} else if (source.matches("(?is)^http://.+,http://.+")) {
 				newUrl = source.split(",")[0];

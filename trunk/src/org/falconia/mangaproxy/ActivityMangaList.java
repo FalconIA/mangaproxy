@@ -434,10 +434,12 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		Dialog dialog;
 		switch (id) {
 		case DIALOG_DOWNLOAD_ID:
-			dialog = mSourceDownloader.createDownloadDialog(R.string.source_of_genre_list);
+			dialog = mSourceDownloader.createDownloadDialog(mGenre.isGenreSearch() ? R.string.source_of_search_list
+					: R.string.source_of_genre_list);
 			break;
 		case DIALOG_PROCESS_ID:
-			dialog = createProcessDialog(R.string.source_of_genre_list);
+			dialog = createProcessDialog(mGenre.isGenreSearch() ? R.string.source_of_search_list
+					: R.string.source_of_genre_list);
 			break;
 		default:
 			dialog = super.onCreateDialog(id);

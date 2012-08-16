@@ -6,12 +6,13 @@ import java.util.TimeZone;
 import org.falconia.mangaproxy.plugin.IPlugin;
 import org.falconia.mangaproxy.plugin.Plugins;
 
-public final class Genre implements Serializable {
+public class Genre implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String GENRE_UNKNOWN_ID = "GENRE_UNKNOWN";
 	public static final String GENRE_ALL_ID = "GENRE_ALL";
+	public static final String GENRE_SEARCH_ID = "GENRE_SEARCH";
 
 	public final int siteId;
 	public final String genreId;
@@ -23,7 +24,7 @@ public final class Genre implements Serializable {
 		this.siteId = siteId;
 	}
 
-	private IPlugin getPlugin() {
+	protected IPlugin getPlugin() {
 		return Plugins.getPlugin(siteId);
 	}
 
@@ -53,6 +54,10 @@ public final class Genre implements Serializable {
 
 	public boolean isGenreAll() {
 		return genreId.equals(GENRE_ALL_ID);
+	}
+
+	public boolean isGenreSearch() {
+		return genreId.equals(GENRE_SEARCH_ID);
 	}
 
 	public MangaList getMangaList(String source, String url) {
