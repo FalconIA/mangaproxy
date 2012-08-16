@@ -1,5 +1,6 @@
 package org.falconia.mangaproxy.plugin;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -17,7 +18,7 @@ import org.falconia.mangaproxy.utils.Regex;
 
 import android.text.TextUtils;
 
-public class PluginDm5 extends PluginBase {
+public final class PluginDm5 extends PluginBase {
 	protected static final String GENRE_ALL_ID = "new";
 
 	protected static final String SEARCH_URL_FORMAT = "search?title=%s&page=%d";
@@ -486,7 +487,7 @@ public class PluginDm5 extends PluginBase {
 			pageUrls = new String[count];
 			for (int i = 0; i < count; i++) {
 				pageUrls[i] = String.format("%s%s?cid=%d&page=%d&key=%s", getUrlBase(), PAGE_REDIRECT_URL_PREFIX, cid,
-						i + 1, key);
+						i + 1, URLEncoder.encode(key));
 			}
 
 			time = System.currentTimeMillis() - time;

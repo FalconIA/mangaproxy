@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import org.apache.http.util.EncodingUtils;
 import org.falconia.mangaproxy.App;
 import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.ChapterList;
@@ -13,35 +14,35 @@ import org.falconia.mangaproxy.data.GenreList;
 import org.falconia.mangaproxy.data.GenreSearch;
 import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.data.MangaList;
+import org.falconia.mangaproxy.task.DownloadTask;
 import org.falconia.mangaproxy.utils.FormatUtils;
 import org.falconia.mangaproxy.utils.Regex;
 
 import android.text.TextUtils;
 import android.util.SparseArray;
 
-public final class Plugin99770 extends PluginBase {
-	protected static final String GENRE_URL_PREFIX_1 = "comiclist/";
-	protected static final String GENRE_URL_PREFIX_2 = "comicabc/";
+public final class PluginHhcomic extends PluginBase {
+	protected static final String GENRE_URL_PREFIX_1 = "hhlist/";
+	protected static final String GENRE_URL_PREFIX_2 = "hhABC/";
 	protected static final String GENRE_ALL_URL = "sitemap/";
 
-	protected static final String URL_BASE_SEARCH = "http://so.dmwz.net/";
-	protected static final String URL_BASE_3G = "http://3gmanhua.com/";
+	protected static final String URL_BASE_3348 = "http://3348.net/";
 
-	protected static final String SEARCH_URL_FORMAT = "?key=%s&pageindex=%d";
+	protected static final String SEARCH_URL_FORMAT = "http://m.baidu.com/s?word=site:(hhcomic.com)+%s&pn=%d";
 	protected static final String MANGA_URL_PREFIX = "comic/";
 
-	public Plugin99770(int siteId) {
+	public PluginHhcomic(int siteId) {
 		super(siteId);
 	}
 
 	@Override
 	public String getName() {
-		return "99770";
+		return "HHcomic";
 	}
 
 	@Override
 	public String getDisplayname() {
-		return "99770漫画";
+		return "汗汗漫画";
 	}
 
 	@Override
@@ -56,7 +57,7 @@ public final class Plugin99770 extends PluginBase {
 
 	@Override
 	public String getUrlBase() {
-		return "http://www.99770.cc/";
+		return "http://hhcomic.com/";
 	}
 
 	@Override
@@ -120,7 +121,7 @@ public final class Plugin99770 extends PluginBase {
 			search = URLEncoder.encode(genreSearch.search, getCharset());
 		} catch (Exception e) {
 		}
-		String url = URL_BASE_SEARCH + String.format(SEARCH_URL_FORMAT, search, page);
+		String url = String.format(SEARCH_URL_FORMAT, search, (page - 1) * 10);
 		logI(Get_URL_of_SearchMangaList, url);
 		return url;
 	}
@@ -137,7 +138,7 @@ public final class Plugin99770 extends PluginBase {
 
 	@Override
 	public String getChapterUrl(Chapter chapter, Manga manga) {
-		String url = URL_BASE_3G + String.format("m/%s/%s.htm", manga.mangaId, chapter.chapterId);
+		String url = URL_BASE_3348 + String.format("art/%s/hh%s.htm", manga.mangaId, chapter.chapterId);
 		logI(Get_URL_of_Chapter, chapter.chapterId, url);
 		return url;
 	}
@@ -152,13 +153,6 @@ public final class Plugin99770 extends PluginBase {
 		GregorianCalendar calendar = null;
 		calendar = parseDateTime(string, "(\\d+)/(\\d+)/(\\d+) (\\d+)\\:(\\d+)\\:(\\d+){'YY','M','D','h','m','s'}");
 		return calendar;
-	}
-
-	@Override
-	protected String parseGenreName(String string) {
-		string = super.parseGenreName(string);
-		string = string.replaceAll("^漫画$", "视界漫画");
-		return string;
 	}
 
 	@Override
@@ -198,10 +192,10 @@ public final class Plugin99770 extends PluginBase {
 			String pattern;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)(<td.*?>按字母筛选：.*?</td>)";
+			pattern = "(?is)(<td[^<>]*?>按字母筛选：.*?</td>)";
 			html2 = Regex.matchString(pattern, source);
 
-			pattern = "(?is)<a\\s+href=\"/([^\"/]+?)/\"\\s*>(.+?)</a>";
+			pattern = "(?is)<a\\s+href=\"/([^\"/]+?)/\"[^<>]*>(.+?)</a>";
 			matches = Regex.matchAll(pattern, html2);
 
 			for (ArrayList<String> groups : matches) {
@@ -295,7 +289,7 @@ public final class Plugin99770 extends PluginBase {
 				if (!genre.genreId.equals("top")) {
 					// Section 1 (Genre)
 					String section = "Last Updates";
-					pattern = "(?is)<table .+?>[\\s\\d·]+<a href=\"/\\w+/(\\d+)/\".*?>\\s*(.+?)\\s*</a>.+?<b>(\\d*)</b><.+?>集\\(卷\\)<.+?>〖(.+?)〗<.+?>\\s*(?:<img [^<>]+>\\s*)?<.+?>([\\d/]+)<.+?</table>";
+					pattern = "(?is)<table .+?>[\\s\\d·]+<a href=\"/\\w+/(\\d+)/\".*?>\\s*(.+?)\\s*</a>.+?<b>(\\d*)</b><.+?>集\\(卷\\)<.+?>[\\[〖](.+?)[〗\\]]<.+?>\\s*(?:<img [^<>]+>\\s*)?<.+?>([\\d/]+)<.+?</table>";
 					matches = Regex.matchAll(pattern, groups.get(1));
 					logD(Catched_count_in_section, matches.size(), section);
 
@@ -313,7 +307,7 @@ public final class Plugin99770 extends PluginBase {
 					// Section 2 (Genre Top)
 					// logV("%s", groups.get(1));
 					String section = "Most Hits";
-					pattern = "(?is)<table .+?>[\\s\\d·]+<a href=\"/?\\w+/(\\d+)/?\".*?>\\s*(.+?)\\s*</a>.*?<font.*?>(\\d*)</font>集\\(卷\\)〖(.+?)〗\\s*<.+?>共<font.*?>(\\d+)</font>人推荐，漫友给出<font.*?>([\\d\\.]+)</font>分，([\\d/]+)<.+?</table>";
+					pattern = "(?is)<table .+?>[\\s\\d·]+<a href=\"/?\\w+/(\\d+)/?\".*?>\\s*(.+?)\\s*</a>.*?<font.*?>(\\d*)</font>集\\(卷\\)[\\[〖](.+?)[〗\\]]\\s*<.+?>共<font.*?>(\\d+)</font>人推荐，漫友给出<font.*?>([\\d\\.]+)</font>分，([\\d/]+)<.+?</table>";
 					matches = Regex.matchAll(pattern, groups.get(1));
 					logD(Catched_count_in_section, matches.size(), section);
 
@@ -407,28 +401,24 @@ public final class Plugin99770 extends PluginBase {
 		try {
 			long time = System.currentTimeMillis();
 
+			source = EncodingUtils.getString(DownloadTask.DownloadBytes, CHARSET_UTF8);
+
 			String pattern;
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)<span[^<>]*?\\s+id=\"labPageCount\"[^<>]*?>(\\d+)</span>.+?<div[^<>]*?\\s+class=\"dSHtm\"[^<>]*?>(.+?)</div>\\s*</div>";
+			pattern = "(?is)<div[^<>]*? (?:id=\"results\"|class=\"reswrap\")[^<>]*?>(.+?)<div[^<>]*? (?:id=\"pagenav\"|class=\"pagenav\")[^<>]*?>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
 			// Section 1
-			list.pageIndexMax = parseInt(groups.get(1));
-			logV(Catched_in_section, groups.get(1), 1, "PageIndexMax", list.pageIndexMax);
-
-			// Section 2
-			pattern = "(?is)<div><a[^<>]*?\\s+href='[^']+?/\\w+/(\\d+)/?'[^<>]*?><[^<>]+>(.+?)</a>.+?〖(.+?)〗.+?>(\\d+)<.+?集";//
-			matches = Regex.matchAll(pattern, groups.get(2));
+			pattern = "(?is)<a[^<>]*?\\s+href=\"[^\"]+?src=" + (getUrlBase() + MANGA_URL_PREFIX).replace("/", "%2F").replace(":", "%3A") + "(\\d+)%2F\"[^<>]*?>(?:\\d+&#160;)?(.+?)</a>";
+			matches = Regex.matchAll(pattern, groups.get(1));
 			logD(Catched_count_in_section, matches.size(), "Mangas");
 
 			for (ArrayList<String> match : matches) {
-				Manga manga = new Manga(parseId(match.get(1)), parseName(match.get(2)), null, getSiteId());
-				manga.isCompleted = parseIsCompleted(match.get(3));
-				manga.chapterCount = parseInt(match.get(4));
-				manga.setDetailsTemplate("%chapterCount%");
+				String displayname = parseName(match.get(2).replaceAll("</?em>|漫画 汗汗漫画$", ""));
+				Manga manga = new Manga(parseId(match.get(1)), displayname, null, getSiteId());
 				list.add(manga, true);
 				// logV(manga.toLongString());
 			}
@@ -467,7 +457,7 @@ public final class Plugin99770 extends PluginBase {
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)集数：(?:\\s*<[^<>]+>)?(\\d*?)(?:<[^<>]+>\\s*)?集\\(卷\\)\\s+\\|\\s+状态：[〖\\[](?:\\s*<[^<>]+>)?(.+?)(?:<[^<>]+>\\s*)?[〗\\]].+?>更新时间：([ \\d/:]+)<.+?<div [^<>]*?class=\"c?vol\"[^<>]*?>\\s*<ul.*?>(.+?)</ul>";
+			pattern = "(?is)集数：(?:\\s*<[^<>]+>)?(\\d*?)(?:<[^<>]+>\\s*)?集\\(卷\\)\\s+\\|\\s+状态：[〖\\[](?:\\s*<[^<>]+>)?(.+?)(?:<[^<>]+>\\s*)?[〗\\]].+?<div [^<>]*?class=\"c?vol\"[^<>]*?>\\s*<ul.*?>(.+?)</ul>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
@@ -479,20 +469,16 @@ public final class Plugin99770 extends PluginBase {
 			manga.isCompleted = parseIsCompleted(groups.get(2));
 			logV(Catched_in_section, groups.get(2), 2, section, manga.isCompleted);
 
-			section = "UpdatedAt";
-			manga.updatedAt = parseDateTime(groups.get(3));
-			logV(Catched_in_section, groups.get(3), 3, section, manga.updatedAt.getTime());
-
 			section = "ChapterList";
 			// logV(groups.get(4));
-			pattern = "(?is)(?:<li>|<div.*?>)<a href=\"?/\\w+/\\d+/(\\d+)\\.htm\\?s=(\\d+)\"? .*?>(?:<.*?>)?(.*?)</a>";
-			matches = Regex.matchAll(pattern, groups.get(4));
+			pattern = "(?is)(?:<li>|<div.*?>)<a [^<>]+?>(?:<.*?>)?(.*?)</a>.+?javascript:ShowA\\(\\d+,(\\d+),(\\d+)\\)";
+			matches = Regex.matchAll(pattern, groups.get(3));
 			logD(Catched_count_in_section, matches.size(), section);
 
 			for (ArrayList<String> groups2 : matches) {
-				Chapter chapter = new Chapter(groups2.get(1), groups2.get(3), manga);
+				Chapter chapter = new Chapter(groups2.get(2), groups2.get(1), manga);
 				chapter.typeId = parseChapterType(chapter.displayname);
-				chapter.setDynamicImgServerId(parseInt(groups2.get(2)) - 1);
+				chapter.setDynamicImgServerId(parseInt(groups2.get(3)) - 1);
 				list.add(chapter);
 				// logV(chapter.toLongString());
 			}

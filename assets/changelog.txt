@@ -20,6 +20,11 @@ http://code.google.com/p/mangaproxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.4.7
+=============
+- [Plugin DM5] Fix some chapters cannot be processed.
+- [Plugin HHcomic] Add new Plugin HHcomic. 
+
 Version 1.4.6
 =============
 - [Plugin 99770] Add support of Search.
