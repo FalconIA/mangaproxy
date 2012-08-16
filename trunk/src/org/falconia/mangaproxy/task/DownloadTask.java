@@ -21,6 +21,8 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 
 	private static final int MAX_BUFFER_SIZE = 1024;
 
+	public static byte[] DownloadBytes;
+
 	private int mFileSize;
 	private int mDownloaded;
 	private OnDownloadListener mListener;
@@ -37,12 +39,15 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 	public DownloadTask(OnDownloadListener listener, String referer) {
 		this(listener);
 		mReferer = referer;
+		DownloadBytes = new byte[0];
 	}
 
 	@Override
 	protected byte[] doInBackground(String... params) {
 		mCancelled = false;
-		return download(params[0]);
+		byte[] bytes = download(params[0]);
+		DownloadBytes = bytes;
+		return bytes;
 	}
 
 	@Override
