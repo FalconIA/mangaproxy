@@ -8,7 +8,9 @@ import org.falconia.mangaproxy.App;
 import org.falconia.mangaproxy.ITag;
 import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.Genre;
+import org.falconia.mangaproxy.data.GenreSearch;
 import org.falconia.mangaproxy.data.Manga;
+import org.falconia.mangaproxy.data.MangaList;
 import org.falconia.mangaproxy.utils.HttpUtils;
 import org.falconia.mangaproxy.utils.MathUtils;
 import org.falconia.mangaproxy.utils.Regex;
@@ -29,12 +31,14 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected static final String Get_URL_of_GenreList = "Get URL of GenreList: %s";
 	protected static final String Get_URL_of_MangaList = "Get URL of MangaList(GenreID:%s): %s";
 	protected static final String Get_URL_of_AllMangaList = "Get URL of MangaList(All mangas): %s";
+	protected static final String Get_URL_of_SearchMangaList = "Get URL of MangaList(Search): %s";
 	protected static final String Get_URL_of_ChapterList = "Get URL of ChapterList(MangaID:%s): %s";
 	protected static final String Get_URL_of_Chapter = "Get URL of Chapter(ChapterID:%s): %s";
 
 	protected static final String Get_GenreList = "Get GenreList.";
 	protected static final String Get_MangaList = "Get MangaList(GenreID:%s).";
 	protected static final String Get_AllMangaList = "Get MangaList(All mangas).";
+	protected static final String Get_SearchMangaList = "Get MangaList(Search).";
 	protected static final String Get_ChapterList = "Get ChapterList(MangaID:%s).";
 	protected static final String Get_Chapter = "Get Chapter(ChapterID:%s).";
 	protected static final String Get_DynamicImgServers = "Get DynamicImgServers.";
@@ -43,6 +47,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected static final String Get_Source_Size_GenreList = "Get GenreList data of %s.";
 	protected static final String Get_Source_Size_MangaList = "Get MangaList data of %s.";
 	protected static final String Get_Source_Size_AllMangaList = "Get MangaList(All mangas) data of %s.";
+	protected static final String Get_Source_Size_SearchMangaList = "Get MangaList(Search) data of %s.";
 	protected static final String Get_Source_Size_ChapterList = "Get ChapterList data of %s.";
 	protected static final String Get_Source_Size_Chapter = "Get Chapter data of %s.";
 	protected static final String Get_Source_Size_DynamicImgServers = "Get DynamicImgServers data of %s.";
@@ -93,6 +98,20 @@ public abstract class PluginBase implements ITag, IPlugin {
 	}
 
 	@Override
+	public String getSearchUrl(GenreSearch genreSearch, int page) {
+		if (hasSearchEngine()) {
+			throw new RuntimeException("The method should to be overrode.");
+		} else {
+			throw new RuntimeException("The site is unsupported for search engine.");
+		}
+	}
+
+	@Override
+	public String getSearchUrl(GenreSearch genreSearch) {
+		return getSearchUrl(genreSearch, 1);
+	}
+
+	@Override
 	public String getMangaUrl(Manga manga) {
 		String url = getUrlBase() + getMangaUrlPrefix() + manga.mangaId + getMangaUrlPostfix();
 		logI(Get_URL_of_ChapterList, manga.mangaId, url);
@@ -102,6 +121,24 @@ public abstract class PluginBase implements ITag, IPlugin {
 	@Override
 	public Genre getGenreAll() {
 		return new Genre(Genre.GENRE_ALL_ID, App.UI_GENRE_ALL_TEXT, getSiteId());
+	}
+
+	@Override
+	public GenreSearch getGenreSearch(String search) {
+		if (hasSearchEngine()) {
+			return new GenreSearch(search, getSiteId());
+		} else {
+			throw new RuntimeException("The site is unsupported for search engine.");
+		}
+	}
+
+	@Override
+	public MangaList getSearchMangaList(String source, String url) {
+		if (hasSearchEngine()) {
+			throw new RuntimeException("The method should to be overrode.");
+		} else {
+			throw new RuntimeException("The site is unsupported for search engine.");
+		}
 	}
 
 	@Override

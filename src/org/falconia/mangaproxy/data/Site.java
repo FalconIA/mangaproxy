@@ -63,6 +63,10 @@ public final class Site implements Serializable {
 		return mPlugin.getGenreAll();
 	}
 
+	public GenreSearch getGenreSearch(String search) {
+		return mPlugin.getGenreSearch(search);
+	}
+
 	public GenreList getGenreList(String source, String url) {
 		GenreList list = new GenreList(mSiteId);
 		GenreList listParsed = mPlugin.getGenreList(source, url);

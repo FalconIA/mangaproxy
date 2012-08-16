@@ -1,5 +1,6 @@
 package org.falconia.mangaproxy.plugin;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -9,6 +10,7 @@ import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.ChapterList;
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.GenreList;
+import org.falconia.mangaproxy.data.GenreSearch;
 import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.data.MangaList;
 import org.falconia.mangaproxy.utils.FormatUtils;
@@ -22,8 +24,10 @@ public class Plugin99770 extends PluginBase {
 	protected static final String GENRE_URL_PREFIX_2 = "comicabc/";
 	protected static final String GENRE_ALL_URL = "sitemap/";
 
+	protected static final String URL_BASE_SEARCH = "http://so.dmwz.net/";
 	protected static final String URL_BASE_3G = "http://3gmanhua.com/";
 
+	protected static final String SEARCH_URL_FORMAT = "?key=%s&pageindex=%d";
 	protected static final String MANGA_URL_PREFIX = "comic/";
 
 	public Plugin99770(int siteId) {
@@ -57,7 +61,7 @@ public class Plugin99770 extends PluginBase {
 
 	@Override
 	public boolean hasSearchEngine() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -109,11 +113,17 @@ public class Plugin99770 extends PluginBase {
 		return url;
 	}
 
-	/*
-	 * @Override public String getMangaUrl(Manga manga) { String url =
-	 * URL_BASE_3G + getMangaUrlPrefix() + manga.mangaId + getMangaUrlPostfix();
-	 * logI(Get_URL_of_ChapterList, manga.mangaId, url); return url; }
-	 */
+	@Override
+	public String getSearchUrl(GenreSearch genreSearch, int page) {
+		String search = genreSearch.search;
+		try {
+			search = URLEncoder.encode(genreSearch.search, getCharset());
+		} catch (Exception e) {
+		}
+		String url = URL_BASE_SEARCH + String.format(SEARCH_URL_FORMAT, search, page);
+		logI(Get_URL_of_SearchMangaList, url);
+		return url;
+	}
 
 	@Override
 	public String getMangaUrlPrefix() {
@@ -377,6 +387,60 @@ public class Plugin99770 extends PluginBase {
 		} catch (Exception e) {
 			e.printStackTrace();
 			logE(Fail_to_process, "AllMangaList", url);
+		}
+
+		return list;
+	}
+
+	@Override
+	public MangaList getSearchMangaList(String source, String url) {
+		MangaList list = new MangaList(getSiteId());
+
+		logI(Get_SearchMangaList);
+		logD(Get_Source_Size_SearchMangaList, FormatUtils.getFileSize(source, getCharset()));
+
+		if (TextUtils.isEmpty(source)) {
+			logE(Source_is_empty);
+			return list;
+		}
+
+		try {
+			long time = System.currentTimeMillis();
+
+			String pattern;
+			ArrayList<String> groups;
+			ArrayList<ArrayList<String>> matches;
+
+			pattern = "(?is)<span[^<>]*?\\s+id=\"labPageCount\"[^<>]*?>(\\d+)</span>.+?<div[^<>]*?\\s+class=\"dSHtm\"[^<>]*?>(.+?)</div>\\s*</div>";
+			groups = Regex.match(pattern, source);
+			logD(Catched_sections, groups.size() - 1);
+
+			// Section 1
+			list.pageIndexMax = parseInt(groups.get(1));
+			logV(Catched_in_section, groups.get(1), 1, "PageIndexMax", list.pageIndexMax);
+
+			// Section 2
+			pattern = "(?is)<div><a[^<>]*?\\s+href='[^']+?/\\w+/(\\d+)/?'[^<>]*?><[^<>]+>(.+?)</a>.+?〖(.+?)〗.+?>(\\d+)<.+?集";//
+			matches = Regex.matchAll(pattern, groups.get(2));
+			logD(Catched_count_in_section, matches.size(), "Mangas");
+
+			for (ArrayList<String> match : matches) {
+				Manga manga = new Manga(parseId(match.get(1)), parseName(match.get(2)), null, getSiteId());
+				manga.isCompleted = parseIsCompleted(match.get(3));
+				manga.chapterCount = parseInt(match.get(4));
+				manga.setDetailsTemplate("%chapterCount%");
+				list.add(manga, true);
+				// logV(manga.toLongString());
+			}
+
+			time = System.currentTimeMillis() - time;
+			logD(Process_Time_MangaList, time);
+
+			logV(list.toString());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logE(Fail_to_process, "SearchMangaList", url);
 		}
 
 		return list;

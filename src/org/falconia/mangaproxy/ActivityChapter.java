@@ -1269,7 +1269,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			showTitleBar();
 			hideStatusBar();
 			mZoomListener.setFlingable(true);
-			//mZoomListener.onTouch(v, event);
+			// mZoomListener.onTouch(v, event);
 
 			// TODO Update database
 			if (mChapter.isFavorite) {

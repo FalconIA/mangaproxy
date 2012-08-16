@@ -2,6 +2,7 @@ package org.falconia.mangaproxy;
 
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.GenreList;
+import org.falconia.mangaproxy.data.GenreSearch;
 import org.falconia.mangaproxy.data.Site;
 import org.falconia.mangaproxy.ui.BaseHeadersAdapter;
 
@@ -9,17 +10,23 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
-public final class ActivityGenreList extends ActivityBase {
+public final class ActivityGenreList extends ActivityBase implements OnClickListener {
 
 	public final static class IntentHandler {
 
@@ -111,6 +118,10 @@ public final class ActivityGenreList extends ActivityBase {
 	private Site mSite;
 	private GenreList mGenreList;
 
+	InputMethodManager mIMM;
+	private EditText metSearch;
+	private ImageButton mbtnSearch;
+
 	@Override
 	public int getSiteId() {
 		return mSiteId;
@@ -136,12 +147,29 @@ public final class ActivityGenreList extends ActivityBase {
 		setContentView(R.layout.activity_genre_list);
 		setCustomTitle(getString(R.string.genre));
 
-		// this.mShowProcessDialog = false;
+		// mShowProcessDialog = false;
+
+		mIMM = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		metSearch = (EditText) findViewById(R.id.metSearch);
+		mbtnSearch = (ImageButton) findViewById(R.id.mbtnSearch);
 
 		setupListView(new GenreListAdapter());
 
 		if (mSite.hasSearchEngine()) {
 			findViewById(R.id.mvgSearch).setVisibility(View.VISIBLE);
+			mbtnSearch.setOnClickListener(this);
+			metSearch.setImeActionLabel(getString(R.string.ui_search), KeyEvent.KEYCODE_ENTER);
+			OnKeyListener listener = new OnKeyListener() {
+				@Override
+				public boolean onKey(View v, int keyCode, KeyEvent event) {
+					if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+						onClick(v);
+						return true;
+					}
+					return false;
+				}
+			};
+			metSearch.setOnKeyListener(listener);
 		} else {
 			findViewById(R.id.mvgSearch).setVisibility(View.GONE);
 		}
@@ -211,6 +239,16 @@ public final class ActivityGenreList extends ActivityBase {
 	}
 
 	@Override
+	public void onClick(View view) {
+		String search = metSearch.getText().toString();
+		if (search.length() == 0)
+			return;
+		mIMM.hideSoftInputFromWindow(metSearch.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+		GenreSearch genreSearch = mSite.getGenreSearch(search);
+		ActivityMangaList.IntentHandler.startActivityMangaList(this, genreSearch);
+	}
+
+	@Override
 	public int onSourceProcess(String source, String url) {
 		mGenreList = mSite.getGenreList(source, url);
 		return mGenreList.size();
@@ -226,7 +264,7 @@ public final class ActivityGenreList extends ActivityBase {
 
 	private void loadGenreList() {
 		mSourceDownloader = new SourceDownloader();
-		mSourceDownloader.download(mSite.getGenreListUrl());
+		mSourceDownloader.download(mSite.getGenreListUrl(), !mSite.hasSearchEngine());
 	}
 
 }

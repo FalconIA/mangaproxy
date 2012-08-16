@@ -14,7 +14,7 @@ import android.text.TextUtils;
 
 public final class HttpUtils {
 
-	public static final String TAG = "AppCache";
+	public static final String TAG = "HttpUtils";
 
 	public static final String CHARSET_GBK = "GBK";
 	public static final String CHARSET_UTF8 = "UTF-8";
@@ -54,6 +54,10 @@ public final class HttpUtils {
 	}
 
 	public static String urlencode(String url) {
+		return urlencode(url, CHARSET_UTF8);
+	}
+
+	public static String urlencode(String url, String urlCharset) {
 		try {
 
 			Pattern p = Pattern.compile("^(?:https?|ftp)://|[^a-zA-Z0-9=?&/: ~`!@#$%^()+.*_-]+");

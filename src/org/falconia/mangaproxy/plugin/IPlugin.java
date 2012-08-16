@@ -6,6 +6,7 @@ import org.falconia.mangaproxy.data.Chapter;
 import org.falconia.mangaproxy.data.ChapterList;
 import org.falconia.mangaproxy.data.Genre;
 import org.falconia.mangaproxy.data.GenreList;
+import org.falconia.mangaproxy.data.GenreSearch;
 import org.falconia.mangaproxy.data.Manga;
 import org.falconia.mangaproxy.data.MangaList;
 
@@ -41,6 +42,10 @@ public interface IPlugin {
 
 	String getGenreAllUrl();
 
+	String getSearchUrl(GenreSearch genreSearch, int page);
+
+	String getSearchUrl(GenreSearch genreSearch);
+
 	String getMangaUrl(Manga manga);
 
 	String getMangaUrlPrefix();
@@ -51,11 +56,15 @@ public interface IPlugin {
 
 	Genre getGenreAll();
 
+	GenreSearch getGenreSearch(String search);
+
 	GenreList getGenreList(String source, String url);
 
 	MangaList getMangaList(String source, String url, Genre genre);
 
 	MangaList getAllMangaList(String source, String url);
+
+	MangaList getSearchMangaList(String source, String url);
 
 	ChapterList getChapterList(String source, String url, Manga manga);
 
