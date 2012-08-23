@@ -175,6 +175,11 @@ public final class PluginHhcomic extends PluginBase {
 	}
 
 	@Override
+	public Genre getGenreAll() {
+		return new Genre(Genre.GENRE_ALL_ID, App.UI_GENRE_ALL_TEXT_ZH, getSiteId());
+	}
+
+	@Override
 	public GenreList getGenreList(String source, String url) {
 		GenreList list = new GenreList(getSiteId());
 
@@ -474,6 +479,11 @@ public final class PluginHhcomic extends PluginBase {
 			pattern = "(?is)(?:<li>|<div.*?>)<a [^<>]+?>(?:<.*?>)?(.*?)</a>.+?javascript:ShowA\\(\\d+,(\\d+),(\\d+)\\)";
 			matches = Regex.matchAll(pattern, groups.get(3));
 			logD(Catched_count_in_section, matches.size(), section);
+
+			section = "UpdatedAt";
+			manga.updatedAt = new GregorianCalendar(getTimeZone());
+			manga.updatedAt.setTimeInMillis(0);
+			logV(No_update_at);
 
 			for (ArrayList<String> groups2 : matches) {
 				Chapter chapter = new Chapter(groups2.get(2), groups2.get(1), manga);

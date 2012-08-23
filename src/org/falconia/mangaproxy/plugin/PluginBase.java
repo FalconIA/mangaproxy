@@ -58,6 +58,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 	protected static final String Catched_count_in_section = "Catched %d in section '%s'.";
 	protected static final String Catched_total_page = "Catched total page of %d.";
 	protected static final String Catched_in_section = "Catched '%s' in section %d, { %s:%s }.";
+	protected static final String No_update_at = "No UpdateAt of Manga.";
 
 	protected static final String Process_Time_GenreList = "Process GenreList in %dms.";
 	protected static final String Process_Time_MangaList = "Process MangaList in %dms.";
@@ -227,7 +228,7 @@ public abstract class PluginBase implements ITag, IPlugin {
 	}
 
 	protected boolean parseIsCompleted(String string) {
-		return string.indexOf("完") >= 0;
+		return string != null && string.indexOf("完") >= 0;
 	}
 
 	protected abstract int parseChapterType(String string);

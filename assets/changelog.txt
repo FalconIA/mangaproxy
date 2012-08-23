@@ -20,6 +20,10 @@ http://code.google.com/p/mangaproxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.4.8
+=============
+- [Plugin 99770] Fix some chapters cannot be processed.
+
 Version 1.4.7
 =============
 - [Plugin DM5] Fix some chapters cannot be processed.

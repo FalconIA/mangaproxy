@@ -171,7 +171,7 @@ public final class PluginDm5 extends PluginBase {
 
 	@Override
 	public Genre getGenreAll() {
-		return new Genre(Genre.GENRE_ALL_ID, String.format("%s (今日漫画)", App.UI_GENRE_ALL_TEXT), getSiteId());
+		return new Genre(Genre.GENRE_ALL_ID, String.format("%s (今日漫画)", App.UI_GENRE_ALL_TEXT_ZH), getSiteId());
 	}
 
 	@Override
