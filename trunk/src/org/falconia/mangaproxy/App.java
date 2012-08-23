@@ -71,6 +71,7 @@ public final class App extends Application {
 
 	// Genre
 	public static String UI_GENRE_ALL_TEXT = "All";
+	public static String UI_GENRE_ALL_TEXT_ZH = "全部漫画";
 
 	// Manga
 	public static String UI_CHAPTER_COUNT = "Chapters: %s";

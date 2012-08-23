@@ -588,7 +588,7 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 			AppUtils.logI(this, "Add to Favorite.");
 			try {
 				manga.updatedAt = new GregorianCalendar(mGenre.getTimeZone());
-				manga.updatedAt.setTimeInMillis(0);
+				manga.updatedAt.setTimeInMillis(System.currentTimeMillis());
 
 				long id = db.insertManga(manga);
 				manga._id = id;

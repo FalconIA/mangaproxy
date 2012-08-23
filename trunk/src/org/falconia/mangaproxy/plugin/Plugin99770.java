@@ -25,7 +25,7 @@ public final class Plugin99770 extends PluginBase {
 	protected static final String GENRE_ALL_URL = "sitemap/";
 
 	protected static final String URL_BASE_SEARCH = "http://so.dmwz.net/";
-	protected static final String URL_BASE_3G = "http://3gmanhua.com/";
+	// protected static final String URL_BASE_3G = "http://3gmanhua.com/";
 
 	protected static final String SEARCH_URL_FORMAT = "?key=%s&pageindex=%d";
 	protected static final String MANGA_URL_PREFIX = "comic/";
@@ -137,7 +137,7 @@ public final class Plugin99770 extends PluginBase {
 
 	@Override
 	public String getChapterUrl(Chapter chapter, Manga manga) {
-		String url = URL_BASE_3G + String.format("m/%s/%s.htm", manga.mangaId, chapter.chapterId);
+		String url = getUrlBase() + String.format("manhua/%s/%s.htm", manga.mangaId, chapter.chapterId);
 		logI(Get_URL_of_Chapter, chapter.chapterId, url);
 		return url;
 	}
@@ -178,6 +178,11 @@ public final class Plugin99770 extends PluginBase {
 			return Chapter.TYPE_ID_CHAPTER;
 		}
 		return Chapter.TYPE_ID_UNKNOW;
+	}
+
+	@Override
+	public Genre getGenreAll() {
+		return new Genre(Genre.GENRE_ALL_ID, App.UI_GENRE_ALL_TEXT_ZH, getSiteId());
 	}
 
 	@Override
@@ -420,7 +425,7 @@ public final class Plugin99770 extends PluginBase {
 			logV(Catched_in_section, groups.get(1), 1, "PageIndexMax", list.pageIndexMax);
 
 			// Section 2
-			pattern = "(?is)<div><a[^<>]*?\\s+href='[^']+?/\\w+/(\\d+)/?'[^<>]*?><[^<>]+>(.+?)</a>.+?〖(.+?)〗.+?>(\\d+)<.+?集";//
+			pattern = "(?is)<div><a[^<>]*?\\s+href='[^']+?/\\w+/(\\d+)/?'[^<>]*?><[^<>]+>(.+?)</a>.+?〖(.+?)〗.+?>(\\d+)<.+?集";
 			matches = Regex.matchAll(pattern, groups.get(2));
 			logD(Catched_count_in_section, matches.size(), "Mangas");
 

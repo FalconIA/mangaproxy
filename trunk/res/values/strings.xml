@@ -2,7 +2,7 @@
 <resources>
 	<string name="app_name">Manga Proxy</string>
 	<string name="genre">Genre</string>
-	<string name="genre_all">全部漫画</string>
+	<string name="genre_all">All</string>
 	<string name="menu_item_source">Source</string>
 	<string name="menu_item_refresh">Refresh</string>
 	<string name="menu_item_preferences">@string/ui_preference</string>
