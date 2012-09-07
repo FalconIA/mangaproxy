@@ -9,6 +9,7 @@ import org.falconia.mangaproxy.App;
 import org.falconia.mangaproxy.AppUtils;
 
 import android.content.Context;
+import android.util.FloatMath;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -35,8 +36,8 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 	 * Enum defining listener modes. Before the view is touched the listener is
 	 * in the UNDEFINED mode. Once touch starts it can enter either one of the
 	 * other two modes: If the user scrolls over the view the listener will
-	 * enter PAN mode, if the user lets his finger rest and makes a longpress
-	 * the listener will enter ZOOM mode.
+	 * enter PAN mode, if the user uses his two fingers the listener will enter
+	 * ZOOM mode.
 	 */
 	private enum Mode {
 		UNDEFINED, PAN_ZOOM, NONE
@@ -81,14 +82,22 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 	/** Distance touch can wander before we think it's scrolling */
 	private final int mScaledTouchSlop;
 
+	/** Minimum velocity for fling */
+	private final int mScaledMinimumFlingVelocity;
+
 	/** Maximum velocity for fling */
 	private final int mScaledMaximumFlingVelocity;
+
+	/** Minimum distance for fling */
+	private final int mScaledMinimumFlingDistance;
 
 	public ZoomViewOnTouchListener(Context context) {
 		mGestureDetector = new GestureDetector(context, new GestureListener());
 		mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
 		mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+		mScaledMinimumFlingVelocity = ViewConfiguration.get(context).getScaledMinimumFlingVelocity();
 		mScaledMaximumFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
+		mScaledMinimumFlingDistance = (int) (App.MIN_DISTANCE_FOR_FLING * context.getResources().getDisplayMetrics().density);
 	}
 
 	@Override
@@ -129,20 +138,21 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 			final float x = event.getX(pointerIndex);
 			final float y = event.getY(pointerIndex);
 
-			final float dx = (x - mX) / v.getWidth();
-			final float dy = (y - mY) / v.getHeight();
-
 			if (mMode == Mode.NONE) {
 
 			} else if (mMode == Mode.PAN_ZOOM) {
 				if (!mScaleDetector.isInProgress()) {
 				}
+
+				final float dx = (x - mX) / v.getWidth();
+				final float dy = (y - mY) / v.getHeight();
+
 				mZoomControl.pan(-dx, -dy);
 			} else {
 				final float scrollX = mDownX - x;
 				final float scrollY = mDownY - y;
 
-				final float dist = (float) Math.sqrt(scrollX * scrollX + scrollY * scrollY);
+				final float dist = FloatMath.sqrt(scrollX * scrollX + scrollY * scrollY);
 
 				if (dist >= mScaledTouchSlop) {
 					mMode = Mode.PAN_ZOOM;
@@ -237,12 +247,25 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 			final float px = mX / mZoomView.getWidth();
 			final float py = mY / mZoomView.getHeight();
 
-			// TODO: Now just for Right-Top.
-			float dx, dy;
-			dx = (1 - px) - (1 - px) / factor;
-			dy = py - py / factor;
 			if (zoom > mZoomControl.getZoomState().getDefaultZoom()) {
 				mZoomControl.getZoomState().setZoom(zoom);
+
+				// TODO: Now just for Right-Top.
+				float dx, dy;
+				switch (mZoomControl.getZoomState().getAlignX()) {
+				case Right:
+					dx = (1 - px) - (1 - px) / factor;
+					break;
+				default:
+					throw new UnsupportedOperationException("Now just for Right-Top.");
+				}
+				switch (mZoomControl.getZoomState().getAlignY()) {
+				case Top:
+					dy = py - py / factor;
+					break;
+				default:
+					throw new UnsupportedOperationException("Now just for Right-Top.");
+				}
 				mZoomControl.pan(-dx, dy);
 			}
 			return true;
@@ -299,10 +322,12 @@ public class ZoomViewOnTouchListener implements OnTouchListener {
 			Log.v(GESTURE_TAG, "Fling");
 
 			final float scrollX = e2.getX() - e1.getX();
+			// final float scrollY = e2.getY() - e1.getY();
 
 			if (mFlingable && ((mIsEdgeLeft && scrollX > 0) || (mIsEdgeRight && scrollX < 0))
-					&& Math.abs(velocityX) > App.SWIPE_THRESHOLD_VELOCITY
-					&& Math.abs(velocityY) < Math.abs(velocityX) / 2 && Math.abs(scrollX) > App.SWIPE_MIN_DISTANCE) {
+					&& Math.abs(velocityX) > mScaledMinimumFlingVelocity
+					&& Math.abs(velocityX) > Math.abs(velocityY) * 2
+					&& Math.abs(scrollX) > mScaledMinimumFlingDistance) {
 				if (velocityX > 0) {
 					Log.i(GESTURE_TAG, "Next Page");
 					onNextPage();

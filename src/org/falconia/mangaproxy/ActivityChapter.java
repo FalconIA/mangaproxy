@@ -419,7 +419,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 							String url = mChapter.getPageRedirectUrl(source, mUrl);
 							if (TextUtils.isEmpty(url)) {
 								AppUtils.logE("Page.OnDownloadListener", "Fail to get PageRedirectUrl.");
-								Page.this.onPostDownload(result);
+								Page.this.onPostDownload(null);
 								return;
 							} else {
 								mUrlRedirected = url;

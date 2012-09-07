@@ -56,7 +56,7 @@ public final class Plugin99770 extends PluginBase {
 
 	@Override
 	public String getUrlBase() {
-		return "http://www.99770.cc/";
+		return "http://99770.cc/";
 	}
 
 	@Override

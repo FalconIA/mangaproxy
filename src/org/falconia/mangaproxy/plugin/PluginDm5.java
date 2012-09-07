@@ -455,7 +455,7 @@ public final class PluginDm5 extends PluginBase {
 			String pattern;
 			ArrayList<String> groups;
 
-			pattern = "(?is)var DM5_CID=(\\d+);\\s+var DM5_IMAGE_COUNT=(\\d+);.+?id=\"dm5_key\" value=\"(.*?)\"(?:.+?eval\\(function\\(p,a,c,k,e,d\\)\\{.+?return p;\\}\\('(.+?)(?<!\\\\)',\\d+,\\d+,'([^']+?)')?";//
+			pattern = "(?is)var DM5_CID=(\\d+);\\s+var DM5_IMAGE_COUNT=(\\d+);.+?id=\"dm5_key\" value=\"(.*?)\"(?:.+?(" + PACKED_PATTERN + "))?";//
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
@@ -473,13 +473,7 @@ public final class PluginDm5 extends PluginBase {
 
 			// Section 4
 			if (groups.get(4) != null) {
-				String _p = groups.get(4).replace("\\'", "'");
-				String[] _d = groups.get(5).split("\\|");
-				for (int i = 0; i < _d.length; i++) {
-					if (_d[i].length() == 0)
-						continue;
-					_p = _p.replaceAll("\\b" + intToBase36(i) + "\\b", _d[i]);
-				}
+				String _p = decodePackedJs(groups.get(4));
 				_p = Regex.match(";.+?=(.+?);", _p).get(1);
 				key = _p.replaceAll("(^'|'$|'\\+')", "");
 			}
@@ -507,6 +501,9 @@ public final class PluginDm5 extends PluginBase {
 	public String getPageRedirectUrl(String source, String url) {
 		String newUrl = null;
 		try {
+			if (source.matches("(?is)" + PACKED_PATTERN + ".+")) {
+				source = decodePackedJs(source);
+			}
 			if (source.matches("(?is)function .+")) {
 				ArrayList<ArrayList<String>> matches = Regex.matchAll("(?is)\"(?:http://)?([^\"]+)\"", source);
 				newUrl = "http://" + matches.get(0).get(1) + matches.get(1).get(1);
@@ -518,6 +515,8 @@ public final class PluginDm5 extends PluginBase {
 				newUrl = source.split(",")[0];
 			} else if (source.matches("(?is)^http://.+")) {
 				newUrl = source;
+			} else {
+				logE(Fail_to_process, "RedirectPageUrl", url);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -526,4 +525,18 @@ public final class PluginDm5 extends PluginBase {
 		return newUrl;
 	}
 
+	private static final String PACKED_PATTERN = "eval\\(function\\(p,a,c,k,e,d\\)\\{.+?return p;\\}\\('.+?(?<!\\\\)',\\d+,\\d+,'[^']+?'.split\\('\\|'\\),0,\\{\\}\\)\\)";
+	private static final String PACKED_MATCHES_PATTERN = "return p;\\}\\('(.+?)(?<!\\\\)',(\\d+),(\\d+),'([^']+?)'";
+
+	private String decodePackedJs(String js) {
+		ArrayList<String> groups = Regex.match(PACKED_MATCHES_PATTERN, js);
+		String _p = groups.get(1).replace("\\'", "'");
+		String[] _d = groups.get(4).split("\\|");
+		for (int i = 0; i < _d.length; i++) {
+			if (_d[i].length() == 0)
+				continue;
+			_p = _p.replaceAll("\\b" + intToBase36(i) + "\\b", _d[i]);
+		}
+		return _p;
+	}
 }
