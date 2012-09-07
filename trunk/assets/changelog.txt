@@ -20,6 +20,11 @@ http://code.google.com/p/mangaproxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.4.9
+=============
+- [Plugin DM5] Fix pages cannot be downloaded, caused by PageRedirectUrl.
+- [Plugin 99770] Fix base URL to 99770.cc.
+
 Version 1.4.8
 =============
 - [Plugin 99770] Fix some chapters cannot be downloaded.
