@@ -5,6 +5,7 @@
 	<string name="genre_all">全部漫画</string>
 	<string name="menu_item_source">来源</string>
 	<string name="menu_item_refresh">刷新</string>
+	<string name="menu_item_update">更新</string>
 	<string name="menu_item_zoom">缩放</string>
 	<string name="menu_item_zoom_fit_width_or_height">适合宽度或高度</string>
 	<string name="menu_item_zoom_fit_width_auto_split">适合宽度（自动开页）</string>

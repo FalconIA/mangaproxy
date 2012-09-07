@@ -28,7 +28,7 @@ public final class PluginHhcomic extends PluginBase {
 
 	// protected static final String URL_BASE_3348 = "http://3348.net/";
 
-	protected static final String SEARCH_URL_FORMAT = "http://m.baidu.com/s?word=site:(hhcomic.com)+%s&pn=%d";
+	protected static final String SEARCH_URL_FORMAT = "http://m.baidu.com/s?word=site:(www.hhcomic.com)+%s&pn=%d";
 	protected static final String MANGA_URL_PREFIX = "comic/";
 
 	public PluginHhcomic(int siteId) {
@@ -413,7 +413,7 @@ public final class PluginHhcomic extends PluginBase {
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)<div[^<>]*? (?:id=\"results\"|class=\"reswrap\")[^<>]*?>(.+?)<div[^<>]*? (?:id=\"pagenav\"|class=\"pagenav\")[^<>]*?>";
+			pattern = "(?is)<div[^<>]*? (?:id=\"results\"|class=\"reswrap\")[^<>]*?>(.+?)<form [^<>]*?>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
@@ -428,6 +428,8 @@ public final class PluginHhcomic extends PluginBase {
 				list.add(manga, true);
 				// logV(manga.toLongString());
 			}
+			if (matches.size() == 0)
+				list.searchEmpty = true;
 
 			time = System.currentTimeMillis() - time;
 			logD(Process_Time_MangaList, time);
@@ -477,7 +479,8 @@ public final class PluginHhcomic extends PluginBase {
 
 			section = "ChapterList";
 			// logV(groups.get(4));
-			pattern = "(?is)(?:<li>|<div.*?>)<a [^<>]+?>(?:<.*?>)?(.*?)</a>.+?javascript:ShowA\\(\\d+,(\\d+),(\\d+)\\)";
+			// pattern = "(?is)(?:<li>|<div.*?>)<a [^<>]+?>(?:<.*?>)?(.*?)</a>.+?javascript:ShowA\\(\\d+,(\\d+),(\\d+)\\)";
+			pattern = "(?is)(?:<li>|<div.*?>)<a href=\"?/hhpage/\\d+/hh(\\d+)\\.htm\\?s=(\\d+)\"? [^<>]+?>(?:<.*?>)?(.*?)</a>";
 			matches = Regex.matchAll(pattern, groups.get(3));
 			logD(Catched_count_in_section, matches.size(), section);
 
@@ -487,9 +490,9 @@ public final class PluginHhcomic extends PluginBase {
 			logV(No_update_at);
 
 			for (ArrayList<String> groups2 : matches) {
-				Chapter chapter = new Chapter(groups2.get(2), groups2.get(1), manga);
+				Chapter chapter = new Chapter(groups2.get(1), groups2.get(3), manga);
 				chapter.typeId = parseChapterType(chapter.displayname);
-				chapter.setDynamicImgServerId(parseInt(groups2.get(3)) - 1);
+				chapter.setDynamicImgServerId(parseInt(groups2.get(2)) - 1);
 				list.add(chapter);
 				// logV(chapter.toLongString());
 			}

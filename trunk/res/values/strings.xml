@@ -5,6 +5,7 @@
 	<string name="genre_all">All</string>
 	<string name="menu_item_source">Source</string>
 	<string name="menu_item_refresh">Refresh</string>
+	<string name="menu_item_update">Update</string>
 	<string name="menu_item_preferences">@string/ui_preference</string>
 	<string name="menu_item_zoom">Zoom</string>
 	<string name="menu_item_zoom_fit_width_or_height">Fit Width or Height</string>
