@@ -460,8 +460,9 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 		case R.id.mmiRefresh:
 			mProcessed = false;
 			if (mPageMax > 0) {
+				if (mPageMax > mPageLoaded)
+					getListView().removeFooterView(mNextPageDownloader.getFooter());
 				mPageLoaded = 0;
-				getListView().removeFooterView(mNextPageDownloader.getFooter());
 			}
 			if (mSourceDownloader == null) {
 				mSourceDownloader = new SourceDownloader();
@@ -528,6 +529,10 @@ public final class ActivityMangaList extends ActivityBase implements OnClickList
 
 	@Override
 	public void onPostSourceProcess(int size) {
+		if (mMangaList.searchEmpty) {
+			size = 1;
+		}
+
 		if (size > 0) {
 			mPageLoaded++;
 		}

@@ -7,7 +7,7 @@
 			</group>
 		</menu>
 	</item>
-	<item android:title="@string/menu_item_refresh" android:icon="@drawable/ic_menu_refresh"
+	<item android:title="@string/menu_item_update" android:icon="@drawable/ic_menu_refresh"
 		android:id="@+id/mmiRefresh" />
 	<item android:title="@string/menu_item_preferences" android:icon="@drawable/ic_menu_preferences"
 		android:id="@+id/mmiPreferences" />

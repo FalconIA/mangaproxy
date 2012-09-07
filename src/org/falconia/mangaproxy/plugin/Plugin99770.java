@@ -416,26 +416,33 @@ public final class Plugin99770 extends PluginBase {
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)<span[^<>]*?\\s+id=\"labPageCount\"[^<>]*?>(\\d+)</span>.+?<div[^<>]*?\\s+class=\"dSHtm\"[^<>]*?>(.+?)</div>\\s*</div>";
+			pattern = "(?is)<span[^<>]*?\\s+id=\"labDataCount\"[^<>]*?>(\\d+)</span>.+?<span[^<>]*?\\s+id=\"labPageCount\"[^<>]*?>(\\d+)</span>.+?<div[^<>]*?\\s+class=\"dSHtm\"[^<>]*?>(?:(.+?)</div>\\s*)?</div>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
 			// Section 1
-			list.pageIndexMax = parseInt(groups.get(1));
-			logV(Catched_in_section, groups.get(1), 1, "PageIndexMax", list.pageIndexMax);
+			logV(Catched_in_section, groups.get(1), 1, "MangaCount", list.pageIndexMax);
 
 			// Section 2
-			pattern = "(?is)<div><a[^<>]*?\\s+href='[^']+?/\\w+/(\\d+)/?'[^<>]*?><[^<>]+>(.+?)</a>.+?〖(.+?)〗.+?>(\\d+)<.+?集";
-			matches = Regex.matchAll(pattern, groups.get(2));
-			logD(Catched_count_in_section, matches.size(), "Mangas");
+			list.pageIndexMax = parseInt(groups.get(2));
+			logV(Catched_in_section, groups.get(2), 2, "PageIndexMax", list.pageIndexMax);
 
-			for (ArrayList<String> match : matches) {
-				Manga manga = new Manga(parseId(match.get(1)), parseName(match.get(2)), null, getSiteId());
-				manga.isCompleted = parseIsCompleted(match.get(3));
-				manga.chapterCount = parseInt(match.get(4));
-				manga.setDetailsTemplate("%chapterCount%");
-				list.add(manga, true);
-				// logV(manga.toLongString());
+			if (parseInt(groups.get(1)) == 0) {
+				list.searchEmpty = true;
+			} else {
+				// Section 3
+				pattern = "(?is)<div><a[^<>]*?\\s+href='[^']+?/\\w+/(\\d+)/?'[^<>]*?><[^<>]+>(.+?)</a>.+?〖(.+?)〗.+?>(\\d+)<.+?集";
+				matches = Regex.matchAll(pattern, groups.get(3));
+				logD(Catched_count_in_section, matches.size(), "Mangas");
+
+				for (ArrayList<String> match : matches) {
+					Manga manga = new Manga(parseId(match.get(1)), parseName(match.get(2)), null, getSiteId());
+					manga.isCompleted = parseIsCompleted(match.get(3));
+					manga.chapterCount = parseInt(match.get(4));
+					manga.setDetailsTemplate("%chapterCount%");
+					list.add(manga, true);
+					// logV(manga.toLongString());
+				}
 			}
 
 			time = System.currentTimeMillis() - time;

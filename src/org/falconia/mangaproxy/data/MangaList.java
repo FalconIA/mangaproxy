@@ -16,6 +16,9 @@ public final class MangaList implements Serializable, ISiteId, Collection<Manga>
 
 	public int pageIndexMax;
 
+	// TODO: Set return list default to null, instead searchEmpty
+	public boolean searchEmpty = false;
+
 	private final ArrayList<String> mMangaKeyList;
 	private final HashMap<String, Manga> mMangaList;
 	private final int mSiteId;
