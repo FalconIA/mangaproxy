@@ -24,6 +24,7 @@ Version 1.4.9
 =============
 - [Plugin DM5] Fix pages cannot be downloaded, caused by PageRedirectUrl.
 - [Plugin 99770] Fix base URL to 99770.cc.
+- [Plugin HHcomic] Fix base URL to www.hhcomic.com.
 
 Version 1.4.8
 =============
