@@ -26,7 +26,7 @@ public final class PluginHhcomic extends PluginBase {
 	protected static final String GENRE_URL_PREFIX_2 = "hhABC/";
 	protected static final String GENRE_ALL_URL = "sitemap/";
 
-	protected static final String URL_BASE_3348 = "http://3348.net/";
+	// protected static final String URL_BASE_3348 = "http://3348.net/";
 
 	protected static final String SEARCH_URL_FORMAT = "http://m.baidu.com/s?word=site:(hhcomic.com)+%s&pn=%d";
 	protected static final String MANGA_URL_PREFIX = "comic/";
@@ -57,7 +57,7 @@ public final class PluginHhcomic extends PluginBase {
 
 	@Override
 	public String getUrlBase() {
-		return "http://hhcomic.com/";
+		return "http://www.hhcomic.com/";
 	}
 
 	@Override
@@ -138,7 +138,8 @@ public final class PluginHhcomic extends PluginBase {
 
 	@Override
 	public String getChapterUrl(Chapter chapter, Manga manga) {
-		String url = URL_BASE_3348 + String.format("art/%s/hh%s.htm", manga.mangaId, chapter.chapterId);
+		// String url = URL_BASE_3348 + String.format("art/%s/hh%s.htm", manga.mangaId, chapter.chapterId);
+		String url = getUrlBase() + String.format("hhpage/%s/hh%s.htm", manga.mangaId, chapter.chapterId);
 		logI(Get_URL_of_Chapter, chapter.chapterId, url);
 		return url;
 	}
