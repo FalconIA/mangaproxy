@@ -394,26 +394,30 @@ public final class PluginDm5 extends PluginBase {
 		try {
 			long time = System.currentTimeMillis();
 
+			int n;
 			String pattern, section;
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)更新时间：([\\d-]+\\s+[\\d:]+)<.+?漫画状态：([^<]+)<.+?<ul [^<>]*id=\"cbc_1\">(.+?)</ul>";
+			pattern = "(?is)漫画状态：([^<]+)<.+?更新时间：([\\d-]+\\s+[\\d:]+)<.+?<ul [^<>]*id=\"cbc_1\">(.+?)</ul>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
-			section = "UpdatedAt";
-			manga.updatedAt = parseDateTime(groups.get(1));
-			logV(Catched_in_section, groups.get(1), 3, section, manga.updatedAt.getTime());
-
+			n = 1;
 			section = "IsCompleted";
-			manga.isCompleted = parseIsCompleted(groups.get(2));
-			logV(Catched_in_section, groups.get(2), 2, section, manga.isCompleted);
+			manga.isCompleted = parseIsCompleted(groups.get(n));
+			logV(Catched_in_section, groups.get(n), n, section, manga.isCompleted);
 
+			n = 2;
+			section = "UpdatedAt";
+			manga.updatedAt = parseDateTime(groups.get(n));
+			logV(Catched_in_section, groups.get(n), n, section, manga.updatedAt.getTime());
+
+			n = 3;
 			section = "ul";
 			// logV(groups.get(3));
 			pattern = "(?is)<li[^<>]*><a [^<>]*href=\"/m(\\d+)/\"[^<>]*>(.+?)</a>.+?</li>";
-			matches = Regex.matchAll(pattern, groups.get(3));
+			matches = Regex.matchAll(pattern, groups.get(n));
 			logD(Catched_count_in_section, matches.size(), section);
 
 			for (ArrayList<String> groups2 : matches) {
