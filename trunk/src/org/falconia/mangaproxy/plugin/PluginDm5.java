@@ -400,18 +400,35 @@ public final class PluginDm5 extends PluginBase {
 			ArrayList<ArrayList<String>> matches;
 
 			pattern = "(?is)漫画状态：([^<]+)<.+?更新时间：([\\d-]+\\s+[\\d:]+)<.+?<ul [^<>]*id=\"cbc_1\">(.+?)</ul>";
-			groups = Regex.match(pattern, source);
-			logD(Catched_sections, groups.size() - 1);
 
-			n = 1;
-			section = "IsCompleted";
-			manga.isCompleted = parseIsCompleted(groups.get(n));
-			logV(Catched_in_section, groups.get(n), n, section, manga.isCompleted);
+			if (Regex.isMatch(pattern, source)) {
+				groups = Regex.match(pattern, source);
+				logD(Catched_sections, groups.size() - 1);
 
-			n = 2;
-			section = "UpdatedAt";
-			manga.updatedAt = parseDateTime(groups.get(n));
-			logV(Catched_in_section, groups.get(n), n, section, manga.updatedAt.getTime());
+				n = 1;
+				section = "IsCompleted";
+				manga.isCompleted = parseIsCompleted(groups.get(n));
+				logV(Catched_in_section, groups.get(n), n, section, manga.isCompleted);
+
+				n = 2;
+				section = "UpdatedAt";
+				manga.updatedAt = parseDateTime(groups.get(n));
+				logV(Catched_in_section, groups.get(n), n, section, manga.updatedAt.getTime());
+			} else {
+				pattern = "(?is)更新时间：([\\d-]+\\s+[\\d:]+)<.+?漫画状态：([^<]+)<.+?<ul [^<>]*id=\"cbc_1\">(.+?)</ul>";
+				groups = Regex.match(pattern, source);
+				logD(Catched_sections, groups.size() - 1);
+
+				n = 1;
+				section = "UpdatedAt";
+				manga.updatedAt = parseDateTime(groups.get(n));
+				logV(Catched_in_section, groups.get(n), n, section, manga.updatedAt.getTime());
+
+				n = 2;
+				section = "IsCompleted";
+				manga.isCompleted = parseIsCompleted(groups.get(n));
+				logV(Catched_in_section, groups.get(n), n, section, manga.isCompleted);
+			}
 
 			n = 3;
 			section = "ul";
@@ -459,7 +476,8 @@ public final class PluginDm5 extends PluginBase {
 			String pattern;
 			ArrayList<String> groups;
 
-			pattern = "(?is)var DM5_CID=(\\d+);\\s+var DM5_IMAGE_COUNT=(\\d+);.+?id=\"dm5_key\" value=\"(.*?)\"(?:.+?(" + PACKED_PATTERN + "))?";//
+			pattern = "(?is)var DM5_CID=(\\d+);\\s+var DM5_IMAGE_COUNT=(\\d+);.+?id=\"dm5_key\" value=\"(.*?)\"(?:.+?("
+					+ PACKED_PATTERN + "))?";//
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
