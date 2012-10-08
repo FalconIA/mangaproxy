@@ -1,1 +1,1 @@
-Version 1.4.10 / VersionCode 30
+Version 1.4.12 / VersionCode 32
