@@ -423,7 +423,7 @@ public final class PluginHhcomic extends PluginBase {
 			logD(Catched_count_in_section, matches.size(), "Mangas");
 
 			for (ArrayList<String> match : matches) {
-				String displayname = parseName(match.get(2).replaceAll("</?em>|漫画 汗汗漫画$", ""));
+				String displayname = parseName(match.get(2).replaceAll("</?em>|漫画 汗汗漫画|漫画 hh漫画$", ""));
 				Manga manga = new Manga(parseId(match.get(1)), displayname, null, getSiteId());
 				list.add(manga, true);
 				// logV(manga.toLongString());
