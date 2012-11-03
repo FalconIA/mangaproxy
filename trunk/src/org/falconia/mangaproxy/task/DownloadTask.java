@@ -1,6 +1,7 @@
 package org.falconia.mangaproxy.task;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -8,13 +9,40 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.falconia.mangaproxy.App;
+import org.falconia.mangaproxy.AppEnv;
 import org.falconia.mangaproxy.utils.HttpUtils;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
 public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
+
+	static {
+		// System.setProperty("http.agent", "Mozilla/5.0 (Windows NT 6.1; rv:7.0.1) Gecko/20100101 Firefox/7.0");
+
+		disableConnectionReuseIfNecessary();
+		enableHttpResponseCache();
+	}
+
+	private static void disableConnectionReuseIfNecessary() {
+		// HTTP connection reuse which was buggy pre-froyo
+		if (Integer.parseInt(Build.VERSION.SDK) < Build.VERSION_CODES.FROYO) {
+			System.setProperty("http.keepAlive", "false");
+		}
+	}
+
+	private static void enableHttpResponseCache() {
+		// Ice Cream Sandwich
+		try {
+			long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+			File httpCacheDir = new File(AppEnv.getExternalCacheDir(), "http");
+			Class.forName("android.net.http.HttpResponseCache").getMethod("install", File.class, long.class)
+					.invoke(null, httpCacheDir, httpCacheSize);
+		} catch (Exception httpResponseCacheNotAvailable) {
+		}
+	}
 
 	protected static final int TIME_OUT_CONNECT = 10000;
 	protected static final int TIME_OUT_READ = 10000;
