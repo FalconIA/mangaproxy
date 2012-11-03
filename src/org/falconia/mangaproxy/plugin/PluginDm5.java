@@ -51,7 +51,7 @@ public final class PluginDm5 extends PluginBase {
 
 	@Override
 	public String getUrlBase() {
-		return "http://www.dm5.com/";
+		return "http://tel.dm5.com/";
 	}
 
 	@Override
@@ -140,7 +140,7 @@ public final class PluginDm5 extends PluginBase {
 
 	protected GregorianCalendar parseDateTime(String string) {
 		GregorianCalendar calendar = null;
-		calendar = parseDateTime(string, "(\\d+)-(\\d+)-(\\d+)\\s+(\\d+)\\:(\\d+)\\:(\\d+){'YY','M','D','h','m','s'}");
+		calendar = parseDateTime(string, "(\\d+)-(\\d+)-(\\d+)\\s+(\\d+)\\:(\\d+)(?:\\:(\\d+))?{'YY','M','D','h','m','s'}");
 		return calendar;
 	}
 
@@ -394,6 +394,7 @@ public final class PluginDm5 extends PluginBase {
 		try {
 			long time = System.currentTimeMillis();
 
+			
 			int n;
 			String pattern, section;
 			ArrayList<String> groups;
@@ -415,19 +416,20 @@ public final class PluginDm5 extends PluginBase {
 				manga.updatedAt = parseDateTime(groups.get(n));
 				logV(Catched_in_section, groups.get(n), n, section, manga.updatedAt.getTime());
 			} else {
-				pattern = "(?is)更新时间：([\\d-]+\\s+[\\d:]+)<.+?漫画状态：([^<]+)<.+?<ul [^<>]*id=\"cbc_1\">(.+?)</ul>";
+				// http://www.gmanhua.com
+				pattern = "(?is)状态：([^　\\s]+)[　\\s]+.+?更新时间：([\\d-]+\\s+[\\d:]+)[　\\s]+.+?<ul [^<>]*id=\"cbc_1\">(.+?)</ul>";
 				groups = Regex.match(pattern, source);
 				logD(Catched_sections, groups.size() - 1);
 
 				n = 1;
-				section = "UpdatedAt";
-				manga.updatedAt = parseDateTime(groups.get(n));
-				logV(Catched_in_section, groups.get(n), n, section, manga.updatedAt.getTime());
-
-				n = 2;
 				section = "IsCompleted";
 				manga.isCompleted = parseIsCompleted(groups.get(n));
 				logV(Catched_in_section, groups.get(n), n, section, manga.isCompleted);
+
+				n = 2;
+				section = "UpdatedAt";
+				manga.updatedAt = parseDateTime(groups.get(n));
+				logV(Catched_in_section, groups.get(n), n, section, manga.updatedAt.getTime());
 			}
 
 			n = 3;

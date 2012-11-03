@@ -62,7 +62,7 @@ public final class PluginHhcomic extends PluginBase {
 
 	@Override
 	public boolean hasSearchEngine() {
-		return true;
+		return false;
 	}
 
 	@Override
