@@ -19,8 +19,11 @@ import android.util.Log;
 
 public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 
+	private static final String DESKTOP_AGENT = "Mozilla/5.0 (Windows NT 6.1; rv:7.0.1) Gecko/20100101 Firefox/7.0";
+	
 	static {
-		// System.setProperty("http.agent", "Mozilla/5.0 (Windows NT 6.1; rv:7.0.1) Gecko/20100101 Firefox/7.0");
+		// Use desktop User-Agent
+		System.setProperty("http.agent", DESKTOP_AGENT);
 
 		disableConnectionReuseIfNecessary();
 		enableHttpResponseCache();
@@ -124,6 +127,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 			connection = (HttpURLConnection) (new URL(url)).openConnection();
 			connection.setConnectTimeout(TIME_OUT_CONNECT);
 			connection.setReadTimeout(TIME_OUT_READ);
+			// connection.setRequestProperty("User-Agent", DESKTOP_AGENT);
 			if (!TextUtils.isEmpty(mReferer)) {
 				connection.setRequestProperty("Referer", mReferer);
 			}

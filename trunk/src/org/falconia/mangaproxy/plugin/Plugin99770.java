@@ -421,7 +421,7 @@ public final class Plugin99770 extends PluginBase {
 			logD(Catched_sections, groups.size() - 1);
 
 			// Section 1
-			logV(Catched_in_section, groups.get(1), 1, "MangaCount", list.pageIndexMax);
+			logV(Catched_in_section, groups.get(1), 1, "MangaCount", parseInt(groups.get(1)));
 
 			// Section 2
 			list.pageIndexMax = parseInt(groups.get(2));

@@ -28,7 +28,7 @@ public final class PluginHhcomic extends PluginBase {
 
 	// protected static final String URL_BASE_3348 = "http://3348.net/";
 
-	protected static final String SEARCH_URL_FORMAT = "http://m.baidu.com/s?word=site:(www.hhcomic.com)+%s&pn=%d";
+	protected static final String SEARCH_URL_FORMAT = "http://www.baidu.com/s?word=site:(www.hhcomic.com)+%s&pn=%d";
 	protected static final String MANGA_URL_PREFIX = "comic/";
 
 	public PluginHhcomic(int siteId) {
@@ -139,7 +139,7 @@ public final class PluginHhcomic extends PluginBase {
 	@Override
 	public String getChapterUrl(Chapter chapter, Manga manga) {
 		// String url = URL_BASE_3348 + String.format("art/%s/hh%s.htm", manga.mangaId, chapter.chapterId);
-		String url = getUrlBase() + String.format("hhpage/%s/hh%s.htm", manga.mangaId, chapter.chapterId);
+		String url = getUrlBase() + String.format("page/%s/%s.htm", manga.mangaId, chapter.chapterId);
 		logI(Get_URL_of_Chapter, chapter.chapterId, url);
 		return url;
 	}
@@ -413,11 +413,13 @@ public final class PluginHhcomic extends PluginBase {
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)<div[^<>]*? (?:id=\"results\"|class=\"reswrap\")[^<>]*?>(.+?)<form [^<>]*?>";
+			// pattern = "(?is)<div[^<>]*? (?:id=\"results\"|class=\"reswrap\")[^<>]*?>(.+?)<form [^<>]*?>";
+			pattern = "(?is)<div id=\"content_left\">(.+?)</div>.+?<span class=\"nums\"[^<>]*>[^<>0-9]+?(\\d+)[^<>0-9]+?</span>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
 			// Section 1
+			// TODO: Baidu does't show real URL.
 			pattern = "(?is)<a[^<>]*?\\s+href=\"[^\"]+?src=" + (getUrlBase() + MANGA_URL_PREFIX).replace("/", "%2F").replace(":", "%3A") + "(\\d+)%2F\"[^<>]*?>(?:\\d+&#160;)?(.+?)</a>";
 			matches = Regex.matchAll(pattern, groups.get(1));
 			logD(Catched_count_in_section, matches.size(), "Mangas");
@@ -428,8 +430,14 @@ public final class PluginHhcomic extends PluginBase {
 				list.add(manga, true);
 				// logV(manga.toLongString());
 			}
-			if (matches.size() == 0)
+			if (matches.size() == 0) {
 				list.searchEmpty = true;
+			}
+
+			// Section 2
+			list.pageIndexMax = (int) Math.ceil(parseInt(groups.get(2)) / 10.0);
+			logV(Catched_in_section, groups.get(2), 2, "MangaCount", parseInt(groups.get(1)));
+			logV(Catched_in_section, groups.get(2), 2, "PageIndexMax", list.pageIndexMax);
 
 			time = System.currentTimeMillis() - time;
 			logD(Process_Time_MangaList, time);
@@ -465,7 +473,7 @@ public final class PluginHhcomic extends PluginBase {
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)集数：(?:\\s*<[^<>]+>)?(\\d*?)(?:<[^<>]+>\\s*)?集\\(卷\\)\\s+\\|\\s+状态：[〖\\[](?:\\s*<[^<>]+>)?(.+?)(?:<[^<>]+>\\s*)?[〗\\]].+?<div [^<>]*?class=\"c?vol\"[^<>]*?>\\s*<ul.*?>(.+?)</ul>";
+			pattern = "(?is)集数：(?:\\s*<[^<>]+>)?(\\d*?)(?:<[^<>]+>\\s*)?集\\(卷\\)\\s+\\|\\s+状态：[〖\\[](?:\\s*<[^<>]+>)?(.+?)(?:<[^<>]+>\\s*)?[〗\\]].+?<div [^<>]*?class=\"[^\"]*vol[^\"]*\"[^<>]*?>\\s*<ul.*?>(.+?)</ul>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
@@ -480,7 +488,8 @@ public final class PluginHhcomic extends PluginBase {
 			section = "ChapterList";
 			// logV(groups.get(4));
 			// pattern = "(?is)(?:<li>|<div.*?>)<a [^<>]+?>(?:<.*?>)?(.*?)</a>.+?javascript:ShowA\\(\\d+,(\\d+),(\\d+)\\)";
-			pattern = "(?is)(?:<li>|<div.*?>)<a href=\"?/hhpage/\\d+/hh(\\d+)\\.htm\\?s=(\\d+)\"? [^<>]+?>(?:<.*?>)?(.*?)</a>";
+			// pattern = "(?is)(?:<li>|<div.*?>)<a href=\"?/hhpage/\\d+/hh(\\d+)\\.htm\\?s=(\\d+)\"? [^<>]+?>(?:<.*?>)?(.*?)</a>";
+			pattern = "(?is)(?:<li>|<div.*?>)<a href=\"?/page/\\d+/(\\d+)\\.htm\\?s=(\\d+)\"? [^<>]+?>(?:<.*?>)?(.*?)</a>";
 			matches = Regex.matchAll(pattern, groups.get(3));
 			logD(Catched_count_in_section, matches.size(), section);
 
@@ -530,7 +539,7 @@ public final class PluginHhcomic extends PluginBase {
 			String pattern;
 			ArrayList<String> groups;
 
-			pattern = "(?is)<script .*?>.*?var\\s+PicListUrl\\s*=\\s*\"/?([^\"]+)\";.*?</script>.*?<script\\s+src=\"?([^\\s\"]+?)\"?></script>";
+			pattern = "(?is)<script .*?>.*?var\\s+PicListUrls\\s*=\\s*\"/?([^\"]+)\";.*?</script>.*?<script\\s+src=\"?([^\\s\"]+?)\"?></script>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
