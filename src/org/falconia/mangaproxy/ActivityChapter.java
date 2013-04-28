@@ -275,7 +275,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 
 		@Override
-		public void onPreDownload() {
+		public synchronized void onPreDownload() {
 			AppUtils.logV(this, "onPreDownload()");
 
 			mIsDownloading = true;
@@ -289,7 +289,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 
 		@Override
-		public void onPostDownload(byte[] result) {
+		public synchronized void onPostDownload(byte[] result) {
 			AppUtils.logV(this, "onPostDownload()");
 
 			if (mIsCancelled) {
@@ -344,7 +344,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 		}
 
 		@Override
-		public void onDownloadProgressUpdate(int value, int total) {
+		public synchronized void onDownloadProgressUpdate(int value, int total) {
 			if (mPageIndex == mPageIndexLoading) {
 				if (value == 0 || mpbDownload.getMax() != total) {
 					mpbDownload.setMax(total);
@@ -361,7 +361,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			return cached;
 		}
 
-		public boolean isDownloaded() {
+		public synchronized boolean isDownloaded() {
 			if (mIsDownloading) {
 				return false;
 			}
@@ -374,7 +374,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			return checkCache();
 		}
 
-		public void download(boolean refresh) {
+		public synchronized void download(boolean refresh) {
 			if (refresh) {
 				AppUtils.logI(this, String.format("Force refresh image: %s", mUrl));
 				cancelDownload();
@@ -458,7 +458,7 @@ public final class ActivityChapter extends Activity implements OnClickListener, 
 			download(false);
 		}
 
-		public void cancelDownload() {
+		public synchronized void cancelDownload() {
 			if (mDownloader != null && mDownloader.getStatus() == AsyncTask.Status.RUNNING) {
 				AppUtils.logD(this, "Cancel DownloadTask.");
 				mDownloader.cancelDownload();
