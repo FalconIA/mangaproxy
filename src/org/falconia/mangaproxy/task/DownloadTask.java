@@ -137,6 +137,7 @@ public class DownloadTask extends AsyncTask<String, Integer, byte[]> {
 				logE("Invalid Status Code: " + statusCode);
 				return null;
 			} else {
+				logD("URL: " + connection.getURL());
 				logD("Status Code: " + statusCode);
 			}
 		} catch (MalformedURLException e) {
