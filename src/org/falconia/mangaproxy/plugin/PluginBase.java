@@ -1,5 +1,6 @@
 package org.falconia.mangaproxy.plugin;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -69,13 +70,17 @@ public abstract class PluginBase implements ITag, IPlugin {
 
 	protected static final String Source_is_empty = "Source is empty.";
 
-	protected static final String BASE36_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz";
-
 	protected static final String CHARSET_GBK = HttpUtils.CHARSET_GBK;
 	protected static final String CHARSET_UTF8 = HttpUtils.CHARSET_UTF8;
 
 	protected static final String DEFAULT_MANGA_URL_PREFIX = "comic/";
 	protected static final String DEFAULT_MANGA_URL_POSTFIX = "/";
+
+	protected static final String BASE36_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz";
+	protected static final String BASE62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	protected static final String PACKED_PATTERN = "eval\\(function\\(p,a,c,k,e,d\\)\\{.+?return p;?\\}\\('.+?(?<!\\\\)',\\d+,\\d+,'[^']+?'.split\\('\\|'\\),0,\\{\\}\\)\\)";
+	protected static final String PACKED_MATCHES_PATTERN = "return p;?\\}\\('(.+?)(?<!\\\\)',(\\d+),(\\d+),'([^']+?)'";
 
 	protected int miSiteId;
 
@@ -254,6 +259,31 @@ public abstract class PluginBase implements ITag, IPlugin {
 
 	protected String intToBase36(int i) {
 		return BASE36_CHARS.substring(i, i + 1);
+	}
+
+	protected String intToBase62(int n) {
+		String result = "";
+		int i;
+		do {
+			i = n % 62;
+			n = n / 62;
+			result = BASE62_CHARS.substring(i, i + 1) + result;
+		} while (n > 0);
+		return result;
+	}
+
+	protected String decodePackedJs(String js) {
+		ArrayList<String> groups = Regex.match(PACKED_MATCHES_PATTERN, js);
+		String _p = groups.get(1).replace("\\'", "'");
+		//int _a = Integer.parseInt(groups.get(2));
+		//int _c = Integer.parseInt(groups.get(3));
+		String[] _k = groups.get(4).split("\\|");
+		for (int i = 0; i < _k.length; i++) {
+			if (_k[i].length() == 0)
+				continue;
+			_p = _p.replaceAll("\\b" + intToBase62(i) + "\\b", _k[i]);
+		}
+		return _p;
 	}
 
 	@Override
