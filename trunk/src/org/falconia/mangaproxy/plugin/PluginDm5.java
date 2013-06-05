@@ -150,12 +150,13 @@ public final class PluginDm5 extends PluginBase {
 	}
 
 	protected String parseChapterName(String string, String manga) {
+		string = parseName(string);
 		if (string.startsWith(manga + "漫画")) {
 			string = string.substring(manga.length() + 2);
 		} else if (string.startsWith(manga)) {
 			string = string.substring(manga.length());
 		}
-		return parseName(string);
+		return string;
 	}
 
 	@Override
@@ -400,7 +401,7 @@ public final class PluginDm5 extends PluginBase {
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)漫画状态：([^<]+)<.+?更新时间：([\\d-]+\\s+[\\d:]+)<.+?<ul [^<>]*id=\"cbc_1\">(.+?)</ul>";
+			pattern = "(?is)漫画状态：([^<]+)<.+?更新时间：([\\d-]+\\s+[\\d:]+)<.+?((?:<ul [^<>]*id=\"cbc_\\d+\">.+?</ul>\\s*)+)";
 
 			if (Regex.isMatch(pattern, source)) {
 				groups = Regex.match(pattern, source);
@@ -551,20 +552,5 @@ public final class PluginDm5 extends PluginBase {
 			logE(Fail_to_process, "RedirectPageUrl", url);
 		}
 		return newUrl;
-	}
-
-	private static final String PACKED_PATTERN = "eval\\(function\\(p,a,c,k,e,d\\)\\{.+?return p;\\}\\('.+?(?<!\\\\)',\\d+,\\d+,'[^']+?'.split\\('\\|'\\),0,\\{\\}\\)\\)";
-	private static final String PACKED_MATCHES_PATTERN = "return p;\\}\\('(.+?)(?<!\\\\)',(\\d+),(\\d+),'([^']+?)'";
-
-	private String decodePackedJs(String js) {
-		ArrayList<String> groups = Regex.match(PACKED_MATCHES_PATTERN, js);
-		String _p = groups.get(1).replace("\\'", "'");
-		String[] _d = groups.get(4).split("\\|");
-		for (int i = 0; i < _d.length; i++) {
-			if (_d[i].length() == 0)
-				continue;
-			_p = _p.replaceAll("\\b" + intToBase36(i) + "\\b", _d[i]);
-		}
-		return _p;
 	}
 }

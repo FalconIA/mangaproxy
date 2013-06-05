@@ -20,6 +20,9 @@ http://code.google.com/p/mangaproxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.4.18
+==============
+- [Plugin 178] New plugin for site 178(www.dmzj.com).
 Version 1.4.17.1
 ================
 - [Plugin 99770] Fix ChapterPages.

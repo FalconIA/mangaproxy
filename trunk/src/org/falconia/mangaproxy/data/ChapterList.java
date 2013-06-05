@@ -3,6 +3,7 @@ package org.falconia.mangaproxy.data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -191,6 +192,10 @@ public final class ChapterList implements Serializable, ISiteId, Collection<Chap
 			}
 		}
 		return modified;
+	}
+	
+	public void reverse() {
+		Collections.reverse(mChapterKeyList);
 	}
 
 	@Override
