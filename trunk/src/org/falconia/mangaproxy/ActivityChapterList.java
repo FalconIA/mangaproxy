@@ -305,7 +305,7 @@ public final class ActivityChapterList extends ActivityBase {
 			getListView().setSelection(mChapterList.indexOfChapterId(mManga.lastReadChapterId) - 1);
 		}
 
-		super.onPostSourceProcess(result);
+		super.onPostSourceProcess(result, mChapterList.getMessage());
 	}
 
 	private void loadChapterList() {

@@ -16,6 +16,7 @@ public final class ChapterList implements Serializable, ISiteId, Collection<Chap
 	private final Manga mManga;
 
 	private int mSizeVolume = 0, mSizeChapter = 0, mSizeUnknow = 0;
+	private String mMessage;
 
 	public ChapterList(Manga manga) {
 		mChapterKeyList = new ArrayList<String>();
@@ -42,6 +43,14 @@ public final class ChapterList implements Serializable, ISiteId, Collection<Chap
 
 	public Chapter getAt(int position) {
 		return get(getChapterId(position));
+	}
+
+	public String getMessage() {
+		return mMessage;
+	}
+
+	public void setMessage(String message) {
+		mMessage = message;
 	}
 
 	public int indexOfChapterId(String chapterId) {

@@ -440,6 +440,11 @@ public final class PluginDm5 extends PluginBase {
 			matches = Regex.matchAll(pattern, groups.get(n));
 			logD(Catched_count_in_section, matches.size(), section);
 
+			if (matches.size() == 0 && (manga.mangaId.equals("huoyingrenzhe-naruto") || manga.mangaId.equals("sishen-bleach") || manga.mangaId.equals("haizeiwang-onepiece"))) {
+				list.setMessage("Copyright removal in China.\nPlease use proxy or try other site.");
+				return list;
+			}
+
 			for (ArrayList<String> groups2 : matches) {
 				Chapter chapter = new Chapter(parseId(groups2.get(1)), parseChapterName(groups2.get(2),
 						manga.displayname), manga);
