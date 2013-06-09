@@ -542,7 +542,7 @@ public final class Plugin99770 extends PluginBase {
 			String pattern;
 			ArrayList<String> groups;
 
-			pattern = "(?is)<script .*?>.*?var\\s+P[a-z]+L[a-z]+U[a-z]+\\s*=\\s*\"/?([^\"]+)\";.*?</script>.*?<script\\s+src=\"?([^\\s\"]+?)\"?></script>";
+			pattern = "(?is)<script .*?>.*?var\\s+[A-Z][a-z]{2}[A-Z][a-z]{3}[A-Z][a-z]{2}\\s*=\\s*\"/?([^\"]+)\";.*?</script>.*?<script\\s+src=\"?([^\\s\"]+?)\"?></script>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
