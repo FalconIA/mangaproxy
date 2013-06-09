@@ -1,1 +1,1 @@
-Version 1.4.18.1 / VersionCode 40
+Version 1.4.18.2 / VersionCode 41
