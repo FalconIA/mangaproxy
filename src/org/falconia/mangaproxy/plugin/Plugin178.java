@@ -2,7 +2,6 @@ package org.falconia.mangaproxy.plugin;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
@@ -210,7 +209,8 @@ public class Plugin178 extends PluginBase {
 			String pattern;
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
-			ArrayList<ArrayList<String>>[] groupedMatches = (ArrayList<ArrayList<String>>[]) new ArrayList[8];
+			@SuppressWarnings("unchecked")
+			ArrayList<ArrayList<String>>[] groupedMatches = new ArrayList[8];
 
 			pattern = "(?is)<div class=\"anim_search_list\">(.+?)</div>\\s*<div class=\"anim_search_ending\">";
 			groups = Regex.match(pattern, source);
@@ -362,7 +362,6 @@ public class Plugin178 extends PluginBase {
 
 			String pattern;
 			ArrayList<String> groups;
-			ArrayList<ArrayList<String>> matches;
 			JSONArray mangaObjs;
 
 			pattern = "(?is)^var g_search_data\\s*=\\s*(\\[.+\\]);$";
@@ -417,6 +416,13 @@ public class Plugin178 extends PluginBase {
 			String pattern, section;
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
+
+			if (manga.mangaId.equals("huoyingrenzhe") || manga.mangaId.equals("sishen") || manga.mangaId.equals("haizeiwang")) {
+				pattern = "(?is)<div class=\"line_height_content\">[^<>]*<[^<>]+>(.*?)</[^<>]+>.*?</div>";
+				groups = Regex.match(pattern, source);
+				list.setMessage(groups.get(1).trim());
+				return list;
+			}
 
 			pattern = "(?is)((?:<div class=\"cartoon_online_border\"[^<>]*>\\s*<ul>.+</ul><div class=\"clearfix\"></div></div>\\s*)+).*?<div class=\"anim-main_list\">.*?<th>状态：</th>\\s*<td><a [^<>]+>([^<>]+)</a></td>.*?<th>最新收录：</th>\\s*<td\\s*><a [^<>]+>(.+)</a>[^<>]*<br /><span[^<>]*>([0-9-]+)</span></td>";
 			groups = Regex.match(pattern, source);

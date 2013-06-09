@@ -295,6 +295,10 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 
 	@Override
 	public void onPostSourceProcess(int size) {
+		onPostSourceProcess(size, null);
+	}
+
+	protected void onPostSourceProcess(int size, String message) {
 		AppUtils.logV(this, "onPostSourceProcess()");
 
 		mSourceProcessTask = null;
@@ -305,7 +309,7 @@ public abstract class ActivityBase extends ListActivity implements OnFocusChange
 		setProgressBarIndeterminateVisibility(false);
 
 		if (size <= 0) {
-			setNoItemsMessage(String.format(getString(R.string.ui_error_on_process), getSiteName()));
+			setNoItemsMessage(message != null ? message : String.format(getString(R.string.ui_error_on_process), getSiteName()));
 			return;
 		}
 
