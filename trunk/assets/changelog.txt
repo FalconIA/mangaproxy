@@ -20,6 +20,11 @@ http://code.google.com/p/mangaproxy/
 章节页面自动跳转到上次浏览的页面
 
 
+Version 1.4.19
+==============
+- [Plugin 99770] Fix ChapterPages.
+- [Plugin HHcomic] Fix ChapterList / ChapterPages.
+- [Plugin DM5] Fix ChapterPages.
 Version 1.4.18.3
 ================
 - [Plugin 99770] Fix ChapterPages.
