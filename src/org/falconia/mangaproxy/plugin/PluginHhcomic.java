@@ -31,6 +31,8 @@ public final class PluginHhcomic extends PluginBase {
 	protected static final String SEARCH_URL_FORMAT = "http://www.baidu.com/s?word=site:(www.hhcomic.com)+%s&pn=%d";
 	protected static final String MANGA_URL_PREFIX = "comic/";
 
+	protected static final String PAGES_DECRYPT_KEY = "tahfcioewrm";
+
 	public PluginHhcomic(int siteId) {
 		super(siteId);
 	}
@@ -473,7 +475,7 @@ public final class PluginHhcomic extends PluginBase {
 			ArrayList<String> groups;
 			ArrayList<ArrayList<String>> matches;
 
-			pattern = "(?is)集数：(?:\\s*<[^<>]+>)?(\\d*?)(?:<[^<>]+>\\s*)?集\\(卷\\)\\s+\\|\\s+状态：[〖\\[](?:\\s*<[^<>]+>)?(.+?)(?:<[^<>]+>\\s*)?[〗\\]].+?<div [^<>]*?class=\"[^\"]*vol[^\"]*\"[^<>]*?>\\s*<ul.*?>(.+?)</ul>";
+			pattern = "(?is)集数：(?:\\s*<[^<>]+>)?(\\d*?)(?:<[^<>]+>\\s*)?集\\(卷\\)\\s+\\|\\s+状态：[〖\\[](?:\\s*<[^<>]+>)?(.+?)(?:<[^<>]+>\\s*)?[〗\\]].+?<div [^<>]*?class=\"[^\"]*vol[^\"]*\"[^<>]*?>.*?<ul.*?>(.+?)</ul>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
@@ -544,7 +546,8 @@ public final class PluginHhcomic extends PluginBase {
 			logD(Catched_sections, groups.size() - 1);
 
 			// Section 1
-			pageUrls = groups.get(1).split("\\|/?");
+			//pageUrls = groups.get(1).split("\\|/?");
+			pageUrls = unsuan(groups.get(1), PAGES_DECRYPT_KEY).replaceAll("^/", "").split("\\|/?");
 			logV(Catched_count_in_section, pageUrls.length, "PageUrls");
 
 			// Section 2

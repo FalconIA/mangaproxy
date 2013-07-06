@@ -286,6 +286,21 @@ public abstract class PluginBase implements ITag, IPlugin {
 		return _p;
 	}
 
+	protected String unsuan(String s, String a) {
+		int i;
+		String k = a.substring(0, a.length() -1);
+		String f = a.substring(a.length() -1);
+		for (i = 0; i < k.length(); i++) {
+			s = s.replaceAll(k.substring(i, i + 1), Integer.toString(i));
+		}
+		String[] ss = s.split(f);
+		s = "";
+		for (i = 0; i < ss.length; i++) {
+			s += Character.toString((char) Integer.parseInt(ss[i], 10));
+		}
+		return s;
+	}
+
 	@Override
 	public String getTag() {
 		return getClass().getSimpleName();

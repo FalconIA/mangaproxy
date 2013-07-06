@@ -535,7 +535,7 @@ public final class PluginDm5 extends PluginBase {
 				source = decodePackedJs(source);
 			}
 
-			if (source.matches("(?is)function .+var pvalue=.+")) { // 2012-10-23
+			if (source.matches("(?is)function .+var pvalue[a-z]*=.+")) { // 2012-10-23,2013-07-07
 				ArrayList<ArrayList<String>> matches = Regex.matchAll("(?is)\"(?:http://)?([^\"]+)\"|cid=(\\d+)", source);
 				newUrl = "http://" + matches.get(2).get(1) + matches.get(3).get(1) + "?cid=" + matches.get(0).get(2) + "&key=" + matches.get(1).get(1);
 			} else if (source.matches("(?is)function .+")) {

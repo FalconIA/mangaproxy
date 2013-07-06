@@ -30,6 +30,8 @@ public final class Plugin99770 extends PluginBase {
 	protected static final String SEARCH_URL_FORMAT = "?key=%s&pageindex=%d";
 	protected static final String MANGA_URL_PREFIX = "comic/";
 
+	protected static final String PAGES_DECRYPT_KEY = "zsanuxoewrm";
+
 	public Plugin99770(int siteId) {
 		super(siteId);
 	}
@@ -542,12 +544,14 @@ public final class Plugin99770 extends PluginBase {
 			String pattern;
 			ArrayList<String> groups;
 
-			pattern = "(?is)<script .*?>.*?var\\s+[A-Z][a-z]{2}[A-Z][a-z]{3}[A-Z][a-z]{2,3}\\s*=\\s*\"/?([^\"]+)\";.*?</script>.*?<script\\s+src=\"?([^\\s\"]+?)\"?></script>";
+			//PicListUrl  -> [A-Z][a-z]{2}[A-Z][a-z]{3}[A-Z][a-z]{2,3}
+			pattern = "(?is)<script .*?>.*?var\\s+PicListUrl\\s*=\\s*\"/?([^\"]+)\";.*?</script>.*?<script\\s+src=\"?([^\\s\"]+?)\"?></script>";
 			groups = Regex.match(pattern, source);
 			logD(Catched_sections, groups.size() - 1);
 
 			// Section 1
-			pageUrls = groups.get(1).split("\\|/?");
+			//pageUrls = groups.get(1).split("\\|/?");
+			pageUrls = unsuan(groups.get(1), PAGES_DECRYPT_KEY).replaceAll("^/", "").split("\\|/?");
 			logV(Catched_count_in_section, pageUrls.length, "PageUrls");
 
 			// Section 2
@@ -617,5 +621,4 @@ public final class Plugin99770 extends PluginBase {
 
 		return false;
 	}
-
 }
